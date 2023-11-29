@@ -43,10 +43,10 @@ public class Usuario {
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "usuarios_grupos", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "grupo_id"))
+    @JsonIgnore
     private List<Grupo> grupos;
 
     @OneToMany(mappedBy = "receptor")
-    @JsonIgnore
     private List<InvitacionAmistad> invitacionesAmigosRecibidas;
 
     @OneToMany(mappedBy = "remitente")

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.services.GrupoService;
 
@@ -29,16 +30,16 @@ public class GrupoController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Grupo> getGroupById(@PathVariable Long id) {
+	public ResponseEntity<GrupoDTO> getGroupById(@PathVariable Long id) {
 		return grupoService.getGroupById(id)
-				.map(group -> new ResponseEntity<>(group, HttpStatus.OK))
+				.map(group -> new ResponseEntity<>(new GrupoDTO(group), HttpStatus.OK))
 				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
 	@PostMapping("/save")
-	public ResponseEntity<Grupo> saveGroup(@RequestBody Grupo grupo) {
+	public ResponseEntity<GrupoDTO> saveGroup(@RequestBody Grupo grupo) {
 		Grupo savedGroup = grupoService.saveGroup(grupo);
-		return new ResponseEntity<>(savedGroup, HttpStatus.CREATED);
+		return new ResponseEntity<>(new GrupoDTO(savedGroup), HttpStatus.CREATED);
 	}
 
 	@DeleteMapping("/delete/{id}")
@@ -48,9 +49,9 @@ public class GrupoController {
 	}
 
 	@GetMapping("/byNombre/{nombre}")
-	public ResponseEntity<Grupo> getGroupByNombre(@PathVariable String nombre) {
+	public ResponseEntity<GrupoDTO> getGroupByNombre(@PathVariable String nombre) {
 		return grupoService.getGroupByNombre(nombre)
-				.map(group -> new ResponseEntity<>(group, HttpStatus.OK))
+				.map(group -> new ResponseEntity<>(new GrupoDTO(group), HttpStatus.OK))
 				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 

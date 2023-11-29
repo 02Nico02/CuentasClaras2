@@ -43,6 +43,12 @@ public class InvitacionAmistadService {
             InvitacionAmistad invitacion = new InvitacionAmistad(sender, receiver);
             invitacionAmistadRepository.save(invitacion);
 
+            sender.agregarInvitacionAmistadEnviada(invitacion);
+            receiver.agregarInvitacionAmistadRecibida(invitacion);
+
+            usuarioRepository.save(sender);
+            usuarioRepository.save(receiver);
+
             return Optional.of(invitacion.getRemitente());
         }
 

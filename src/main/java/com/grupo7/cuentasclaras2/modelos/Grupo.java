@@ -7,6 +7,8 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,16 +32,19 @@ public class Grupo {
     @Column(nullable = false)
     private boolean esPareja;
 
-    @ManyToMany(mappedBy = "grupos", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "grupos", fetch = FetchType.LAZY)
     private List<Usuario> miembros;
 
     @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Gasto> gastos;
 
     @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Pago> pagos;
 
     @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<DeudaUsuario> deudas;
 
     @ManyToOne
@@ -107,7 +112,10 @@ public class Grupo {
         if (miembros == null) {
             miembros = new ArrayList<>();
         }
-        miembros.add(usuario);
+        if (!miembros.contains(usuario)) {
+            miembros.add(usuario);
+            usuario.unirseAGrupo(this);
+        }
     }
 
     public void eliminarMiembro(Usuario usuario) {

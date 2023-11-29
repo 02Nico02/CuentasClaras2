@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
+import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.services.InvitacionAmistadService;
 import com.grupo7.cuentasclaras2.services.InvitacionService;
@@ -27,42 +28,42 @@ public class UsuarioController {
     private InvitacionService invitacionService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UsuarioDTO> getUserById(@PathVariable Long id) {
         Optional<Usuario> user = usuarioService.getById(id);
-        return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        return user.map(value -> new ResponseEntity<>(new UsuarioDTO(value), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/username/{username}")
-    public ResponseEntity<Usuario> getUserByUsername(@PathVariable String username) {
+    public ResponseEntity<UsuarioDTO> getUserByUsername(@PathVariable String username) {
         Optional<Usuario> user = usuarioService.getByUsername(username);
-        return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        return user.map(value -> new ResponseEntity<>(new UsuarioDTO(value), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<Usuario> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<UsuarioDTO> getUserByEmail(@PathVariable String email) {
         Optional<Usuario> user = usuarioService.getByEmail(email);
-        return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        return user.map(value -> new ResponseEntity<>(new UsuarioDTO(value), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Usuario> registerUser(@RequestBody Usuario newUser) {
+    public ResponseEntity<UsuarioDTO> registerUser(@RequestBody Usuario newUser) {
         Optional<Usuario> registeredUser = usuarioService.registerUser(newUser);
 
-        return registeredUser.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
+        return registeredUser.map(value -> new ResponseEntity<>(new UsuarioDTO(value), HttpStatus.CREATED))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Usuario> login(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<UsuarioDTO> login(@RequestBody Map<String, String> credentials) {
         String usernameOrEmail = credentials.get("usernameOrEmail");
         String password = credentials.get("password");
 
         Optional<Usuario> user = usuarioService.login(usernameOrEmail, password);
 
-        return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        return user.map(value -> new ResponseEntity<>(new UsuarioDTO(value), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
     }
 
