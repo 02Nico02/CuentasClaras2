@@ -12,7 +12,7 @@ public class GrupoDTO {
     private String nombre;
     private boolean esPareja;
     private Date fechaCreacion;
-    private List<UsuarioDTO> miembros;
+    private List<IdEmailUsuarioDTO> miembros;
 
     public GrupoDTO(Grupo grupo) {
         this.id = grupo.getId();
@@ -54,22 +54,22 @@ public class GrupoDTO {
         this.fechaCreacion = fechaCreacion;
     }
 
-    private List<UsuarioDTO> convertirUsuariosAMiembrosDTO(List<Usuario> usuarios) {
-        List<UsuarioDTO> miembrosDTO = new ArrayList<>();
+    private List<IdEmailUsuarioDTO> convertirUsuariosAMiembrosDTO(List<Usuario> usuarios) {
+        List<IdEmailUsuarioDTO> miembrosDTO = new ArrayList<>();
         if (usuarios != null) {
             for (Usuario usuario : usuarios) {
-                UsuarioDTO usuarioDTO = new UsuarioDTO(usuario);
+                IdEmailUsuarioDTO usuarioDTO = new IdEmailUsuarioDTO(usuario);
                 miembrosDTO.add(usuarioDTO);
             }
         }
         return miembrosDTO;
     }
 
-    public List<UsuarioDTO> getMiembros() {
+    public List<IdEmailUsuarioDTO> getMiembros() {
         return miembros;
     }
 
-    public void setMiembros(List<UsuarioDTO> miembros) {
+    public void setMiembros(List<IdEmailUsuarioDTO> miembros) {
         this.miembros = miembros;
     }
 
