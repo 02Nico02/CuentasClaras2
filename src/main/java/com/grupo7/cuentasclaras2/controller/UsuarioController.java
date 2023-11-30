@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.Authentication;
 
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
@@ -177,16 +176,6 @@ public class UsuarioController {
             return new ResponseEntity<>("Invitación de grupo rechazada con éxito.", HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Usuario no encontrado.", HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @GetMapping("/secure")
-    public ResponseEntity<String> secureEndpoint(Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            String username = authentication.getName();
-            return new ResponseEntity<>("Hola, " + username + "!", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Usuario no autenticado", HttpStatus.UNAUTHORIZED);
         }
     }
 
