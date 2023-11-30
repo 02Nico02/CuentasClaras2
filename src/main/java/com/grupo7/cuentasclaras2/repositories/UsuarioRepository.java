@@ -23,4 +23,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     List<Usuario> findByInvitacionesGrupo_Destinatario_Id(long destinatarioId);
 
     List<Usuario> findByInvitacionesAmigosRecibidas_Id(long invitacionAmistadId);
+
+    boolean existsByUsername(String userName);
+
+    boolean existsByEmail(String email);
 }

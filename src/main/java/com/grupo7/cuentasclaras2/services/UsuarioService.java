@@ -8,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
+import com.grupo7.cuentasclaras2.exception.UserAlreadyExistsException;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.repositories.UsuarioRepository;
 
@@ -75,6 +77,30 @@ public class UsuarioService {
     public Optional<Usuario> findByUsernameOrEmail(String usernameOrEmail) {
         return usuarioRepository.findByUsername(usernameOrEmail)
                 .or(() -> usuarioRepository.findByEmail(usernameOrEmail));
+    }
+
+    public Usuario updateUser(Usuario usuario) {
+        return usuarioRepository.save(usuario);
+    }
+
+    public Usuario updateUserDataFromDTO(Usuario usuarioExistente, UsuarioDTO usuarioDTO) {
+        String nuevoUsername = usuarioDTO.getUsername();
+        if (!nuevoUsername.equals(usuarioExistente.getUsername())
+                && usuarioRepository.existsByUsername(nuevoUsername)) {
+            throw new UserAlreadyExistsException("username");
+        }
+
+        String nuevoEmail = usuarioDTO.getEmail();
+        if (!nuevoEmail.equals(usuarioExistente.getEmail()) && usuarioRepository.existsByEmail(nuevoEmail)) {
+            throw new UserAlreadyExistsException("email");
+        }
+
+        usuarioExistente.setUsername(nuevoUsername);
+        usuarioExistente.setNombres(usuarioDTO.getNombres());
+        usuarioExistente.setApellido(usuarioDTO.getApellido());
+        usuarioExistente.setEmail(nuevoEmail);
+
+        return usuarioRepository.save(usuarioExistente);
     }
 
 }

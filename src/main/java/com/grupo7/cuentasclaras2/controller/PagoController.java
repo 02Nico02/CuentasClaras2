@@ -72,14 +72,7 @@ public class PagoController {
 
 	@PostMapping("/new")
 	public ResponseEntity<PagoDTO> crearPago(@RequestBody PagoDTO pagoDTO) {
-		System.out.println("monto: " + pagoDTO.getMonto());
-		System.out.println("id autor: " + pagoDTO.getAutorId());
-		System.out.println("id destinatario: " + pagoDTO.getDestinatarioId());
-		System.out.println("id grupo: " + pagoDTO.getGrupoId());
-
-		System.out.println("antes de NuevoPago");
 		Pago nuevoPago = convertirDTOaPago(pagoDTO);
-		System.out.println("antes de PagoGuardado");
 		Pago pagoGuardado = pagoService.guardarPago(nuevoPago);
 
 		return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.CREATED);

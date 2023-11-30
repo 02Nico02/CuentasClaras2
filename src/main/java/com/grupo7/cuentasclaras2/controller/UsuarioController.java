@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
+import com.grupo7.cuentasclaras2.exception.UserAlreadyExistsException;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.services.InvitacionAmistadService;
 import com.grupo7.cuentasclaras2.services.InvitacionService;
@@ -53,6 +54,24 @@ public class UsuarioController {
 
         return registeredUser.map(value -> new ResponseEntity<>(new UsuarioDTO(value), HttpStatus.CREATED))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable long userId, @RequestBody UsuarioDTO usuarioDTO) {
+        try {
+            Optional<Usuario> usuarioExistenteOptional = usuarioService.getById(userId);
+            if (usuarioExistenteOptional.isPresent()) {
+                Usuario usuarioExistente = usuarioExistenteOptional.get();
+                Usuario usuarioGuardado = usuarioService.updateUserDataFromDTO(usuarioExistente, usuarioDTO);
+                return new ResponseEntity<>(new UsuarioDTO(usuarioGuardado), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (UserAlreadyExistsException e) {
+            e.getMessage();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        }
     }
 
     @PostMapping("/login")
