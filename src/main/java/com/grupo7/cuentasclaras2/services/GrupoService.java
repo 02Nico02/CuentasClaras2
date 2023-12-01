@@ -2,10 +2,14 @@ package com.grupo7.cuentasclaras2.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
+import com.grupo7.cuentasclaras2.modelos.Categoria;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.repositories.GrupoRepository;
@@ -18,6 +22,12 @@ public class GrupoService {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;
+
+	@Autowired
+	private UsuarioService usuarioService;
+
+	@Autowired
+	private CategoriaService categoriaService;
 
 	public List<Grupo> getAllGroups() {
 		return grupoRepository.findAll();
@@ -41,7 +51,7 @@ public class GrupoService {
 
 	public boolean addMemberToGroup(Long groupId, Long userId) {
 		Optional<Grupo> grupoOptional = grupoRepository.findById(groupId);
-		Optional<Usuario> usuarioOptional = usuarioRepository.findById(userId);
+		Optional<Usuario> usuarioOptional = usuarioService.getById(userId);
 
 		if (grupoOptional.isPresent() && usuarioOptional.isPresent()) {
 			Grupo grupo = grupoOptional.get();
@@ -82,7 +92,7 @@ public class GrupoService {
 
 	public boolean removeMemberFromGroup(Long groupId, Long memberId) {
 		Optional<Grupo> grupoOptional = grupoRepository.findById(groupId);
-		Optional<Usuario> usuarioOptional = usuarioRepository.findById(memberId);
+		Optional<Usuario> usuarioOptional = usuarioService.getById(memberId);
 
 		if (grupoOptional.isPresent() && usuarioOptional.isPresent()) {
 			Grupo grupo = grupoOptional.get();
@@ -102,6 +112,64 @@ public class GrupoService {
 		}
 
 		return false;
+	}
+
+	public Optional<Grupo> newGroupByDTO(GrupoDTO grupoDTO) {
+		if (grupoDTO.getNombre() == null || grupoDTO.getNombre().isEmpty()) {
+			throw new IllegalArgumentException("El nombre del grupo es obligatorio.");
+		}
+
+		Grupo grupo = new Grupo();
+		grupo.setNombre(grupoDTO.getNombre());
+		grupo.setEsPareja(false);
+
+		Long categoriaId = grupoDTO.getCategoria() != null ? grupoDTO.getCategoria().getId() : null;
+		if (categoriaId == null) {
+			throw new IllegalArgumentException("La categoría del grupo es obligatoria.");
+		}
+
+		Optional<Categoria> categoriaOptional = categoriaService.getCategoriaById(categoriaId);
+
+		if (categoriaOptional.isEmpty()) {
+			throw new IllegalArgumentException("La categoría especificada no existe.");
+		}
+
+		Categoria categoria = categoriaOptional.get();
+		if (!categoria.isGrupo()) {
+			throw new IllegalArgumentException("La categoría especificada no es de grupo.");
+		}
+
+		List<IdEmailUsuarioDTO> miembrosDTO = grupoDTO.getMiembros();
+		if (miembrosDTO == null || miembrosDTO.isEmpty()) {
+			throw new IllegalArgumentException("Se requiere al menos un miembro para crear un grupo.");
+		}
+
+		List<Usuario> miembros = convertirDTOaUsuarios(miembrosDTO);
+
+		grupo.setMiembros(miembros);
+
+		categoria.addGroup(grupo);
+		grupo.setCategoria(categoria);
+
+		categoriaService.saveCategoria(categoria);
+
+		Grupo grupoGuardado = grupoRepository.save(grupo);
+		return Optional.of(grupoGuardado);
+	}
+
+	private List<Usuario> convertirDTOaUsuarios(List<IdEmailUsuarioDTO> miembrosDTO) {
+		return miembrosDTO.stream()
+				.map(idEmailUsuarioDTO -> {
+					Long usuarioId = idEmailUsuarioDTO.getId();
+					Optional<Usuario> usuarioOptional = usuarioService.getById(usuarioId);
+
+					if (usuarioOptional.isEmpty()) {
+						throw new IllegalArgumentException("El usuario con ID " + usuarioId + " no existe.");
+					}
+
+					return usuarioOptional.get();
+				})
+				.collect(Collectors.toList());
 	}
 
 	// public Gasto addGastoToGroup(Gasto gasto, Long groupId) {

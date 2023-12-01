@@ -10,16 +10,23 @@ import com.grupo7.cuentasclaras2.modelos.Usuario;
 public class GrupoDTO {
     private long id;
     private String nombre;
-    private boolean esPareja;
+    private boolean pareja;
     private Date fechaCreacion;
     private List<IdEmailUsuarioDTO> miembros;
+    private CategoriaDTO categoria;
+
+    public GrupoDTO() {
+    }
 
     public GrupoDTO(Grupo grupo) {
         this.id = grupo.getId();
         this.nombre = grupo.getNombre();
-        this.esPareja = grupo.getEsPareja();
+        this.pareja = grupo.getEsPareja();
         this.fechaCreacion = grupo.getFechaCreacion();
         this.miembros = convertirUsuariosAMiembrosDTO(grupo.getMiembros());
+        if (grupo.getCategoria() != null) {
+            this.categoria = new CategoriaDTO(grupo.getCategoria());
+        }
     }
 
     public long getId() {
@@ -38,12 +45,12 @@ public class GrupoDTO {
         this.nombre = nombre;
     }
 
-    public boolean isEsPareja() {
-        return esPareja;
+    public boolean isPareja() {
+        return pareja;
     }
 
-    public void setEsPareja(boolean esPareja) {
-        this.esPareja = esPareja;
+    public void setPareja(boolean pareja) {
+        this.pareja = pareja;
     }
 
     public Date getFechaCreacion() {
@@ -71,6 +78,14 @@ public class GrupoDTO {
 
     public void setMiembros(List<IdEmailUsuarioDTO> miembros) {
         this.miembros = miembros;
+    }
+
+    public CategoriaDTO getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(CategoriaDTO categoria) {
+        this.categoria = categoria;
     }
 
 }

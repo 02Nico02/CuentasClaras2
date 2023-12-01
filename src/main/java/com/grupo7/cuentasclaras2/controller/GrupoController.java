@@ -1,6 +1,7 @@
 package com.grupo7.cuentasclaras2.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,10 +38,17 @@ public class GrupoController {
 				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
-	@PostMapping("/save")
-	public ResponseEntity<GrupoDTO> saveGroup(@RequestBody Grupo grupo) {
-		Grupo savedGroup = grupoService.saveGroup(grupo);
-		return new ResponseEntity<>(new GrupoDTO(savedGroup), HttpStatus.CREATED);
+	@PostMapping("/newGroup")
+	public ResponseEntity<GrupoDTO> saveGroup(@RequestBody GrupoDTO grupoDTO) {
+
+		Optional<Grupo> grupoOptional = grupoService.newGroupByDTO(grupoDTO);
+
+		if (grupoOptional.isPresent()) {
+			Grupo grupoGuardado = grupoOptional.get();
+			return new ResponseEntity<>(new GrupoDTO(grupoGuardado), HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@DeleteMapping("/delete/{id}")
@@ -78,4 +87,19 @@ public class GrupoController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
+
+	@PutMapping("/update/{id}")
+	public ResponseEntity<GrupoDTO> updateGroupName(
+			@PathVariable Long id,
+			@RequestBody GrupoDTO grupoDTO) {
+		if (grupoService.getGroupById(id).isPresent()) {
+			Grupo grupo = grupoService.getGroupById(id).get();
+			grupo.setNombre(grupoDTO.getNombre());
+			Grupo updatedGroup = grupoService.saveGroup(grupo);
+			return new ResponseEntity<>(new GrupoDTO(updatedGroup), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+
 }

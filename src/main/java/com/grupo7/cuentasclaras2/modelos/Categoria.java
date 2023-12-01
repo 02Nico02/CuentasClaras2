@@ -1,5 +1,6 @@
 package com.grupo7.cuentasclaras2.modelos;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class Categoria {
     private String icono;
 
     @Column(nullable = false)
-    private boolean esGrupo;
+    private boolean grupo;
 
     @OneToMany(mappedBy = "categoria")
     private List<Grupo> grupos;
@@ -46,17 +47,17 @@ public class Categoria {
     public Categoria(String nombre, String icono, boolean esGrupo, List<Grupo> grupos, List<Gasto> gastos) {
         this.nombre = nombre;
         this.icono = icono;
-        this.esGrupo = esGrupo;
+        this.grupo = esGrupo;
         this.grupos = grupos;
         this.gastos = gastos;
     }
 
-    public boolean isEsGrupo() {
-        return esGrupo;
+    public boolean isGrupo() {
+        return grupo;
     }
 
-    public void setEsGrupo(boolean esGrupo) {
-        this.esGrupo = esGrupo;
+    public void setEsGrupo(boolean grupo) {
+        this.grupo = grupo;
     }
 
     public List<Grupo> getGrupos() {
@@ -113,6 +114,16 @@ public class Categoria {
 
     public void setFechaActualizacion(Date fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
+    }
+
+    public void addGroup(Grupo grupo) {
+        if (this.grupos != null) {
+            this.grupos = new ArrayList<>();
+        }
+        if (this.isGrupo() && !this.grupos.contains(grupo)) {
+            this.grupos.add(grupo);
+            grupo.setCategoria(this);
+        }
     }
 
 }

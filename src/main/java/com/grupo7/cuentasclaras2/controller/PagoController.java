@@ -70,26 +70,27 @@ public class PagoController {
 		return new ResponseEntity<>(pagos, HttpStatus.OK);
 	}
 
-	@PostMapping("/new")
-	public ResponseEntity<PagoDTO> crearPago(@RequestBody PagoDTO pagoDTO) {
-		Pago nuevoPago = convertirDTOaPago(pagoDTO);
-		Pago pagoGuardado = pagoService.guardarPago(nuevoPago);
+	// @PostMapping("/new")
+	// public ResponseEntity<PagoDTO> crearPago(@RequestBody PagoDTO pagoDTO) {
+	// Pago nuevoPago = convertirDTOaPago(pagoDTO);
+	// Pago pagoGuardado = pagoService.guardarPago(nuevoPago);
 
-		return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.CREATED);
-	}
+	// return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.CREATED);
+	// }
 
-	@PutMapping("/{id}")
-	public ResponseEntity<PagoDTO> actualizarPago(@PathVariable long id, @RequestBody PagoDTO pagoDTO) {
-		if (pagoService.obtenerPagoPorId(id).isPresent()) {
-			Pago pagoActualizado = convertirDTOaPago(pagoDTO);
-			pagoActualizado.setId(id);
+	// @PutMapping("/{id}")
+	// public ResponseEntity<PagoDTO> actualizarPago(@PathVariable long id,
+	// @RequestBody PagoDTO pagoDTO) {
+	// if (pagoService.obtenerPagoPorId(id).isPresent()) {
+	// Pago pagoActualizado = convertirDTOaPago(pagoDTO);
+	// pagoActualizado.setId(id);
 
-			Pago pagoGuardado = pagoService.guardarPago(pagoActualizado);
-			return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+	// Pago pagoGuardado = pagoService.guardarPago(pagoActualizado);
+	// return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.OK);
+	// } else {
+	// return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	// }
+	// }
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> eliminarPago(@PathVariable long id) {
@@ -101,16 +102,17 @@ public class PagoController {
 		}
 	}
 
-	private Pago convertirDTOaPago(PagoDTO pagoDTO) {
-		Pago pago = new Pago();
-		pago.setMonto(pagoDTO.getMonto());
-		Optional<Usuario> autor = usuarioService.getById(pagoDTO.getAutorId());
-		autor.ifPresent(pago::setAutor);
-		Optional<Usuario> destinatario = usuarioService.getById(pagoDTO.getDestinatarioId());
-		destinatario.ifPresent(pago::setDestinatario);
-		Optional<Grupo> grupo = grupoService.getGroupById(pagoDTO.getGrupoId());
-		grupo.ifPresent(pago::setGrupo);
+	// private Pago convertirDTOaPago(PagoDTO pagoDTO) {
+	// Pago pago = new Pago();
+	// pago.setMonto(pagoDTO.getMonto());
+	// Optional<Usuario> autor = usuarioService.getById(pagoDTO.getAutorId());
+	// autor.ifPresent(pago::setAutor);
+	// Optional<Usuario> destinatario =
+	// usuarioService.getById(pagoDTO.getDestinatarioId());
+	// destinatario.ifPresent(pago::setDestinatario);
+	// Optional<Grupo> grupo = grupoService.getGroupById(pagoDTO.getGrupoId());
+	// grupo.ifPresent(pago::setGrupo);
 
-		return pago;
-	}
+	// return pago;
+	// }
 }
