@@ -51,7 +51,6 @@ public class UsuarioController {
     @PostMapping("/register")
     public ResponseEntity<UsuarioDTO> registerUser(@RequestBody Usuario newUser) {
         Optional<Usuario> registeredUser = usuarioService.registerUser(newUser);
-
         return registeredUser.map(value -> new ResponseEntity<>(new UsuarioDTO(value), HttpStatus.CREATED))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
@@ -68,7 +67,7 @@ public class UsuarioController {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (UserAlreadyExistsException e) {
-            e.getMessage();
+            System.err.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         }

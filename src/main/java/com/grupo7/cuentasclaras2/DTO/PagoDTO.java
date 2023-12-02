@@ -5,13 +5,13 @@ import com.grupo7.cuentasclaras2.modelos.Usuario;
 
 public class PagoDTO {
 
-    private long id;
+    private Long id;
     private double monto;
-    private long autorId;
+    private Long autorId;
     private String nombreAutor;
-    private long destinatarioId;
+    private Long destinatarioId;
     private String nombreDestinatario;
-    private long grupoId;
+    private Long grupoId;
 
     public PagoDTO() {
     }
@@ -30,11 +30,11 @@ public class PagoDTO {
         this.grupoId = pago.getGrupo().getId();
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -46,27 +46,27 @@ public class PagoDTO {
         this.monto = monto;
     }
 
-    public long getAutorId() {
+    public Long getAutorId() {
         return autorId;
     }
 
-    public void setAutorId(long autorId) {
+    public void setAutorId(Long autorId) {
         this.autorId = autorId;
     }
 
-    public long getDestinatarioId() {
+    public Long getDestinatarioId() {
         return destinatarioId;
     }
 
-    public void setDestinatarioId(long destinatarioId) {
+    public void setDestinatarioId(Long destinatarioId) {
         this.destinatarioId = destinatarioId;
     }
 
-    public long getGrupoId() {
+    public Long getGrupoId() {
         return grupoId;
     }
 
-    public void setGrupoId(long grupoId) {
+    public void setGrupoId(Long grupoId) {
         this.grupoId = grupoId;
     }
 

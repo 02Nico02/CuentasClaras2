@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
+import com.grupo7.cuentasclaras2.exception.InvalidPaymentException;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Pago;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
@@ -35,6 +37,11 @@ public class PagoController {
 
 	@Autowired
 	private GrupoService grupoService;
+
+	@ExceptionHandler(InvalidPaymentException.class)
+	public ResponseEntity<String> handleServicioException(InvalidPaymentException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<PagoDTO> obtenerPagoPorId(@PathVariable long id) {
@@ -70,27 +77,26 @@ public class PagoController {
 		return new ResponseEntity<>(pagos, HttpStatus.OK);
 	}
 
-	// @PostMapping("/new")
-	// public ResponseEntity<PagoDTO> crearPago(@RequestBody PagoDTO pagoDTO) {
-	// Pago nuevoPago = convertirDTOaPago(pagoDTO);
-	// Pago pagoGuardado = pagoService.guardarPago(nuevoPago);
+	@PostMapping("/new")
+	public ResponseEntity<PagoDTO> crearPago(@RequestBody PagoDTO pagoDTO) {
+		Pago pagoGuardado = pagoService.guardarPagoDesdeDTO(pagoDTO);
 
-	// return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.CREATED);
-	// }
+		return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.CREATED);
+	}
 
-	// @PutMapping("/{id}")
-	// public ResponseEntity<PagoDTO> actualizarPago(@PathVariable long id,
-	// @RequestBody PagoDTO pagoDTO) {
-	// if (pagoService.obtenerPagoPorId(id).isPresent()) {
-	// Pago pagoActualizado = convertirDTOaPago(pagoDTO);
-	// pagoActualizado.setId(id);
+	@PutMapping("/{id}")
+	public ResponseEntity<PagoDTO> actualizarPago(@PathVariable long id,
+			@RequestBody PagoDTO pagoDTO) {
+		if (pagoService.obtenerPagoPorId(id).isPresent()) {
+			Pago pagoActualizado = convertirDTOaPago(pagoDTO);
+			pagoActualizado.setId(id);
 
-	// Pago pagoGuardado = pagoService.guardarPago(pagoActualizado);
-	// return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.OK);
-	// } else {
-	// return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	// }
-	// }
+			Pago pagoGuardado = pagoService.guardarPago(pagoActualizado);
+			return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> eliminarPago(@PathVariable long id) {
@@ -102,17 +108,16 @@ public class PagoController {
 		}
 	}
 
-	// private Pago convertirDTOaPago(PagoDTO pagoDTO) {
-	// Pago pago = new Pago();
-	// pago.setMonto(pagoDTO.getMonto());
-	// Optional<Usuario> autor = usuarioService.getById(pagoDTO.getAutorId());
-	// autor.ifPresent(pago::setAutor);
-	// Optional<Usuario> destinatario =
-	// usuarioService.getById(pagoDTO.getDestinatarioId());
-	// destinatario.ifPresent(pago::setDestinatario);
-	// Optional<Grupo> grupo = grupoService.getGroupById(pagoDTO.getGrupoId());
-	// grupo.ifPresent(pago::setGrupo);
+	private Pago convertirDTOaPago(PagoDTO pagoDTO) {
+		Pago pago = new Pago();
+		pago.setMonto(pagoDTO.getMonto());
+		Optional<Usuario> autor = usuarioService.getById(pagoDTO.getAutorId());
+		autor.ifPresent(pago::setAutor);
+		Optional<Usuario> destinatario = usuarioService.getById(pagoDTO.getDestinatarioId());
+		destinatario.ifPresent(pago::setDestinatario);
+		Optional<Grupo> grupo = grupoService.getGroupById(pagoDTO.getGrupoId());
+		grupo.ifPresent(pago::setGrupo);
 
-	// return pago;
-	// }
+		return pago;
+	}
 }

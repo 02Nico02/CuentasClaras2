@@ -11,17 +11,14 @@ import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
 import com.grupo7.cuentasclaras2.modelos.Categoria;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
+import com.grupo7.cuentasclaras2.modelos.Pago;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.repositories.GrupoRepository;
-import com.grupo7.cuentasclaras2.repositories.UsuarioRepository;
 
 @Service
 public class GrupoService {
 	@Autowired
 	private GrupoRepository grupoRepository;
-
-	@Autowired
-	private UsuarioRepository usuarioRepository;
 
 	@Autowired
 	private UsuarioService usuarioService;
@@ -170,6 +167,20 @@ public class GrupoService {
 					return usuarioOptional.get();
 				})
 				.collect(Collectors.toList());
+	}
+
+	public boolean addPaymentToGroup(Grupo grupo, Pago pago) {
+		if (grupo != null && pago != null) {
+			List<Pago> pagos = grupo.getPagos();
+
+			if (pagos == null || !pagos.contains(pago)) {
+				grupo.agregarPago(pago);
+				grupoRepository.save(grupo);
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	// public Gasto addGastoToGroup(Gasto gasto, Long groupId) {

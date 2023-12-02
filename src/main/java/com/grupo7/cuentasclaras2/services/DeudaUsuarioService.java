@@ -100,32 +100,30 @@ public class DeudaUsuarioService {
 		return false;
 	}
 
-	public List<DeudaUsuario> obtenerDeudasEntreUsuariosEnGrupo(long groupId, long user1Id, long user2Id) {
+	public Optional<DeudaUsuario> obtenerDeudaEntreUsuariosEnGrupo(long groupId, long deudorId, long acreedorId) {
 		Optional<Grupo> grupoOptional = grupoRepository.findById(groupId);
 
 		if (grupoOptional.isPresent()) {
 			Grupo grupo = grupoOptional.get();
 
-			Optional<Usuario> usuario1Optional = usuarioRepository.findById(user1Id);
+			Optional<Usuario> deudorOptional = usuarioRepository.findById(deudorId);
+			Optional<Usuario> acreedorOptional = usuarioRepository.findById(acreedorId);
 
-			Optional<Usuario> usuario2Optional = usuarioRepository.findById(user2Id);
+			if (deudorOptional.isPresent() && acreedorOptional.isPresent()) {
+				Usuario deudor = deudorOptional.get();
+				Usuario acreedor = acreedorOptional.get();
 
-			if (usuario1Optional.isPresent() && usuario2Optional.isPresent()) {
-				Usuario usuario1 = usuario1Optional.get();
-				Usuario usuario2 = usuario2Optional.get();
+				Optional<DeudaUsuario> deudaUsuarioOptional = deudaUsuarioRepository
+						.findByAcreedorAndDeudorAndGrupo(acreedor, deudor, grupo);
 
-				List<DeudaUsuario> deudasUsuarios = deudaUsuarioRepository
-						.findByAcreedorAndDeudorAndGrupoOrAcreedorAndDeudorAndGrupo(usuario1, usuario2, grupo, usuario2,
-								usuario1, grupo);
-
-				return deudasUsuarios;
+				return deudaUsuarioOptional;
 			}
 		}
 
-		return Collections.emptyList();
+		return Optional.empty();
 	}
 
-	public DeudaUsuario crearDeudaUsuario(long deudorId, long acreedorId, double monto, long grupoId) {
+	public Optional<DeudaUsuario> crearDeudaUsuario(long deudorId, long acreedorId, double monto, long grupoId) {
 		Optional<Usuario> deudorOptional = usuarioRepository.findById(deudorId);
 		Optional<Usuario> acreedorOptional = usuarioRepository.findById(acreedorId);
 		Optional<Grupo> grupoOptional = grupoRepository.findById(grupoId);
@@ -141,10 +139,10 @@ public class DeudaUsuarioService {
 			nuevaDeuda.setMonto(monto);
 			nuevaDeuda.setGrupo(grupo);
 
-			return deudaUsuarioRepository.save(nuevaDeuda);
+			return Optional.of(deudaUsuarioRepository.save(nuevaDeuda));
 		}
 
-		return null;
+		return Optional.empty();
 	}
 
 }

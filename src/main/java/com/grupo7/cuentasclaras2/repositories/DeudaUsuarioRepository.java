@@ -27,10 +27,6 @@ public interface DeudaUsuarioRepository extends JpaRepository<DeudaUsuario, Long
 
     Optional<DeudaUsuario> findTopByOrderByMontoDesc();
 
-    List<DeudaUsuario> findByAcreedorAndDeudorAndGrupo(Usuario acreedor, Usuario deudor, Grupo grupo);
-
-    List<DeudaUsuario> findByAcreedorAndDeudorAndGrupoOrAcreedorAndDeudorAndGrupo(
-            Usuario usuario1, Usuario usuario2, Grupo grupo,
-            Usuario usuario3, Usuario usuario4, Grupo grupo2);
+    Optional<DeudaUsuario> findByAcreedorAndDeudorAndGrupo(Usuario acreedor, Usuario deudor, Grupo grupo);
 
 }

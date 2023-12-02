@@ -1,6 +1,7 @@
 package com.grupo7.cuentasclaras2.controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,11 +9,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grupo7.cuentasclaras2.DTO.DeudaUsuarioDTO;
+import com.grupo7.cuentasclaras2.modelos.DeudaUsuario;
 import com.grupo7.cuentasclaras2.services.DeudaUsuarioService;
 
 @RestController
@@ -57,16 +61,39 @@ public class DeudaUsuarioController {
 	}
 
 	@GetMapping("/between-users-and-group")
-	public ResponseEntity<List<DeudaUsuarioDTO>> getDebtsBetweenUsersInGroup(
+	public ResponseEntity<DeudaUsuarioDTO> getDebtsBetweenUsersInGroup(
 			@RequestParam long groupId,
-			@RequestParam long user1Id,
-			@RequestParam long user2Id) {
+			@RequestParam long deudorId,
+			@RequestParam long acreedorId) {
 
-		List<DeudaUsuarioDTO> debts = deudaUsuarioService.obtenerDeudasEntreUsuariosEnGrupo(groupId, user1Id, user2Id)
-				.stream()
-				.map(DeudaUsuarioDTO::new)
-				.collect(Collectors.toList());
-		return new ResponseEntity<>(debts, HttpStatus.OK);
+		Optional<DeudaUsuario> deudaUsuarioOptional = deudaUsuarioService.obtenerDeudaEntreUsuariosEnGrupo(groupId,
+				deudorId, acreedorId);
+
+		if (deudaUsuarioOptional.isPresent()) {
+			return new ResponseEntity<>(new DeudaUsuarioDTO(deudaUsuarioOptional.get()), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@PostMapping("/new")
+	public ResponseEntity<DeudaUsuarioDTO> createNewDebt(@RequestBody DeudaUsuarioDTO deudaUsuarioDTO) {
+		try {
+			Optional<DeudaUsuario> deudaUsuario = deudaUsuarioService.crearDeudaUsuario(
+					deudaUsuarioDTO.getDeudorId(),
+					deudaUsuarioDTO.getAcreedorId(),
+					deudaUsuarioDTO.getMonto(),
+					deudaUsuarioDTO.getGrupoId());
+
+			if (deudaUsuario.isPresent()) {
+				return new ResponseEntity<>(new DeudaUsuarioDTO(deudaUsuario.get()), HttpStatus.CREATED);
+			} else {
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} catch (Exception e) {
+			System.err.println("Error al procesar la solicitud");
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }

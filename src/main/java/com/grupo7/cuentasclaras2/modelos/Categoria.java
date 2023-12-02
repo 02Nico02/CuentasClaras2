@@ -29,10 +29,10 @@ public class Categoria {
     private boolean grupo;
 
     @OneToMany(mappedBy = "categoria")
-    private List<Grupo> grupos;
+    private List<Grupo> grupos = new ArrayList<>();
 
     @OneToMany(mappedBy = "categoria")
-    private List<Gasto> gastos;
+    private List<Gasto> gastos = new ArrayList<>();
 
     @CreationTimestamp
     private Date fechaCreacion;
@@ -50,6 +50,12 @@ public class Categoria {
         this.grupo = esGrupo;
         this.grupos = grupos;
         this.gastos = gastos;
+    }
+
+    public Categoria(String nombre, String icono, boolean grupo) {
+        this.nombre = nombre;
+        this.icono = icono;
+        this.grupo = grupo;
     }
 
     public boolean isGrupo() {
