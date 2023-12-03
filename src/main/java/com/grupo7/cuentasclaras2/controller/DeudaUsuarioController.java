@@ -78,20 +78,15 @@ public class DeudaUsuarioController {
 
 	@PostMapping("/new")
 	public ResponseEntity<DeudaUsuarioDTO> createNewDebt(@RequestBody DeudaUsuarioDTO deudaUsuarioDTO) {
-		try {
-			Optional<DeudaUsuario> deudaUsuario = deudaUsuarioService.crearDeudaUsuario(
-					deudaUsuarioDTO.getDeudorId(),
-					deudaUsuarioDTO.getAcreedorId(),
-					deudaUsuarioDTO.getMonto(),
-					deudaUsuarioDTO.getGrupoId());
+		Optional<DeudaUsuario> deudaUsuario = deudaUsuarioService.crearDeudaUsuario(
+				deudaUsuarioDTO.getDeudorId(),
+				deudaUsuarioDTO.getAcreedorId(),
+				deudaUsuarioDTO.getMonto(),
+				deudaUsuarioDTO.getGrupoId());
 
-			if (deudaUsuario.isPresent()) {
-				return new ResponseEntity<>(new DeudaUsuarioDTO(deudaUsuario.get()), HttpStatus.CREATED);
-			} else {
-				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		} catch (Exception e) {
-			System.err.println("Error al procesar la solicitud");
+		if (deudaUsuario.isPresent()) {
+			return new ResponseEntity<>(new DeudaUsuarioDTO(deudaUsuario.get()), HttpStatus.CREATED);
+		} else {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

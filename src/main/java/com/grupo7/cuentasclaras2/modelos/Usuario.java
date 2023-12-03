@@ -140,6 +140,15 @@ public class Usuario {
         }
     }
 
+    public void salirDeGrupo(Grupo grupo) {
+        if (grupos == null) {
+            grupos = new ArrayList<>();
+        }
+        if (!grupos.contains(grupo)) {
+            grupos.remove(grupo);
+        }
+    }
+
     public List<InvitacionAmistad> getInvitacionesAmigosEnviadas() {
         if (invitacionesAmigosEnviadas == null) {
             invitacionesAmigosEnviadas = new ArrayList<>();

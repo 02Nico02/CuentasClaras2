@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
-import com.grupo7.cuentasclaras2.exception.UserAlreadyExistsException;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.services.InvitacionAmistadService;
 import com.grupo7.cuentasclaras2.services.InvitacionService;
@@ -57,19 +56,13 @@ public class UsuarioController {
 
     @PutMapping("/{userId}")
     public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable long userId, @RequestBody UsuarioDTO usuarioDTO) {
-        try {
-            Optional<Usuario> usuarioExistenteOptional = usuarioService.getById(userId);
-            if (usuarioExistenteOptional.isPresent()) {
-                Usuario usuarioExistente = usuarioExistenteOptional.get();
-                Usuario usuarioGuardado = usuarioService.updateUserDataFromDTO(usuarioExistente, usuarioDTO);
-                return new ResponseEntity<>(new UsuarioDTO(usuarioGuardado), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (UserAlreadyExistsException e) {
-            System.err.println(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
+        Optional<Usuario> usuarioExistenteOptional = usuarioService.getById(userId);
+        if (usuarioExistenteOptional.isPresent()) {
+            Usuario usuarioExistente = usuarioExistenteOptional.get();
+            Usuario usuarioGuardado = usuarioService.updateUserDataFromDTO(usuarioExistente, usuarioDTO);
+            return new ResponseEntity<>(new UsuarioDTO(usuarioGuardado), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -145,26 +138,13 @@ public class UsuarioController {
 
     @PostMapping("/sendGroupInvitation")
     public ResponseEntity<String> sendGroupInvitation(
-            @RequestParam String senderEmail,
-            @RequestParam String receiverEmail,
+            @RequestParam Long senderId,
+            @RequestParam Long receiverId,
             @RequestParam Long groupId) {
-        Optional<Usuario> senderOptional = usuarioService.getByEmail(senderEmail);
-        Optional<Usuario> receiverOptional = usuarioService.getByEmail(receiverEmail);
 
-        if (senderOptional.isPresent() && receiverOptional.isPresent()) {
-            Usuario sender = senderOptional.get();
-            Usuario receiver = receiverOptional.get();
+        invitacionService.enviarInvitacion(senderId, receiverId, groupId);
+        return new ResponseEntity<>("Solicitud de grupo enviada con éxito.", HttpStatus.OK);
 
-            boolean success = invitacionService.enviarInvitacion(sender.getId(), receiver.getId(), groupId);
-
-            if (success) {
-                return new ResponseEntity<>("Solicitud de grupo enviada con éxito.", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("No se pudo enviar la solicitud de grupo.", HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            return new ResponseEntity<>("Usuarios no encontrados.", HttpStatus.NOT_FOUND);
-        }
     }
 
     @PostMapping("/acceptGroupInvitation")

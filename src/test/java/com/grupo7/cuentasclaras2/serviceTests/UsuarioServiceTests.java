@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -14,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.grupo7.cuentasclaras2.exception.GroupException;
+import com.grupo7.cuentasclaras2.exception.InvitationGroupException;
+import com.grupo7.cuentasclaras2.exception.UserException;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Invitacion;
 import com.grupo7.cuentasclaras2.modelos.InvitacionAmistad;
@@ -353,11 +357,11 @@ public class UsuarioServiceTests {
         grupoRepository.save(grupo);
         grupo.agregarMiembro(remitente);
 
-        // Act
-        boolean result = invitacionService.enviarInvitacion(remitente.getId(), destinatario.getId(), grupo.getId());
+        // Act & Assert
+        assertDoesNotThrow(
+                () -> invitacionService.enviarInvitacion(remitente.getId(), destinatario.getId(), grupo.getId()));
 
-        // Assert
-        assertTrue(result);
+        // Verifica que no hay excepciones y que se creó la invitación
         assertEquals(1, invitacionRepository.count());
     }
 
@@ -372,11 +376,12 @@ public class UsuarioServiceTests {
         usuarioRepository.save(destinatario);
         grupoRepository.save(grupo);
 
-        // Act
-        boolean result = invitacionService.enviarInvitacion(remitente.getId(), destinatario.getId(), grupo.getId());
+        // Act & Assert
+        assertThrows(GroupException.class, () -> {
+            invitacionService.enviarInvitacion(remitente.getId(), destinatario.getId(), grupo.getId());
+        });
 
-        // Assert
-        assertFalse(result);
+        // Verifica que no se creó la invitación
         assertEquals(0, invitacionRepository.count());
     }
 
@@ -434,7 +439,16 @@ public class UsuarioServiceTests {
         invitacionRepository.save(invitacion);
 
         // Act & Assert
-        assertDoesNotThrow(() -> invitacionService.aceptarInvitacion(destinatario, 999L));
+        assertThrows(InvitationGroupException.class, () -> {
+            invitacionService.aceptarInvitacion(destinatario, 999L);
+        });
+
+        // Verifica que el usuario no se ha agregado al grupo
+        if (invitacion.getGrupo() != null) {
+            assertFalse(invitacion.getGrupo().getMiembros().contains(destinatario));
+        }
+        // Verifica que la invitación no se ha eliminado
+        assertNotNull(invitacionRepository.findById(invitacion.getId()));
     }
 
     @Test
@@ -448,7 +462,12 @@ public class UsuarioServiceTests {
         invitacionRepository.save(invitacion);
 
         // Act & Assert
-        assertDoesNotThrow(() -> invitacionService.rechazarInvitacion(destinatario, 999L));
+        assertThrows(InvitationGroupException.class, () -> {
+            invitacionService.rechazarInvitacion(destinatario, 999L);
+        });
+
+        // Verifica que la invitación no se ha eliminado
+        assertNotNull(invitacionRepository.findById(invitacion.getId()));
     }
 
     @Test
@@ -461,11 +480,12 @@ public class UsuarioServiceTests {
         grupoRepository.save(grupo);
         grupo.agregarMiembro(remitente);
 
-        // Act
-        boolean result = invitacionService.enviarInvitacion(remitente.getId(), 999L, grupo.getId());
+        // Act & Assert
+        assertThrows(UserException.class, () -> {
+            invitacionService.enviarInvitacion(remitente.getId(), 999L, grupo.getId());
+        });
 
-        // Assert
-        assertFalse(result);
+        // Verifica que no se creó la invitación
         assertEquals(0, invitacionRepository.count());
     }
 
@@ -478,11 +498,12 @@ public class UsuarioServiceTests {
         usuarioRepository.save(remitente);
         usuarioRepository.save(destinatario);
 
-        // Act
-        boolean result = invitacionService.enviarInvitacion(remitente.getId(), destinatario.getId(), 999L);
+        // Act & Assert
+        assertThrows(GroupException.class, () -> {
+            invitacionService.enviarInvitacion(remitente.getId(), destinatario.getId(), 999L);
+        });
 
-        // Assert
-        assertFalse(result);
+        // Verifica que no se creó la invitación
         assertEquals(0, invitacionRepository.count());
     }
 
@@ -501,11 +522,9 @@ public class UsuarioServiceTests {
         invitacion.setGrupo(grupo);
         invitacionRepository.save(invitacion);
 
-        // Act
-        invitacionService.aceptarInvitacion(otroUsuario, invitacion.getId());
-
-        // Assert
-        assertFalse(grupo.getMiembros().contains(otroUsuario));
+        // Act & Assert
+        assertThrows(InvitationGroupException.class,
+                () -> invitacionService.aceptarInvitacion(otroUsuario, invitacion.getId()));
     }
 
 }

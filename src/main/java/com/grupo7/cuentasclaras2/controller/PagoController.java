@@ -1,21 +1,12 @@
 package com.grupo7.cuentasclaras2.controller;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
 import com.grupo7.cuentasclaras2.exception.InvalidPaymentException;
@@ -29,6 +20,7 @@ import com.grupo7.cuentasclaras2.services.UsuarioService;
 @RestController
 @RequestMapping("/api/pay")
 public class PagoController {
+
 	@Autowired
 	private PagoService pagoService;
 
@@ -38,16 +30,11 @@ public class PagoController {
 	@Autowired
 	private GrupoService grupoService;
 
-	@ExceptionHandler(InvalidPaymentException.class)
-	public ResponseEntity<String> handleServicioException(InvalidPaymentException ex) {
-		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-	}
-
 	@GetMapping("/{id}")
 	public ResponseEntity<PagoDTO> obtenerPagoPorId(@PathVariable long id) {
 		return pagoService.obtenerPagoPorId(id)
-				.map(pago -> new ResponseEntity<>(new PagoDTO(pago), HttpStatus.OK))
-				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+				.map(pago -> ResponseEntity.ok(new PagoDTO(pago)))
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@GetMapping("/byGroup/{grupoId}")
@@ -56,7 +43,7 @@ public class PagoController {
 				.stream()
 				.map(PagoDTO::new)
 				.collect(Collectors.toList());
-		return new ResponseEntity<>(pagos, HttpStatus.OK);
+		return ResponseEntity.ok(pagos);
 	}
 
 	@GetMapping("/bySender/{usuarioId}")
@@ -65,7 +52,7 @@ public class PagoController {
 				.stream()
 				.map(PagoDTO::new)
 				.collect(Collectors.toList());
-		return new ResponseEntity<>(pagos, HttpStatus.OK);
+		return ResponseEntity.ok(pagos);
 	}
 
 	@GetMapping("/byRecipient/{usuarioId}")
@@ -74,50 +61,49 @@ public class PagoController {
 				.stream()
 				.map(PagoDTO::new)
 				.collect(Collectors.toList());
-		return new ResponseEntity<>(pagos, HttpStatus.OK);
+		return ResponseEntity.ok(pagos);
 	}
 
 	@PostMapping("/new")
 	public ResponseEntity<PagoDTO> crearPago(@RequestBody PagoDTO pagoDTO) {
 		Pago pagoGuardado = pagoService.guardarPagoDesdeDTO(pagoDTO);
-
-		return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.CREATED);
+		return ResponseEntity.status(HttpStatus.CREATED).body(new PagoDTO(pagoGuardado));
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<PagoDTO> actualizarPago(@PathVariable long id,
-			@RequestBody PagoDTO pagoDTO) {
-		if (pagoService.obtenerPagoPorId(id).isPresent()) {
-			Pago pagoActualizado = convertirDTOaPago(pagoDTO);
-			pagoActualizado.setId(id);
-
-			Pago pagoGuardado = pagoService.guardarPago(pagoActualizado);
-			return new ResponseEntity<>(new PagoDTO(pagoGuardado), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+	public ResponseEntity<PagoDTO> actualizarPago(@PathVariable long id, @RequestBody PagoDTO pagoDTO) {
+		return pagoService.obtenerPagoPorId(id)
+				.map(existingPago -> {
+					Pago pagoActualizado = convertirDTOaPago(pagoDTO);
+					pagoActualizado.setId(id);
+					Pago pagoGuardado = pagoService.guardarPago(pagoActualizado);
+					return ResponseEntity.ok(new PagoDTO(pagoGuardado));
+				})
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> eliminarPago(@PathVariable long id) {
-		if (pagoService.obtenerPagoPorId(id).isPresent()) {
-			pagoService.eliminarPago(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+		return pagoService.obtenerPagoPorId(id)
+				.map(existingPago -> {
+					pagoService.eliminarPago(id);
+					return ResponseEntity.ok().<Void>build();
+				})
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	private Pago convertirDTOaPago(PagoDTO pagoDTO) {
 		Pago pago = new Pago();
 		pago.setMonto(pagoDTO.getMonto());
-		Optional<Usuario> autor = usuarioService.getById(pagoDTO.getAutorId());
-		autor.ifPresent(pago::setAutor);
-		Optional<Usuario> destinatario = usuarioService.getById(pagoDTO.getDestinatarioId());
-		destinatario.ifPresent(pago::setDestinatario);
-		Optional<Grupo> grupo = grupoService.getGroupById(pagoDTO.getGrupoId());
-		grupo.ifPresent(pago::setGrupo);
-
+		Usuario autor = usuarioService.getById(pagoDTO.getAutorId())
+				.orElseThrow(() -> new InvalidPaymentException("No se encontró el autor del pago"));
+		pago.setAutor(autor);
+		Usuario destinatario = usuarioService.getById(pagoDTO.getDestinatarioId())
+				.orElseThrow(() -> new InvalidPaymentException("No se encontró el destinatario del pago"));
+		pago.setDestinatario(destinatario);
+		Grupo grupo = grupoService.getGroupById(pagoDTO.getGrupoId())
+				.orElseThrow(() -> new InvalidPaymentException("No se encontró el grupo especificado"));
+		pago.setGrupo(grupo);
 		return pago;
 	}
 }

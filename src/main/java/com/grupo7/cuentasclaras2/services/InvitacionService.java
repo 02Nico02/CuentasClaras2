@@ -1,10 +1,11 @@
 package com.grupo7.cuentasclaras2.services;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.grupo7.cuentasclaras2.exception.GroupException;
+import com.grupo7.cuentasclaras2.exception.InvitationGroupException;
+import com.grupo7.cuentasclaras2.exception.UserException;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Invitacion;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
@@ -26,56 +27,53 @@ public class InvitacionService {
 	@Autowired
 	private GrupoService grupoService;
 
-	public boolean enviarInvitacion(Long remitenteId, Long destinatarioId, Long grupoId) {
-		Optional<Usuario> remitenteOptional = usuarioRepository.findById(remitenteId);
-		Optional<Usuario> destinatarioOptional = usuarioRepository.findById(destinatarioId);
-		Optional<Grupo> grupoOptional = grupoRepository.findById(grupoId);
+	public void enviarInvitacion(Long remitenteId, Long destinatarioId, Long grupoId) {
+		Usuario remitente = usuarioRepository.findById(remitenteId)
+				.orElseThrow(() -> new UserException("Usuario remitente no encontrado"));
 
-		if (remitenteOptional.isPresent() && destinatarioOptional.isPresent() && grupoOptional.isPresent()) {
-			Usuario remitente = remitenteOptional.get();
-			Usuario destinatario = destinatarioOptional.get();
-			Grupo grupo = grupoOptional.get();
+		Usuario destinatario = usuarioRepository.findById(destinatarioId)
+				.orElseThrow(() -> new UserException("Usuario destinatario no encontrado"));
 
-			if (grupo.getMiembros().contains(remitente)) {
-				Invitacion invitacion = new Invitacion();
-				invitacion.setRemitente(remitente);
-				invitacion.setDestinatario(destinatario);
-				invitacion.setGrupo(grupo);
+		Grupo grupo = grupoRepository.findById(grupoId)
+				.orElseThrow(() -> new GroupException("Grupo no encontrado"));
 
-				invitacionRepository.save(invitacion);
-
-				destinatario.addGroupInvitationReceived(invitacion);
-
-				usuarioRepository.save(destinatario);
-
-				return true;
-			}
+		if (!grupo.getMiembros().contains(remitente)) {
+			throw new GroupException("El remitente no es miembro del grupo");
 		}
 
-		return false;
+		Invitacion invitacion = new Invitacion();
+		invitacion.setRemitente(remitente);
+		invitacion.setDestinatario(destinatario);
+		invitacion.setGrupo(grupo);
+
+		invitacionRepository.save(invitacion);
+
+		destinatario.addGroupInvitationReceived(invitacion);
+
+		usuarioRepository.save(destinatario);
 	}
 
 	public void aceptarInvitacion(Usuario usuario, Long invitacionId) {
-		Optional<Invitacion> invitacionOptional = invitacionRepository.findById(invitacionId);
+		Invitacion invitacion = invitacionRepository.findById(invitacionId)
+				.orElseThrow(() -> new InvitationGroupException("Invitación no encontrada"));
 
-		if (invitacionOptional.isPresent()) {
-			Invitacion invitacion = invitacionOptional.get();
-			if (invitacion.getDestinatario().equals(usuario)) {
-				Grupo grupo = invitacion.getGrupo();
-				grupoService.addMemberToGroup(grupo, usuario);
-				invitacionRepository.delete(invitacion);
-			}
+		if (!invitacion.getDestinatario().equals(usuario)) {
+			throw new InvitationGroupException("El usuario no es el destinatario de la invitación");
 		}
+
+		Grupo grupo = invitacion.getGrupo();
+		grupoService.addMemberToGroup(grupo, usuario);
+		invitacionRepository.delete(invitacion);
 	}
 
 	public void rechazarInvitacion(Usuario usuario, Long invitacionId) {
-		Optional<Invitacion> invitacionOptional = invitacionRepository.findById(invitacionId);
+		Invitacion invitacion = invitacionRepository.findById(invitacionId)
+				.orElseThrow(() -> new InvitationGroupException("Invitación no encontrada"));
 
-		if (invitacionOptional.isPresent()) {
-			Invitacion invitacion = invitacionOptional.get();
-			if (invitacion.getDestinatario().equals(usuario)) {
-				invitacionRepository.delete(invitacion);
-			}
+		if (!invitacion.getDestinatario().equals(usuario)) {
+			throw new InvitationGroupException("El usuario no es el destinatario de la invitación");
 		}
+
+		invitacionRepository.delete(invitacion);
 	}
 }

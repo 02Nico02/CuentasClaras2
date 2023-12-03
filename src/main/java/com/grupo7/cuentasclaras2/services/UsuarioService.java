@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
-import com.grupo7.cuentasclaras2.exception.UserAlreadyExistsException;
+import com.grupo7.cuentasclaras2.exception.UserException;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.repositories.UsuarioRepository;
 
@@ -64,14 +64,15 @@ public class UsuarioService {
     }
 
     public Optional<Usuario> registerUser(Usuario newUser) {
-        if (usuarioRepository.findByUsername(newUser.getUsername()).isPresent() ||
-                usuarioRepository.findByEmail(newUser.getEmail()).isPresent()) {
-            return Optional.empty();
-        }
-
-        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-
-        return Optional.of(usuarioRepository.save(newUser));
+        return usuarioRepository.findByUsername(newUser.getUsername())
+                .or(() -> usuarioRepository.findByEmail(newUser.getEmail()))
+                .map(existingUser -> {
+                    return Optional.<Usuario>empty();
+                })
+                .orElseGet(() -> {
+                    newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+                    return Optional.of(usuarioRepository.save(newUser));
+                });
     }
 
     public Optional<Usuario> findByUsernameOrEmail(String usernameOrEmail) {
@@ -87,12 +88,12 @@ public class UsuarioService {
         String nuevoUsername = usuarioDTO.getUsername();
         if (!nuevoUsername.equals(usuarioExistente.getUsername())
                 && usuarioRepository.existsByUsername(nuevoUsername)) {
-            throw new UserAlreadyExistsException("username");
+            throw new UserException("El nombre de usuario ya está en uso.");
         }
 
         String nuevoEmail = usuarioDTO.getEmail();
         if (!nuevoEmail.equals(usuarioExistente.getEmail()) && usuarioRepository.existsByEmail(nuevoEmail)) {
-            throw new UserAlreadyExistsException("email");
+            throw new UserException("La dirección de correo electrónico ya está en uso.");
         }
 
         usuarioExistente.setUsername(nuevoUsername);

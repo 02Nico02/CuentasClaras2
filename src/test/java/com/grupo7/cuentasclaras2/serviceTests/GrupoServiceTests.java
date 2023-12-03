@@ -3,6 +3,7 @@ package com.grupo7.cuentasclaras2.serviceTests;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import com.grupo7.cuentasclaras2.DTO.CategoriaDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
+import com.grupo7.cuentasclaras2.exception.GroupException;
 import com.grupo7.cuentasclaras2.modelos.Categoria;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
@@ -262,6 +264,48 @@ public class GrupoServiceTests {
         Optional<Grupo> grupoGuardado = grupoService.newGroupByDTO(grupoDTO);
 
         assertTrue(grupoGuardado.isPresent());
+    }
+
+    @Test
+    void testNewCoupleGroupByDTO() {
+        GrupoDTO coupleGroupDTO = new GrupoDTO();
+
+        Usuario usuario1 = new Usuario("usuario1", "Nombre", "Apellido", "usuario1@example.com", "password");
+        Usuario usuario2 = new Usuario("usuario2", "Nombre", "Apellido", "usuario2@example.com", "password");
+        List<Usuario> usuarios = usuarioRepository.saveAll(Arrays.asList(usuario1, usuario2));
+
+        IdEmailUsuarioDTO idEmailUsuarioDTO1 = new IdEmailUsuarioDTO();
+        idEmailUsuarioDTO1.setUsername(usuarios.get(0).getUsername());
+        idEmailUsuarioDTO1.setId(usuarios.get(0).getId());
+        IdEmailUsuarioDTO idEmailUsuarioDTO2 = new IdEmailUsuarioDTO();
+        idEmailUsuarioDTO2.setUsername(usuarios.get(1).getUsername());
+        idEmailUsuarioDTO2.setId(usuarios.get(1).getId());
+
+        List<IdEmailUsuarioDTO> miembrosDTO = Arrays.asList(idEmailUsuarioDTO1, idEmailUsuarioDTO2);
+        coupleGroupDTO.setMiembros(miembrosDTO);
+
+        Optional<Grupo> coupleGroupGuardado = grupoService.newCoupleGroupByDTO(coupleGroupDTO);
+
+        assertTrue(coupleGroupGuardado.isPresent());
+        assertTrue(coupleGroupGuardado.get().getEsPareja());
+    }
+
+    @Test
+    void testNewCoupleGroupByDTOWithInsufficientMembers() {
+        GrupoDTO coupleGroupDTO = new GrupoDTO();
+
+        Usuario usuario1 = new Usuario("usuario1", "Nombre", "Apellido", "usuario1@example.com", "password");
+        usuarioRepository.save(usuario1);
+
+        IdEmailUsuarioDTO idEmailUsuarioDTO1 = new IdEmailUsuarioDTO();
+        idEmailUsuarioDTO1.setUsername(usuario1.getUsername());
+        idEmailUsuarioDTO1.setId(usuario1.getId());
+
+        List<IdEmailUsuarioDTO> miembrosDTO = Collections.singletonList(idEmailUsuarioDTO1);
+        coupleGroupDTO.setMiembros(miembrosDTO);
+
+        assertThrows(GroupException.class, () -> grupoService.newCoupleGroupByDTO(coupleGroupDTO),
+                "Se esperaba una excepción GroupException");
     }
 
 }

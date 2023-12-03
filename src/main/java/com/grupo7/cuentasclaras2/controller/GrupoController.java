@@ -28,40 +28,45 @@ public class GrupoController {
 	@GetMapping("/all")
 	public ResponseEntity<List<Grupo>> getAllGroups() {
 		List<Grupo> groups = grupoService.getAllGroups();
-		return new ResponseEntity<>(groups, HttpStatus.OK);
+		return ResponseEntity.ok(groups);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<GrupoDTO> getGroupById(@PathVariable Long id) {
 		return grupoService.getGroupById(id)
-				.map(group -> new ResponseEntity<>(new GrupoDTO(group), HttpStatus.OK))
-				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+				.map(group -> ResponseEntity.ok(new GrupoDTO(group)))
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@PostMapping("/newGroup")
 	public ResponseEntity<GrupoDTO> saveGroup(@RequestBody GrupoDTO grupoDTO) {
+		return grupoService.newGroupByDTO(grupoDTO)
+				.map(grupoGuardado -> new ResponseEntity<>(new GrupoDTO(grupoGuardado), HttpStatus.CREATED))
+				.orElseGet(() -> ResponseEntity.badRequest().build());
+	}
 
-		Optional<Grupo> grupoOptional = grupoService.newGroupByDTO(grupoDTO);
-
-		if (grupoOptional.isPresent()) {
-			Grupo grupoGuardado = grupoOptional.get();
-			return new ResponseEntity<>(new GrupoDTO(grupoGuardado), HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	@PostMapping("/couple")
+	public ResponseEntity<GrupoDTO> crearGrupoPareja(@RequestBody GrupoDTO grupoDTO) {
+		try {
+			Optional<Grupo> grupoOptional = grupoService.newCoupleGroupByDTO(grupoDTO);
+			GrupoDTO nuevoGrupoDTO = new GrupoDTO(grupoOptional.orElse(null));
+			return ResponseEntity.status(HttpStatus.CREATED).body(nuevoGrupoDTO);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().build();
 		}
 	}
 
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
 		grupoService.deleteGroup(id);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/byNombre/{nombre}")
 	public ResponseEntity<GrupoDTO> getGroupByNombre(@PathVariable String nombre) {
 		return grupoService.getGroupByNombre(nombre)
 				.map(group -> new ResponseEntity<>(new GrupoDTO(group), HttpStatus.OK))
-				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@PostMapping("/addMember/{groupId}/{userId}")
@@ -69,11 +74,7 @@ public class GrupoController {
 			@PathVariable Long groupId,
 			@PathVariable Long userId) {
 		boolean success = grupoService.addMemberToGroup(groupId, userId);
-		if (success) {
-			return new ResponseEntity<>(HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+		return success ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
 	}
 
 	@DeleteMapping("/removeMember/{groupId}/{memberId}")
@@ -81,25 +82,20 @@ public class GrupoController {
 			@PathVariable Long groupId,
 			@PathVariable Long memberId) {
 		boolean success = grupoService.removeMemberFromGroup(groupId, memberId);
-		if (success) {
-			return new ResponseEntity<>(HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+		return success ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
 	}
 
 	@PutMapping("/update/{id}")
 	public ResponseEntity<GrupoDTO> updateGroupName(
 			@PathVariable Long id,
 			@RequestBody GrupoDTO grupoDTO) {
-		if (grupoService.getGroupById(id).isPresent()) {
-			Grupo grupo = grupoService.getGroupById(id).get();
-			grupo.setNombre(grupoDTO.getNombre());
-			Grupo updatedGroup = grupoService.saveGroup(grupo);
-			return new ResponseEntity<>(new GrupoDTO(updatedGroup), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+		return grupoService.getGroupById(id)
+				.map(grupo -> {
+					grupo.setNombre(grupoDTO.getNombre());
+					Grupo updatedGroup = grupoService.saveGroup(grupo);
+					return ResponseEntity.ok(new GrupoDTO(updatedGroup));
+				})
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 }

@@ -33,19 +33,19 @@ public class Grupo {
     private boolean esPareja;
 
     @ManyToMany(mappedBy = "grupos", fetch = FetchType.LAZY)
-    private List<Usuario> miembros;
+    private List<Usuario> miembros = new ArrayList<>();
 
     @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Gasto> gastos;
+    private List<Gasto> gastos = new ArrayList<>();
 
     @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Pago> pagos;
+    private List<Pago> pagos = new ArrayList<>();
 
     @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<DeudaUsuario> deudas;
+    private List<DeudaUsuario> deudas = new ArrayList<>();
 
     @ManyToOne
     private Categoria categoria;
@@ -115,6 +115,19 @@ public class Grupo {
         if (!miembros.contains(usuario)) {
             miembros.add(usuario);
             usuario.unirseAGrupo(this);
+        }
+    }
+
+    public void agregarMiembros(List<Usuario> usuarios) {
+        if (miembros == null) {
+            miembros = new ArrayList<>();
+        }
+        List<Usuario> usuariosCopia = new ArrayList<>(usuarios);
+        for (Usuario usuario : usuariosCopia) {
+            if (!miembros.contains(usuario)) {
+                miembros.add(usuario);
+                usuario.unirseAGrupo(this);
+            }
         }
     }
 

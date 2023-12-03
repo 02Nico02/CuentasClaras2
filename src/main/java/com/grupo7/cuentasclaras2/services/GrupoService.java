@@ -1,19 +1,24 @@
 package com.grupo7.cuentasclaras2.services;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
+import com.grupo7.cuentasclaras2.exception.GroupException;
 import com.grupo7.cuentasclaras2.modelos.Categoria;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Pago;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.repositories.GrupoRepository;
+import com.grupo7.cuentasclaras2.repositories.UsuarioRepository;
 
 @Service
 public class GrupoService {
@@ -22,6 +27,9 @@ public class GrupoService {
 
 	@Autowired
 	private UsuarioService usuarioService;
+
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
 	@Autowired
 	private CategoriaService categoriaService;
@@ -54,14 +62,7 @@ public class GrupoService {
 			Grupo grupo = grupoOptional.get();
 			Usuario usuario = usuarioOptional.get();
 
-			List<Usuario> miembros = grupo.getMiembros();
-
-			if (miembros == null || !miembros.contains(usuario)) {
-				if (grupo.getEsPareja() && miembros != null && miembros.size() >= 2) {
-					return false;
-				}
-				grupo.agregarMiembro(usuario);
-				grupoRepository.save(grupo);
+			if (agregarMiembroAGrupo(grupo, usuario)) {
 				return true;
 			}
 		}
@@ -80,6 +81,9 @@ public class GrupoService {
 
 				grupo.agregarMiembro(usuario);
 				grupoRepository.save(grupo);
+
+				usuario.unirseAGrupo(grupo);
+				usuarioRepository.save(usuario);
 				return true;
 			}
 		}
@@ -95,78 +99,60 @@ public class GrupoService {
 			Grupo grupo = grupoOptional.get();
 			Usuario usuario = usuarioOptional.get();
 
-			List<Usuario> miembros = grupo.getMiembros();
-
-			if (miembros != null && !miembros.isEmpty()) {
-				boolean removed = miembros.remove(usuario);
-
-				if (removed) {
-					grupoRepository.save(grupo);
-				}
-
-				return removed;
+			if (quitarMiembroDeGrupo(grupo, usuario)) {
+				return true;
 			}
 		}
 
 		return false;
 	}
 
+	@Transactional
 	public Optional<Grupo> newGroupByDTO(GrupoDTO grupoDTO) {
-		if (grupoDTO.getNombre() == null || grupoDTO.getNombre().isEmpty()) {
-			throw new IllegalArgumentException("El nombre del grupo es obligatorio.");
-		}
+		validarGrupoDTO(grupoDTO);
 
 		Grupo grupo = new Grupo();
 		grupo.setNombre(grupoDTO.getNombre());
 		grupo.setEsPareja(false);
 
-		Long categoriaId = grupoDTO.getCategoria() != null ? grupoDTO.getCategoria().getId() : null;
-		if (categoriaId == null) {
-			throw new IllegalArgumentException("La categoría del grupo es obligatoria.");
+		Categoria categoria = obtenerCategoriaValidada(grupoDTO.getCategoria().getId());
+
+		List<Usuario> miembros = convertirDTOaUsuariosValidados(grupoDTO.getMiembros());
+
+		if (miembros.isEmpty()) {
+			throw new GroupException("Se debe proporcionar al menos un usuario al crear un grupo.");
 		}
 
-		Optional<Categoria> categoriaOptional = categoriaService.getCategoriaById(categoriaId);
-
-		if (categoriaOptional.isEmpty()) {
-			throw new IllegalArgumentException("La categoría especificada no existe.");
-		}
-
-		Categoria categoria = categoriaOptional.get();
-		if (!categoria.isGrupo()) {
-			throw new IllegalArgumentException("La categoría especificada no es de grupo.");
-		}
-
-		List<IdEmailUsuarioDTO> miembrosDTO = grupoDTO.getMiembros();
-		if (miembrosDTO == null || miembrosDTO.isEmpty()) {
-			throw new IllegalArgumentException("Se requiere al menos un miembro para crear un grupo.");
-		}
-
-		List<Usuario> miembros = convertirDTOaUsuarios(miembrosDTO);
-
-		grupo.setMiembros(miembros);
-
+		grupo.agregarMiembros(miembros);
 		categoria.addGroup(grupo);
 		grupo.setCategoria(categoria);
 
 		categoriaService.saveCategoria(categoria);
-
 		Grupo grupoGuardado = grupoRepository.save(grupo);
+
+		guardarUsuariosEnGrupo(miembros, grupoGuardado);
+
 		return Optional.of(grupoGuardado);
 	}
 
-	private List<Usuario> convertirDTOaUsuarios(List<IdEmailUsuarioDTO> miembrosDTO) {
-		return miembrosDTO.stream()
-				.map(idEmailUsuarioDTO -> {
-					Long usuarioId = idEmailUsuarioDTO.getId();
-					Optional<Usuario> usuarioOptional = usuarioService.getById(usuarioId);
+	@Transactional
+	public Optional<Grupo> newCoupleGroupByDTO(GrupoDTO grupoDTO) {
+		validarCoupleGroupDTO(grupoDTO);
 
-					if (usuarioOptional.isEmpty()) {
-						throw new IllegalArgumentException("El usuario con ID " + usuarioId + " no existe.");
-					}
+		Grupo grupo = new Grupo();
+		grupo.setEsPareja(true);
 
-					return usuarioOptional.get();
-				})
-				.collect(Collectors.toList());
+		List<Usuario> miembros = convertirDTOaUsuariosValidados(grupoDTO.getMiembros());
+
+		validarMiembrosParaGrupoPareja(miembros);
+
+		grupo.agregarMiembros(miembros);
+		Grupo grupoGuardado = grupoRepository.save(grupo);
+		usuarioRepository.saveAll(miembros);
+
+		// guardarUsuariosEnGrupo(miembros, grupoGuardado);
+
+		return Optional.of(grupoGuardado);
 	}
 
 	public boolean addPaymentToGroup(Grupo grupo, Pago pago) {
@@ -199,4 +185,135 @@ public class GrupoService {
 
 	// return null;
 	// }
+
+	private boolean agregarMiembroAGrupo(Grupo grupo, Usuario usuario) {
+		List<Usuario> miembros = grupo.getMiembros();
+
+		if (miembros == null || !miembros.contains(usuario)) {
+			if (grupo.getEsPareja() && miembros != null && miembros.size() >= 2) {
+				return false;
+			}
+
+			if (miembros != null && miembros.contains(usuario)) {
+				return false;
+			}
+
+			grupo.agregarMiembro(usuario);
+			grupoRepository.save(grupo);
+			usuario.unirseAGrupo(grupo);
+			usuarioRepository.save(usuario);
+			return true;
+		}
+
+		return false;
+	}
+
+	private boolean quitarMiembroDeGrupo(Grupo grupo, Usuario usuario) {
+		List<Usuario> miembros = grupo.getMiembros();
+
+		if (miembros != null && !miembros.isEmpty()) {
+			boolean removed = miembros.remove(usuario);
+
+			if (removed) {
+				grupoRepository.save(grupo);
+				usuario.salirDeGrupo(grupo);
+				usuarioRepository.save(usuario);
+			}
+
+			return removed;
+		}
+
+		return false;
+	}
+
+	private void validarMiembrosParaGrupoPareja(List<Usuario> miembros) {
+		if (miembros.size() != 2) {
+			throw new GroupException("Un grupo de pareja debe tener exactamente 2 miembros.");
+		}
+
+		Usuario usuario1 = miembros.get(0);
+		Usuario usuario2 = miembros.get(1);
+
+		if (usuario1.equals(usuario2)) {
+			throw new GroupException("No se pueden unir a un mismo miembro en una pareja");
+		}
+
+		if (existeGrupoParejaEntreUsuarios(usuario1, usuario2)) {
+			throw new GroupException("Ya existe un grupo de pareja entre estos dos usuarios.");
+		}
+	}
+
+	private void guardarUsuariosEnGrupo(List<Usuario> miembros, Grupo grupo) {
+		List<Usuario> miembrosCopia = new ArrayList<>(miembros);
+		for (Usuario miembro : miembrosCopia) {
+			miembro.unirseAGrupo(grupo);
+			usuarioRepository.save(miembro);
+		}
+	}
+
+	private void validarCoupleGroupDTO(GrupoDTO grupoDTO) {
+
+		if (grupoDTO.getMiembros() == null || grupoDTO.getMiembros().size() != 2) {
+			throw new GroupException("Un grupo de pareja debe tener exactamente 2 miembros.");
+		}
+
+	}
+
+	private void validarGrupoDTO(GrupoDTO grupoDTO) {
+		if (grupoDTO.getNombre() == null || grupoDTO.getNombre().isEmpty()) {
+			throw new GroupException("El nombre del grupo es obligatorio.");
+		}
+
+		Long categoriaId = grupoDTO.getCategoria() != null ? grupoDTO.getCategoria().getId() : null;
+		if (categoriaId == null) {
+			throw new GroupException("La categoría del grupo es obligatoria.");
+		}
+	}
+
+	private Categoria obtenerCategoriaValidada(Long categoriaId) {
+		Optional<Categoria> categoriaOptional = categoriaService.getCategoriaById(categoriaId);
+
+		if (categoriaOptional.isEmpty()) {
+			throw new GroupException("La categoría especificada no existe.");
+		}
+
+		Categoria categoria = categoriaOptional.get();
+		if (!categoria.isGrupo()) {
+			throw new GroupException("La categoría especificada no es de grupo.");
+		}
+
+		return categoria;
+	}
+
+	private List<Usuario> convertirDTOaUsuariosValidados(List<IdEmailUsuarioDTO> miembrosDTO) {
+		return miembrosDTO.stream()
+				.map(this::obtenerUsuarioValidado)
+				.collect(Collectors.toList());
+	}
+
+	private Usuario obtenerUsuarioValidado(IdEmailUsuarioDTO idEmailUsuarioDTO) {
+		Long usuarioId = idEmailUsuarioDTO.getId();
+		Optional<Usuario> usuarioOptional = usuarioService.getById(usuarioId);
+
+		if (usuarioOptional.isEmpty()) {
+			throw new GroupException("El usuario con ID " + usuarioId + " no existe.");
+		}
+
+		return usuarioOptional.get();
+	}
+
+	private boolean existeGrupoParejaEntreUsuarios(Usuario usuario1, Usuario usuario2) {
+		List<Grupo> gruposPareja = grupoRepository.findAllByEsParejaAndMiembrosIn(true,
+				Arrays.asList(usuario1, usuario2));
+
+		for (Grupo grupo : gruposPareja) {
+			List<Usuario> miembros = grupo.getMiembros();
+			if (miembros != null && miembros.size() == 2 && miembros.contains(usuario1)
+					&& miembros.contains(usuario2)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }
