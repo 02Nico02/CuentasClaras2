@@ -1,7 +1,6 @@
 package com.grupo7.cuentasclaras2.interceptor;
 
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.lang.Nullable;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,8 +36,8 @@ public class AccessLogInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-            @Nullable ModelAndView modelAndView) {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+            @Nullable Exception ex) {
         String remoteAddr = request.getRemoteAddr();
         String method = request.getMethod();
         String uri = request.getRequestURI();

@@ -1,5 +1,6 @@
 package com.grupo7.cuentasclaras2.modelos;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class Gasto {
     private long id;
 
     @OneToMany(mappedBy = "gasto")
-    private List<GastoAutor> gastoAutor;
+    private List<GastoAutor> gastoAutor = new ArrayList<>();
 
     @Column(nullable = false)
     private String nombre;
@@ -157,5 +158,12 @@ public class Gasto {
 
     public void setFechaActualizacion(Date fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
+    }
+
+    public void agregarGastoAutor(GastoAutor gastoAutor2) {
+        if (!gastoAutor.contains(gastoAutor2)) {
+            gastoAutor.add(gastoAutor2);
+            gastoAutor2.setGasto(this);
+        }
     }
 }

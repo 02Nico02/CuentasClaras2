@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.grupo7.cuentasclaras2.modelos.DeudaUsuario;
+import com.grupo7.cuentasclaras2.modelos.Gasto;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
+import com.grupo7.cuentasclaras2.modelos.Pago;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 
 public class GrupoDTO {
@@ -12,8 +15,11 @@ public class GrupoDTO {
     private String nombre;
     private boolean pareja;
     private Date fechaCreacion;
-    private List<IdEmailUsuarioDTO> miembros;
     private CategoriaDTO categoria;
+    private List<IdEmailUsuarioDTO> miembros;
+    private List<GastoDTO> gastos;
+    private List<PagoDTO> pagos;
+    private List<DeudaUsuarioDTO> deudasUsuarios;
 
     public GrupoDTO() {
     }
@@ -27,6 +33,9 @@ public class GrupoDTO {
         if (grupo.getCategoria() != null) {
             this.categoria = new CategoriaDTO(grupo.getCategoria());
         }
+        this.gastos = convertirGastosADTOs(grupo.getGastos());
+        this.pagos = convertirPagosADTOs(grupo.getPagos());
+        this.deudasUsuarios = convertirDeudasUsuariosADTOs(grupo.getDeudas());
     }
 
     public long getId() {
@@ -61,17 +70,6 @@ public class GrupoDTO {
         this.fechaCreacion = fechaCreacion;
     }
 
-    private List<IdEmailUsuarioDTO> convertirUsuariosAMiembrosDTO(List<Usuario> usuarios) {
-        List<IdEmailUsuarioDTO> miembrosDTO = new ArrayList<>();
-        if (usuarios != null) {
-            for (Usuario usuario : usuarios) {
-                IdEmailUsuarioDTO usuarioDTO = new IdEmailUsuarioDTO(usuario);
-                miembrosDTO.add(usuarioDTO);
-            }
-        }
-        return miembrosDTO;
-    }
-
     public List<IdEmailUsuarioDTO> getMiembros() {
         return miembros;
     }
@@ -88,4 +86,71 @@ public class GrupoDTO {
         this.categoria = categoria;
     }
 
+    public List<GastoDTO> getGastos() {
+        return gastos;
+    }
+
+    public void setGastos(List<GastoDTO> gastos) {
+        this.gastos = gastos;
+    }
+
+    public List<PagoDTO> getPagos() {
+        return pagos;
+    }
+
+    public void setPagos(List<PagoDTO> pagos) {
+        this.pagos = pagos;
+    }
+
+    public List<DeudaUsuarioDTO> getDeudasUsuarios() {
+        return deudasUsuarios;
+    }
+
+    public void setDeudasUsuarios(List<DeudaUsuarioDTO> deudasUsuarios) {
+        this.deudasUsuarios = deudasUsuarios;
+    }
+
+    private List<IdEmailUsuarioDTO> convertirUsuariosAMiembrosDTO(List<Usuario> usuarios) {
+        List<IdEmailUsuarioDTO> miembrosDTO = new ArrayList<>();
+        if (usuarios != null) {
+            for (Usuario usuario : usuarios) {
+                IdEmailUsuarioDTO usuarioDTO = new IdEmailUsuarioDTO(usuario);
+                miembrosDTO.add(usuarioDTO);
+            }
+        }
+        return miembrosDTO;
+    }
+
+    private List<GastoDTO> convertirGastosADTOs(List<Gasto> gastos) {
+        List<GastoDTO> gastosDTO = new ArrayList<>();
+        if (gastos != null) {
+            for (Gasto gasto : gastos) {
+                GastoDTO gastoDTO = new GastoDTO(gasto);
+                gastosDTO.add(gastoDTO);
+            }
+        }
+        return gastosDTO;
+    }
+
+    private List<PagoDTO> convertirPagosADTOs(List<Pago> pagos) {
+        List<PagoDTO> pagoDTOs = new ArrayList<>();
+        if (pagos != null) {
+            for (Pago pago : pagos) {
+                PagoDTO pagoDTO = new PagoDTO(pago);
+                pagoDTOs.add(pagoDTO);
+            }
+        }
+        return pagoDTOs;
+    }
+
+    private List<DeudaUsuarioDTO> convertirDeudasUsuariosADTOs(List<DeudaUsuario> deudaUsuarios) {
+        List<DeudaUsuarioDTO> deudaUsuarioDTOs = new ArrayList<>();
+        if (deudaUsuarios != null) {
+            for (DeudaUsuario deudaUsuario : deudaUsuarios) {
+                DeudaUsuarioDTO deudaUsuarioDTO = new DeudaUsuarioDTO(deudaUsuario);
+                deudaUsuarioDTOs.add(deudaUsuarioDTO);
+            }
+        }
+        return deudaUsuarioDTOs;
+    }
 }

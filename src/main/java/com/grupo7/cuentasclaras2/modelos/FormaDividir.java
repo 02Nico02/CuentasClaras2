@@ -1,5 +1,6 @@
 package com.grupo7.cuentasclaras2.modelos;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,11 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
-enum formatosDivision {
-    porcentaje,
-    monto
-};
-
 @Entity
 public class FormaDividir {
     @Id
@@ -29,10 +25,10 @@ public class FormaDividir {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private formatosDivision formaDividir;
+    private FormatosDivision formaDividir;
 
     @OneToMany(mappedBy = "formaDividir")
-    private List<DivisionIndividual> divisionIndividual;
+    private List<DivisionIndividual> divisionIndividual = new ArrayList<>();
 
     @ManyToOne
     private Gasto gasto;
@@ -47,7 +43,7 @@ public class FormaDividir {
 
     }
 
-    public FormaDividir(long id, com.grupo7.cuentasclaras2.modelos.formatosDivision formaDividir,
+    public FormaDividir(long id, FormatosDivision formaDividir,
             List<DivisionIndividual> divisionIndividual,
             Gasto gasto) {
         super();
@@ -73,11 +69,11 @@ public class FormaDividir {
         this.id = id;
     }
 
-    public formatosDivision getFormaDividir() {
+    public FormatosDivision getFormaDividir() {
         return formaDividir;
     }
 
-    public void setFormaDividir(formatosDivision formaDividir) {
+    public void setFormaDividir(FormatosDivision formaDividir) {
         this.formaDividir = formaDividir;
     }
 
@@ -94,9 +90,9 @@ public class FormaDividir {
 
         for (DivisionIndividual division : divisionIndividual) {
             if (division.getUsuario().equals(usuario)) {
-                if (formaDividir == com.grupo7.cuentasclaras2.modelos.formatosDivision.porcentaje) {
+                if (formaDividir == FormatosDivision.PORCENTAJE) {
                     gastoUsuario = (gasto.getMontoTotal() * division.getMonto()) / 100.0;
-                } else if (formaDividir == com.grupo7.cuentasclaras2.modelos.formatosDivision.monto) {
+                } else if (formaDividir == FormatosDivision.MONTO) {
                     gastoUsuario = division.getMonto();
                 }
                 break;

@@ -44,22 +44,22 @@ public class Usuario {
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "usuarios_grupos", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "grupo_id"))
     @JsonIgnore
-    private List<Grupo> grupos;
+    private List<Grupo> grupos = new ArrayList<>();
 
     @OneToMany(mappedBy = "receptor")
-    private List<InvitacionAmistad> invitacionesAmigosRecibidas;
+    private List<InvitacionAmistad> invitacionesAmigosRecibidas = new ArrayList<>();
 
     @OneToMany(mappedBy = "remitente")
     @JsonIgnore
-    private List<InvitacionAmistad> invitacionesAmigosEnviadas;
+    private List<InvitacionAmistad> invitacionesAmigosEnviadas = new ArrayList<>();
 
     @OneToMany(mappedBy = "destinatario")
-    private List<Invitacion> invitacionesGrupo;
+    private List<Invitacion> invitacionesGrupo = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(name = "amigos", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "amigo_id"))
     @JsonIgnore
-    private List<Usuario> amigos;
+    private List<Usuario> amigos = new ArrayList<>();
 
     @CreationTimestamp
     private Date fechaCreacion;

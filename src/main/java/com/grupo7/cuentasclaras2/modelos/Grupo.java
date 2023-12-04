@@ -146,10 +146,10 @@ public class Grupo {
     }
 
     public void agregarGasto(Gasto gasto) {
-        if (gastos == null) {
-            gastos = new ArrayList<>();
+        if (!gastos.contains(gasto)) {
+            gastos.add(gasto);
+            gasto.setGrupo(this);
         }
-        gastos.add(gasto);
     }
 
     public void eliminarGasto(Gasto gasto) {
@@ -188,10 +188,9 @@ public class Grupo {
     }
 
     public void agregarDeudaUsuario(DeudaUsuario deuda) {
-        if (deudas == null) {
-            deudas = new ArrayList<>();
+        if (!deudas.contains(deuda)) {
+            deudas.add(deuda);
         }
-        deudas.add(deuda);
     }
 
     public void eliminarDeudaUsuario(DeudaUsuario deuda) {

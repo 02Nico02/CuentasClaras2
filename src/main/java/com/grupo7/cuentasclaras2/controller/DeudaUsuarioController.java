@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+// import org.springframework.web.bind.annotation.PostMapping;
+// import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -76,19 +76,21 @@ public class DeudaUsuarioController {
 		}
 	}
 
-	@PostMapping("/new")
-	public ResponseEntity<DeudaUsuarioDTO> createNewDebt(@RequestBody DeudaUsuarioDTO deudaUsuarioDTO) {
-		Optional<DeudaUsuario> deudaUsuario = deudaUsuarioService.crearDeudaUsuario(
-				deudaUsuarioDTO.getDeudorId(),
-				deudaUsuarioDTO.getAcreedorId(),
-				deudaUsuarioDTO.getMonto(),
-				deudaUsuarioDTO.getGrupoId());
+	// @PostMapping("/new")
+	// public ResponseEntity<DeudaUsuarioDTO> createNewDebt(@RequestBody
+	// DeudaUsuarioDTO deudaUsuarioDTO) {
+	// Optional<DeudaUsuario> deudaUsuario = deudaUsuarioService.crearDeudaUsuario(
+	// deudaUsuarioDTO.getDeudorId(),
+	// deudaUsuarioDTO.getAcreedorId(),
+	// deudaUsuarioDTO.getMonto(),
+	// deudaUsuarioDTO.getGrupoId());
 
-		if (deudaUsuario.isPresent()) {
-			return new ResponseEntity<>(new DeudaUsuarioDTO(deudaUsuario.get()), HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+	// if (deudaUsuario.isPresent()) {
+	// return new ResponseEntity<>(new DeudaUsuarioDTO(deudaUsuario.get()),
+	// HttpStatus.CREATED);
+	// } else {
+	// return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	// }
+	// }
 
 }

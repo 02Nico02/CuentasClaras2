@@ -132,4 +132,11 @@ public class Categoria {
         }
     }
 
+    public void agregarGasto(Gasto gasto) {
+        if (!gastos.contains(gasto)) {
+            gastos.add(gasto);
+            gasto.setCategoria(this);
+        }
+    }
+
 }
