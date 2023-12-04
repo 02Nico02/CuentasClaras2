@@ -184,8 +184,8 @@ public class DeudaUsuarioService {
 			List<DeudaUsuario> deudasUsuario = deudaUsuarioRepository.findByDeudorAndGrupo(usuario, grupo);
 
 			for (DeudaUsuario deudaUsuario : deudasUsuario) {
-				List<DeudaUsuario> deudasAcreedor = deudaUsuarioRepository.findByAcreedorAndGrupo(
-						deudaUsuario.getDeudor(),
+				List<DeudaUsuario> deudasAcreedor = deudaUsuarioRepository.findByDeudorAndGrupo(
+						deudaUsuario.getAcreedor(),
 						grupo);
 
 				double montoPendiente = deudaUsuario.getMonto();
