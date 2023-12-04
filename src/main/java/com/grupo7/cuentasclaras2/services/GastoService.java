@@ -70,9 +70,11 @@ public class GastoService {
 	public Gasto newSpendingByDTO(GastoDTO gastoDTO) {
 		validateNombreAndFecha(gastoDTO.getNombre(), gastoDTO.getFecha());
 		validateFormaDividir(gastoDTO.getFormaDividir(), gastoDTO.getGastoAutor());
+
 		CategoriaDTO categoriaDTO = gastoDTO.getCategoria();
 		Categoria categoria = validateAndGetCategoria(categoriaDTO.getId());
 		validateCategoria(categoria);
+
 		Grupo grupo = validateGroupExistente(gastoDTO.getGrupoId());
 		List<Usuario> miembros = grupo.getMiembros();
 		validateGroupMembers(gastoDTO.getGastoAutor(), gastoDTO.getFormaDividir().getDivisionIndividual(), miembros);
@@ -196,7 +198,7 @@ public class GastoService {
 		List<DivisionIndividualDTO> divisionIndividualDTOs = formaDividirDTO.getDivisionIndividual();
 		double totalMontoGastoAutor = gasto.getGastoAutor().stream().mapToDouble(GastoAutor::getMonto).sum();
 
-		// Obtener las contribuciones de los usuarios que ya pagaron
+		// Los usuarios que ya pagaron
 		Map<Long, Double> contribuciones = gasto.getGastoAutor()
 				.stream()
 				.collect(Collectors.toMap(gastoAutor -> gastoAutor.getIntegrante().getId(), GastoAutor::getMonto));
@@ -206,38 +208,35 @@ public class GastoService {
 				.collect(Collectors.toMap(Usuario::getId, usuario -> 0.0));
 
 		// Actualizar los montos de los miembros con lo que ya pagaron
-		for (GastoAutor gastoAutor : gasto.getGastoAutor()) {
-			miembros.put(gastoAutor.getIntegrante().getId(), gastoAutor.getMonto());
-		}
+		gasto.getGastoAutor()
+				.forEach(gastoAutor -> miembros.put(gastoAutor.getIntegrante().getId(), gastoAutor.getMonto()));
 
 		Map<Long, Double> deudas = new HashMap<>();
 		if (FormatosDivision.PORCENTAJE.equals(formaDividirDTO.getFormaDividir())) {
-			// Caso 1: Forma de dividir por PORCENTAJE
 			// Calcular el total de porcentajes
 			double totalPorcentajes = divisionIndividualDTOs.stream().mapToDouble(DivisionIndividualDTO::getMonto)
 					.sum();
 
-			// Calcular las deudas o excedentes de cada usuario
-			for (DivisionIndividualDTO divisionIndividualDTO : divisionIndividualDTOs) {
+			// Calcular las deudas de cada usuario
+			divisionIndividualDTOs.forEach(divisionIndividualDTO -> {
 				double porcentaje = divisionIndividualDTO.getMonto();
 				double montoDeuda = (porcentaje / totalPorcentajes) * totalMontoGastoAutor;
 
 				// Ajustar el monto de la deuda restando la contribución del usuario que ya pagó
 				montoDeuda -= contribuciones.getOrDefault(divisionIndividualDTO.getUserId(), 0.0);
-				// Agrego la deuda de este usuario
+				// Agregar la deuda de este usuario
 				deudas.put(divisionIndividualDTO.getUserId(), montoDeuda);
-			}
+			});
 		} else if (FormatosDivision.MONTO.equals(formaDividirDTO.getFormaDividir())) {
-			// Caso 2: Forma de dividir por MONTO
-			// Calcular las deudas o excedentes de cada usuario
-			for (DivisionIndividualDTO divisionIndividualDTO : divisionIndividualDTOs) {
+			// Calcular las deudas de cada usuario
+			divisionIndividualDTOs.forEach(divisionIndividualDTO -> {
 				double montoDeuda = divisionIndividualDTO.getMonto();
 
 				// Ajustar el monto de la deuda restando la contribución del usuario que ya pagó
 				montoDeuda -= contribuciones.getOrDefault(divisionIndividualDTO.getUserId(), 0.0);
-				// Agrego la deuda de este usuario
+				// Agregar la deuda de este usuario
 				deudas.put(divisionIndividualDTO.getUserId(), montoDeuda);
-			}
+			});
 		}
 
 		Long grupoId = gasto.getGrupo().getId();
@@ -254,6 +253,8 @@ public class GastoService {
 				}
 			}
 		}
+
+		deudaUsuarioService.consolidarDeudasEnGrupo(gasto.getGrupo());
 	}
 
 }

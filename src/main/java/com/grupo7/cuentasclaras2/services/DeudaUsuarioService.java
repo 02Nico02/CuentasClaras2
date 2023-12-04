@@ -1,7 +1,9 @@
 package com.grupo7.cuentasclaras2.services;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,13 +135,98 @@ public class DeudaUsuarioService {
 				.flatMap(deudor -> usuarioRepository.findById(acreedorId)
 						.flatMap(acreedor -> grupoRepository.findById(grupoId)
 								.map(grupo -> {
-									DeudaUsuario nuevaDeuda = new DeudaUsuario();
-									nuevaDeuda.setDeudor(deudor);
-									nuevaDeuda.setAcreedor(acreedor);
-									nuevaDeuda.setMonto(monto);
-									nuevaDeuda.setGrupo(grupo);
-									return deudaUsuarioRepository.save(nuevaDeuda);
+									// Buscar DeudaUsuario existente entre estos dos usuarios, en este grupo
+									Optional<DeudaUsuario> deudaExistente = deudaUsuarioRepository
+											.findByDeudorIdAndAcreedorIdAndGrupoId(deudorId, acreedorId, grupoId);
+
+									Optional<DeudaUsuario> deudaInvertida = deudaUsuarioRepository
+											.findByDeudorIdAndAcreedorIdAndGrupoId(acreedorId, deudorId, grupoId);
+
+									if (deudaExistente.isPresent()) {
+										deudaExistente.get().setMonto(deudaExistente.get().getMonto() + monto);
+										return deudaUsuarioRepository.save(deudaExistente.get());
+									} else if (deudaInvertida.isPresent()) {
+										// Calcular la diferencia y actualizar o crear la DeudaUsuario
+										double diferencia = deudaInvertida.get().getMonto() - monto;
+										if (diferencia > 0) {
+											// Actualizar la DeudaUsuario invertida
+											deudaInvertida.get().setMonto(diferencia);
+											return deudaUsuarioRepository.save(deudaInvertida.get());
+										} else {
+											// Eliminar la DeudaUsuario invertida
+											deudaUsuarioRepository.delete(deudaInvertida.get());
+
+											// Crear nueva DeudaUsuario
+											DeudaUsuario nuevaDeuda = new DeudaUsuario();
+											nuevaDeuda.setDeudor(deudor);
+											nuevaDeuda.setAcreedor(acreedor);
+											nuevaDeuda.setMonto(-diferencia);
+											nuevaDeuda.setGrupo(grupo);
+											return deudaUsuarioRepository.save(nuevaDeuda);
+										}
+									} else {
+										// Crear nueva DeudaUsuario
+										DeudaUsuario nuevaDeuda = new DeudaUsuario();
+										nuevaDeuda.setDeudor(deudor);
+										nuevaDeuda.setAcreedor(acreedor);
+										nuevaDeuda.setMonto(monto);
+										nuevaDeuda.setGrupo(grupo);
+										return deudaUsuarioRepository.save(nuevaDeuda);
+									}
 								})));
+	}
+
+	@Transactional
+	public void consolidarDeudasEnGrupo(Grupo grupo) {
+		List<Usuario> miembros = grupo.getMiembros();
+
+		for (Usuario usuario : miembros) {
+			List<DeudaUsuario> deudasUsuario = deudaUsuarioRepository.findByDeudorAndGrupo(usuario, grupo);
+
+			for (DeudaUsuario deudaUsuario : deudasUsuario) {
+				List<DeudaUsuario> deudasAcreedor = deudaUsuarioRepository.findByAcreedorAndGrupo(
+						deudaUsuario.getDeudor(),
+						grupo);
+
+				double montoPendiente = deudaUsuario.getMonto();
+				Map<Long, Double> nuevasDeudasAsumidas = new HashMap<>();
+
+				for (DeudaUsuario deudaAcreedor : deudasAcreedor) {
+					if (montoPendiente > 0) {
+						double montoAcreedor = deudaAcreedor.getMonto();
+
+						if (montoAcreedor >= montoPendiente) {
+							// Pagar completamente la deuda
+							deudaAcreedor.setMonto(montoAcreedor - montoPendiente);
+							deudaUsuarioRepository.save(deudaAcreedor);
+							nuevasDeudasAsumidas.put(deudaAcreedor.getAcreedor().getId(), montoPendiente);
+							montoPendiente = 0;
+						} else {
+							// Pagar parcialmente la deuda y continuar con la siguiente
+							nuevasDeudasAsumidas.put(deudaAcreedor.getAcreedor().getId(), deudaAcreedor.getMonto());
+							deudaUsuarioRepository.delete(deudaAcreedor);
+							montoPendiente -= montoAcreedor;
+						}
+					} else {
+						break; // Ya se ha pagado toda la deuda del usuario
+					}
+				}
+
+				// Si sobró monto, actualizar la deuda existente; sino, eliminar la deuda
+				// existente
+				if (montoPendiente > 0) {
+					deudaUsuario.setMonto(montoPendiente);
+					deudaUsuarioRepository.save(deudaUsuario);
+				} else {
+					deudaUsuarioRepository.delete(deudaUsuario);
+				}
+
+				// Crear las nuevas deudas asumidas
+				for (Map.Entry<Long, Double> entry : nuevasDeudasAsumidas.entrySet()) {
+					crearDeudaUsuario(usuario.getId(), entry.getKey(), entry.getValue(), grupo.getId());
+				}
+			}
+		}
 	}
 
 }

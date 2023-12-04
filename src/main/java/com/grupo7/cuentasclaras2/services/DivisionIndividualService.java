@@ -29,7 +29,7 @@ public class DivisionIndividualService {
 			FormaDividir formaDividir) {
 		DivisionIndividual divisionIndividual = new DivisionIndividual();
 
-		if (divisionIndividualDTO.getMonto() <= 0) {
+		if (divisionIndividualDTO.getMonto() < 0) {
 			throw new IllegalArgumentException("El monto debe ser mayor que cero");
 		}
 

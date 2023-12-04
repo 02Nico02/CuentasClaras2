@@ -22,7 +22,7 @@ public class GastoAutorService {
 
 	@Transactional
 	public GastoAutor createGastoAutorByDTO(GastoAutorDTO gastoAutorDTO, Gasto gasto) {
-		if (gastoAutorDTO.getMonto() <= 0) {
+		if (gastoAutorDTO.getMonto() < 0) {
 			throw new IllegalArgumentException("El monto debe ser mayor que cero");
 		}
 
