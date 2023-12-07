@@ -139,4 +139,10 @@ public class Categoria {
         }
     }
 
+    public void removeGasto(Gasto gastoExistente) {
+        if (gastos.remove(gastoExistente)) {
+            gastoExistente.setCategoria(null);
+        }
+    }
+
 }

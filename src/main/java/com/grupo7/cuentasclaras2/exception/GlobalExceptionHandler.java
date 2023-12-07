@@ -15,6 +15,11 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(PagoException.class)
+    public ResponseEntity<String> handlePagoException(PagoException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
     @ExceptionHandler(GastoException.class)
     public ResponseEntity<String> handleGastoException(GastoException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
@@ -22,7 +27,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BDErrorException.class)
     public ResponseEntity<String> handleBDErrorException(BDErrorException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        log.error("Error en la base", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 
     @ExceptionHandler(UserException.class)

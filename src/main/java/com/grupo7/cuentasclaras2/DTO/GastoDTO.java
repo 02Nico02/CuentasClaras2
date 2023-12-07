@@ -16,6 +16,7 @@ public class GastoDTO {
     private Long grupoId;
     private FormaDividirDTO formaDividir;
     private CategoriaDTO categoria;
+    private Boolean editable;
 
     public GastoDTO() {
     }
@@ -31,6 +32,7 @@ public class GastoDTO {
         this.grupoId = gasto.getGrupo().getId();
         this.formaDividir = new FormaDividirDTO(gasto.getFormaDividir());
         this.categoria = new CategoriaDTO(gasto.getCategoria());
+        this.editable = gasto.isEditable();
     }
 
     public long getId() {
@@ -95,6 +97,14 @@ public class GastoDTO {
 
     public void setGastoAutor(List<GastoAutorDTO> gastoAutor) {
         this.gastoAutor = gastoAutor;
+    }
+
+    public Boolean isEditable() {
+        return editable;
+    }
+
+    public void setEditable(Boolean editable) {
+        this.editable = editable;
     }
 
 }

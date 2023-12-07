@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
-import com.grupo7.cuentasclaras2.exception.InvalidPaymentException;
+import com.grupo7.cuentasclaras2.exception.BDErrorException;
+import com.grupo7.cuentasclaras2.exception.PagoException;
 import com.grupo7.cuentasclaras2.modelos.DeudaUsuario;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Pago;
@@ -43,7 +44,7 @@ public class PagoService {
         try {
             return pagoRepository.save(pago);
         } catch (DataAccessException e) {
-            throw new InvalidPaymentException("Error al guardar el pago en la base de datos", e);
+            throw new BDErrorException("Error al guardar el pago en la base de datos", e);
         }
     }
 
@@ -68,17 +69,17 @@ public class PagoService {
         validarPagoDTO(pagoDTO);
 
         Usuario autor = usuarioService.getById(pagoDTO.getAutorId())
-                .orElseThrow(() -> new InvalidPaymentException("No se encontró el autor del pago"));
+                .orElseThrow(() -> new PagoException("No se encontró el autor del pago"));
 
         Usuario destinatario = usuarioService.getById(pagoDTO.getDestinatarioId())
-                .orElseThrow(() -> new InvalidPaymentException("No se encontró el destinatario del pago"));
+                .orElseThrow(() -> new PagoException("No se encontró el destinatario del pago"));
 
         Grupo grupo = grupoService.getGroupById(pagoDTO.getGrupoId())
-                .orElseThrow(() -> new InvalidPaymentException("No se encontró el grupo especificado"));
+                .orElseThrow(() -> new PagoException("No se encontró el grupo especificado"));
 
         DeudaUsuario deudaUsuario = deudaUsuarioService.obtenerDeudaEntreUsuariosEnGrupo(grupo.getId(),
                 autor.getId(), destinatario.getId())
-                .orElseThrow(() -> new InvalidPaymentException("No se encontró una deuda entre "
+                .orElseThrow(() -> new PagoException("No se encontró una deuda entre "
                         + autor.getUsername() + " y " + destinatario.getUsername() + " en el grupo con ID "
                         + grupo.getId()));
 
@@ -100,21 +101,21 @@ public class PagoService {
 
     private void validarPagoDTO(PagoDTO pagoDTO) {
         if (pagoDTO.getMonto() <= 0) {
-            throw new InvalidPaymentException("El monto del pago debe ser mayor que cero.");
+            throw new PagoException("El monto del pago debe ser mayor que cero.");
         }
 
         if (pagoDTO.getAutorId() == null || pagoDTO.getDestinatarioId() == null) {
-            throw new InvalidPaymentException("No se ha proporcionado el autor o destinatario del pago");
+            throw new PagoException("No se ha proporcionado el autor o destinatario del pago");
         }
 
         if (pagoDTO.getAutorId().equals(pagoDTO.getDestinatarioId())) {
-            throw new InvalidPaymentException("No se puede realizar un pago a uno mismo");
+            throw new PagoException("No se puede realizar un pago a uno mismo");
         }
     }
 
     private void validarMontoDePago(double montoPago, double montoDeuda) {
-        if (montoPago != montoDeuda) {
-            throw new InvalidPaymentException("El monto del pago no alcanza para pagar la deuda o es superior");
+        if (montoPago > montoDeuda) {
+            throw new PagoException("El monto del pago es superior a la deuda");
         }
     }
 }

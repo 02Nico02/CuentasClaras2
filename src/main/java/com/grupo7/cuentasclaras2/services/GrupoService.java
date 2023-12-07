@@ -14,9 +14,11 @@ import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
 import com.grupo7.cuentasclaras2.exception.GroupException;
 import com.grupo7.cuentasclaras2.modelos.Categoria;
+import com.grupo7.cuentasclaras2.modelos.Gasto;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Pago;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
+import com.grupo7.cuentasclaras2.repositories.GastoRepository;
 import com.grupo7.cuentasclaras2.repositories.GrupoRepository;
 import com.grupo7.cuentasclaras2.repositories.UsuarioRepository;
 
@@ -30,6 +32,9 @@ public class GrupoService {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;
+
+	@Autowired
+	private GastoRepository gastoRepository;
 
 	@Autowired
 	private CategoriaService categoriaService;
@@ -54,6 +59,14 @@ public class GrupoService {
 		return grupoRepository.findByNombre(nombre);
 	}
 
+	public List<Grupo> getGroupsByUserId(Long userId) {
+		return grupoRepository.findByMiembros_IdAndEsParejaIsFalse(userId);
+	}
+
+	public List<Grupo> getGroupsWhereEsPareja(Long userId) {
+		return grupoRepository.findByMiembros_IdAndEsParejaIsTrue(userId);
+	}
+
 	public boolean addMemberToGroup(Long groupId, Long userId) {
 		Optional<Grupo> grupoOptional = grupoRepository.findById(groupId);
 		Optional<Usuario> usuarioOptional = usuarioService.getById(userId);
@@ -62,6 +75,9 @@ public class GrupoService {
 			Grupo grupo = grupoOptional.get();
 			Usuario usuario = usuarioOptional.get();
 
+			if (grupo.getEsPareja()) {
+				throw new GroupException("No se puede agregar miembros a una pareja");
+			}
 			if (agregarMiembroAGrupo(grupo, usuario)) {
 				return true;
 			}
@@ -99,7 +115,18 @@ public class GrupoService {
 			Grupo grupo = grupoOptional.get();
 			Usuario usuario = usuarioOptional.get();
 
+			if (grupo.getEsPareja()) {
+				throw new GroupException("No se puede eliminar miembros de una pareja");
+			}
 			if (quitarMiembroDeGrupo(grupo, usuario)) {
+				List<Gasto> gastosGrupo = grupo.getGastos();
+
+				for (Gasto gasto : gastosGrupo) {
+					if (usuarioParticipaEnGasto(usuario, gasto)) {
+						gasto.setEditable(false);
+						gastoRepository.save(gasto);
+					}
+				}
 				return true;
 			}
 		}
@@ -120,10 +147,14 @@ public class GrupoService {
 		List<Usuario> miembros = convertirDTOaUsuariosValidados(grupoDTO.getMiembros());
 
 		if (miembros.isEmpty()) {
-			throw new GroupException("Se debe proporcionar al menos un usuario al crear un grupo.");
+			throw new GroupException("Se debe proporcionar al creador del grupo.");
 		}
 
-		grupo.agregarMiembros(miembros);
+		if (miembros.size() != 1) {
+			throw new GroupException("Se debe proporcionar solo 1 miembro, el creador.");
+		}
+
+		grupo.agregarMiembro(miembros.get(0));
 		categoria.addGroup(grupo);
 		grupo.setCategoria(categoria);
 
@@ -212,18 +243,28 @@ public class GrupoService {
 		List<Usuario> miembros = grupo.getMiembros();
 
 		if (miembros != null && !miembros.isEmpty()) {
-			boolean removed = miembros.remove(usuario);
+			boolean tieneDeudasPendientes = tieneDeudasPendientesEnGrupo(grupo, usuario);
 
-			if (removed) {
-				grupoRepository.save(grupo);
-				usuario.salirDeGrupo(grupo);
-				usuarioRepository.save(usuario);
+			if (!tieneDeudasPendientes) {
+				boolean removed = miembros.remove(usuario);
+				if (removed) {
+					usuario.salirDeGrupo(grupo);
+					grupoRepository.save(grupo);
+					usuarioRepository.save(usuario);
+				}
+
+				return removed;
+			} else {
+				throw new GroupException("El usuario tiene cuentas pendientes, no se puede eliminar");
 			}
-
-			return removed;
 		}
 
 		return false;
+	}
+
+	private boolean tieneDeudasPendientesEnGrupo(Grupo grupo, Usuario usuario) {
+		return grupo.getDeudas().stream()
+				.anyMatch(deuda -> deuda.getDeudor().equals(usuario) || deuda.getAcreedor().equals(usuario));
 	}
 
 	private void validarMiembrosParaGrupoPareja(List<Usuario> miembros) {
@@ -315,5 +356,12 @@ public class GrupoService {
 		}
 
 		return false;
+	}
+
+	private boolean usuarioParticipaEnGasto(Usuario usuario, Gasto gasto) {
+		boolean esAutor = gasto.getGastoAutor().stream().anyMatch(ga -> ga.getIntegrante().equals(usuario));
+		boolean esParticipante = gasto.getFormaDividir().getDivisionIndividual().stream()
+				.anyMatch(ga -> ga.getUsuario().equals(usuario));
+		return esAutor || esParticipante;
 	}
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,7 +28,7 @@ public class FormaDividir {
     @Column(nullable = false)
     private FormatosDivision formaDividir;
 
-    @OneToMany(mappedBy = "formaDividir")
+    @OneToMany(mappedBy = "formaDividir", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DivisionIndividual> divisionIndividual = new ArrayList<>();
 
     @ManyToOne

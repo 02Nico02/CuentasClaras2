@@ -254,11 +254,8 @@ public class GrupoServiceTests {
         IdEmailUsuarioDTO idEmailUsuarioDTO1 = new IdEmailUsuarioDTO();
         idEmailUsuarioDTO1.setUsername(usuarios.get(0).getUsername());
         idEmailUsuarioDTO1.setId(usuarios.get(0).getId());
-        IdEmailUsuarioDTO idEmailUsuarioDTO2 = new IdEmailUsuarioDTO();
-        idEmailUsuarioDTO2.setUsername(usuarios.get(1).getUsername());
-        idEmailUsuarioDTO2.setId(usuarios.get(1).getId());
 
-        List<IdEmailUsuarioDTO> miembrosDTO = Arrays.asList(idEmailUsuarioDTO1, idEmailUsuarioDTO2);
+        List<IdEmailUsuarioDTO> miembrosDTO = Arrays.asList(idEmailUsuarioDTO1);
         grupoDTO.setMiembros(miembrosDTO);
 
         Optional<Grupo> grupoGuardado = grupoService.newGroupByDTO(grupoDTO);

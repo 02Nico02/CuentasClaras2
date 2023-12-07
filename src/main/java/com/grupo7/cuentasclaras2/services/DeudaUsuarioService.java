@@ -93,6 +93,8 @@ public class DeudaUsuarioService {
 				.map(deuda -> {
 					double nuevoMonto = deuda.getMonto() - montoPago;
 					if (nuevoMonto <= 0) {
+						deuda.getGrupo().eliminarDeudaUsuario(deuda);
+						grupoRepository.save(deuda.getGrupo());
 						deudaUsuarioRepository.delete(deuda);
 					} else {
 						deuda.setMonto(nuevoMonto);
@@ -195,33 +197,30 @@ public class DeudaUsuarioService {
 					if (montoPendiente > 0) {
 						double montoAcreedor = deudaAcreedor.getMonto();
 
-						if (montoAcreedor >= montoPendiente) {
-							// Pagar completamente la deuda
+						if (montoAcreedor > montoPendiente) {
 							deudaAcreedor.setMonto(montoAcreedor - montoPendiente);
 							deudaUsuarioRepository.save(deudaAcreedor);
 							nuevasDeudasAsumidas.put(deudaAcreedor.getAcreedor().getId(), montoPendiente);
 							montoPendiente = 0;
 						} else {
-							// Pagar parcialmente la deuda y continuar con la siguiente
 							nuevasDeudasAsumidas.put(deudaAcreedor.getAcreedor().getId(), deudaAcreedor.getMonto());
+							grupo.eliminarDeudaUsuario(deudaAcreedor);
 							deudaUsuarioRepository.delete(deudaAcreedor);
 							montoPendiente -= montoAcreedor;
 						}
 					} else {
-						break; // Ya se ha pagado toda la deuda del usuario
+						break;
 					}
 				}
 
-				// Si sobró monto, actualizar la deuda existente; sino, eliminar la deuda
-				// existente
 				if (montoPendiente > 0) {
 					deudaUsuario.setMonto(montoPendiente);
 					deudaUsuarioRepository.save(deudaUsuario);
 				} else {
+					grupo.eliminarDeudaUsuario(deudaUsuario);
 					deudaUsuarioRepository.delete(deudaUsuario);
 				}
 
-				// Crear las nuevas deudas asumidas
 				for (Map.Entry<Long, Double> entry : nuevasDeudasAsumidas.entrySet()) {
 					crearDeudaUsuario(usuario.getId(), entry.getKey(), entry.getValue(), grupo.getId());
 				}

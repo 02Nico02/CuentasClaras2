@@ -44,4 +44,13 @@ public class CategoriaService {
 	public void deleteCategoria(long categoriaId) {
 		categoriaRepository.deleteById(categoriaId);
 	}
+
+	public List<Categoria> getGroupCategories() {
+		return categoriaRepository.findByGrupoTrue();
+	}
+
+	public List<Categoria> getExpenseCategories() {
+		return categoriaRepository.findByGrupoFalse();
+	}
+
 }

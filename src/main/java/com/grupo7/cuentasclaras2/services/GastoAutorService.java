@@ -23,7 +23,7 @@ public class GastoAutorService {
 	@Transactional
 	public GastoAutor createGastoAutorByDTO(GastoAutorDTO gastoAutorDTO, Gasto gasto) {
 		if (gastoAutorDTO.getMonto() < 0) {
-			throw new IllegalArgumentException("El monto debe ser mayor que cero");
+			throw new GastoException("El monto debe no ser negativo");
 		}
 
 		Usuario usuario = usuarioRepository.findById(gastoAutorDTO.getUserId())
@@ -36,4 +36,21 @@ public class GastoAutorService {
 
 		return gastoAutorRepository.save(gastoAutor);
 	}
+
+	@Transactional
+	public GastoAutor updateGastoAutorByDTO(GastoAutorDTO gastoAutorDTO, GastoAutor gastoAutorExistente) {
+		if (gastoAutorDTO.getMonto() < 0) {
+			throw new GastoException("El monto debe no ser negativo");
+		}
+
+		Usuario usuario = usuarioRepository.findById(gastoAutorDTO.getUserId())
+				.orElseThrow(() -> new GastoException("Usuario no encontrado con ID: " + gastoAutorDTO.getUserId()));
+
+		// Actualizar los campos del gastoAutorExistente
+		gastoAutorExistente.setMonto(gastoAutorDTO.getMonto());
+		gastoAutorExistente.setIntegrante(usuario);
+
+		return gastoAutorRepository.save(gastoAutorExistente);
+	}
+
 }

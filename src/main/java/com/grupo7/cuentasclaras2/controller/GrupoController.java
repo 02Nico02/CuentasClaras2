@@ -2,6 +2,7 @@ package com.grupo7.cuentasclaras2.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,10 +26,22 @@ public class GrupoController {
 	@Autowired
 	private GrupoService grupoService;
 
-	@GetMapping("/all")
-	public ResponseEntity<List<Grupo>> getAllGroups() {
-		List<Grupo> groups = grupoService.getAllGroups();
-		return ResponseEntity.ok(groups);
+	@GetMapping("/by-user/{userId}")
+	public ResponseEntity<List<GrupoDTO>> getGroupsByUserId(@PathVariable Long userId) {
+		List<Grupo> groups = grupoService.getGroupsByUserId(userId);
+		List<GrupoDTO> groupDTOs = groups.stream()
+				.map(GrupoDTO::new)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(groupDTOs);
+	}
+
+	@GetMapping("/pareja/by-user/{userId}")
+	public ResponseEntity<List<GrupoDTO>> getGroupsWhereEsPareja(@PathVariable Long userId) {
+		List<Grupo> groups = grupoService.getGroupsWhereEsPareja(userId);
+		List<GrupoDTO> groupDTOs = groups.stream()
+				.map(GrupoDTO::new)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(groupDTOs);
 	}
 
 	@GetMapping("/{id}")
@@ -69,7 +82,7 @@ public class GrupoController {
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
-	@PostMapping("/addMember/{groupId}/{userId}")
+	@PostMapping("/addMember/byGroup/{groupId}/user/{userId}")
 	public ResponseEntity<Void> addMemberToGroup(
 			@PathVariable Long groupId,
 			@PathVariable Long userId) {
@@ -77,7 +90,7 @@ public class GrupoController {
 		return success ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
 	}
 
-	@DeleteMapping("/removeMember/{groupId}/{memberId}")
+	@DeleteMapping("/removeMember/byGroup/{groupId}/user/{memberId}")
 	public ResponseEntity<Void> removeMemberFromGroup(
 			@PathVariable Long groupId,
 			@PathVariable Long memberId) {

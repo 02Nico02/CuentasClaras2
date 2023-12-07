@@ -144,7 +144,7 @@ public class Usuario {
         if (grupos == null) {
             grupos = new ArrayList<>();
         }
-        if (!grupos.contains(grupo)) {
+        if (grupos.contains(grupo)) {
             grupos.remove(grupo);
         }
     }

@@ -7,6 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,11 +22,14 @@ public class Gasto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToMany(mappedBy = "gasto")
+    @OneToMany(mappedBy = "gasto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GastoAutor> gastoAutor = new ArrayList<>();
 
     @Column(nullable = false)
     private String nombre;
+
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean editable;
 
     @Column(nullable = false)
     private Date fecha;
@@ -52,7 +56,7 @@ public class Gasto {
     }
 
     public Gasto(long id, List<GastoAutor> gastoAutor, String nombre, Date fecha, String imagen, Grupo grupo,
-            FormaDividir formaDividir, Categoria categoria) {
+            FormaDividir formaDividir, Categoria categoria, Boolean isEditable) {
         super();
         this.id = id;
         this.gastoAutor = gastoAutor;
@@ -62,6 +66,7 @@ public class Gasto {
         this.grupo = grupo;
         this.formaDividir = formaDividir;
         this.categoria = categoria;
+        this.editable = isEditable;
     }
 
     public void editarInformacion(Double monto, Date fecha, String imagen, Usuario integrante,
@@ -165,5 +170,21 @@ public class Gasto {
             gastoAutor.add(gastoAutor2);
             gastoAutor2.setGasto(this);
         }
+    }
+
+    public double getTotal() {
+        double total = 0.0;
+        for (GastoAutor gastoAutor : gastoAutor) {
+            total += gastoAutor.getMonto();
+        }
+        return total;
+    }
+
+    public Boolean isEditable() {
+        return editable;
+    }
+
+    public void setEditable(Boolean editable) {
+        this.editable = editable;
     }
 }

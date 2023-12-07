@@ -30,11 +30,22 @@ public class DatabaseInitializer implements ApplicationRunner {
             Categoria casa = new Categoria("Casa", "icono_casa.png", true);
             Categoria trabajo = new Categoria("Trabajo", "icono_trabajo.png", true);
             Categoria familia = new Categoria("Familia", "icono_familia.png", true);
+            Categoria amigos = new Categoria("Amigos", "icono_amigos.png", true);
+            Categoria estudio = new Categoria("Estudio", "icono_estudio.png", true);
+            Categoria deportes = new Categoria("Deportes", "icono_deportes.png", true);
+            Categoria viajes_grupo = new Categoria("Viajes", "icono_viajes.png", true);
             Categoria comida = new Categoria("Comida", "icono_comida.png", false);
             Categoria transporte = new Categoria("Transporte", "icono_transporte.png", false);
             Categoria entretenimiento = new Categoria("Entretenimiento", "icono_entretenimiento.png", false);
+            Categoria salud = new Categoria("Salud", "icono_salud.png", false);
+            Categoria ropa = new Categoria("Ropa", "icono_ropa.png", false);
+            Categoria educacion = new Categoria("Educación", "icono_educacion.png", false);
+            Categoria tecnologia = new Categoria("Tecnología", "icono_tecnologia.png", false);
+            Categoria viajes = new Categoria("Viajes", "icono_viajes.png", false);
+            Categoria Servicios_publicos = new Categoria("Servicios públicos", "icono_Servicios_publicos.png", false);
 
-            categoriaRepository.saveAll(List.of(casa, trabajo, familia, comida, transporte, entretenimiento));
+            categoriaRepository.saveAll(List.of(casa, trabajo, familia, amigos, estudio, deportes, viajes_grupo, comida,
+                    transporte, entretenimiento, salud, ropa, educacion, tecnologia, viajes, Servicios_publicos));
         }
     }
 }
