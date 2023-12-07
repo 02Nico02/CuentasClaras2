@@ -187,19 +187,21 @@ public class GrupoServiceTests {
         Grupo grupo = new Grupo();
         grupo.setNombre("Grupo de Prueba");
         grupo.setEsPareja(true);
-        grupoRepository.save(grupo);
 
         Usuario usuario1 = new Usuario("usuario1", "Nombre", "Apellido", "usuario1@example.com", "password");
         Usuario usuario2 = new Usuario("usuario2", "Nombre", "Apellido", "usuario2@example.com", "password");
         Usuario usuario3 = new Usuario("usuario3", "Nombre", "Apellido", "usuario3@example.com", "password");
         usuarioRepository.saveAll(List.of(usuario1, usuario2, usuario3));
 
-        grupoService.addMemberToGroup(grupo.getId(), usuario1.getId());
-        grupoService.addMemberToGroup(grupo.getId(), usuario2.getId());
+        // ahora deberia hascer grupo.setMiembros y enviarla una lista con los usuarios
+        grupo.setMiembros(Arrays.asList(usuario1, usuario2));
+        grupoRepository.save(grupo);
 
-        boolean success = grupoService.addMemberToGroup(grupo.getId(), usuario3.getId());
+        GroupException thrownException = assertThrows(GroupException.class, () -> {
+            grupoService.addMemberToGroup(grupo.getId(), usuario3.getId());
+        });
 
-        assertFalse(success);
+        assertEquals("No se puede agregar miembros a una pareja", thrownException.getMessage());
     }
 
     @Test

@@ -41,6 +41,10 @@ public class InvitacionService {
 			throw new GroupException("El remitente no es miembro del grupo");
 		}
 
+		if (grupo.getEsPareja()) {
+			throw new GroupException("No se puede enviar invitaciones de un grupo de 2");
+		}
+
 		Invitacion invitacion = new Invitacion();
 		invitacion.setRemitente(remitente);
 		invitacion.setDestinatario(destinatario);

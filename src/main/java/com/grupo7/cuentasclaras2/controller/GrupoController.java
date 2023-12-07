@@ -69,18 +69,11 @@ public class GrupoController {
 		}
 	}
 
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
-		grupoService.deleteGroup(id);
-		return ResponseEntity.noContent().build();
-	}
-
-	@GetMapping("/byNombre/{nombre}")
-	public ResponseEntity<GrupoDTO> getGroupByNombre(@PathVariable String nombre) {
-		return grupoService.getGroupByNombre(nombre)
-				.map(group -> new ResponseEntity<>(new GrupoDTO(group), HttpStatus.OK))
-				.orElseGet(() -> ResponseEntity.notFound().build());
-	}
+	// @DeleteMapping("/delete/{id}")
+	// public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
+	// grupoService.deleteGroup(id);
+	// return ResponseEntity.noContent().build();
+	// }
 
 	@PostMapping("/addMember/byGroup/{groupId}/user/{userId}")
 	public ResponseEntity<Void> addMemberToGroup(
@@ -99,15 +92,12 @@ public class GrupoController {
 	}
 
 	@PutMapping("/update/{id}")
-	public ResponseEntity<GrupoDTO> updateGroupName(
+	public ResponseEntity<GrupoDTO> updateGroup(
 			@PathVariable Long id,
 			@RequestBody GrupoDTO grupoDTO) {
-		return grupoService.getGroupById(id)
-				.map(grupo -> {
-					grupo.setNombre(grupoDTO.getNombre());
-					Grupo updatedGroup = grupoService.saveGroup(grupo);
-					return ResponseEntity.ok(new GrupoDTO(updatedGroup));
-				})
+		Optional<Grupo> updatedGroup = grupoService.updateGroup(id, grupoDTO);
+
+		return updatedGroup.map(group -> ResponseEntity.ok(new GrupoDTO(group)))
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 

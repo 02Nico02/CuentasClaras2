@@ -88,18 +88,10 @@ public class GrupoService {
 
 	public boolean addMemberToGroup(Grupo grupo, Usuario usuario) {
 		if (grupo != null && usuario != null) {
-			List<Usuario> miembros = grupo.getMiembros();
-
-			if (miembros == null || !miembros.contains(usuario)) {
-				if (grupo.getEsPareja() && miembros != null && miembros.size() >= 2) {
-					return false;
-				}
-
-				grupo.agregarMiembro(usuario);
-				grupoRepository.save(grupo);
-
-				usuario.unirseAGrupo(grupo);
-				usuarioRepository.save(usuario);
+			if (grupo.getEsPareja()) {
+				throw new GroupException("No se puede agregar miembros a una pareja");
+			}
+			if (agregarMiembroAGrupo(grupo, usuario)) {
 				return true;
 			}
 		}
@@ -181,8 +173,6 @@ public class GrupoService {
 		Grupo grupoGuardado = grupoRepository.save(grupo);
 		usuarioRepository.saveAll(miembros);
 
-		// guardarUsuariosEnGrupo(miembros, grupoGuardado);
-
 		return Optional.of(grupoGuardado);
 	}
 
@@ -199,23 +189,6 @@ public class GrupoService {
 
 		return false;
 	}
-
-	// public Gasto addGastoToGroup(Gasto gasto, Long groupId) {
-	// Optional<Grupo> grupoOptional = grupoRepository.findById(groupId);
-
-	// if (grupoOptional.isPresent()) {
-	// Grupo grupo = grupoOptional.get();
-	// gasto.setGrupo(grupo);
-
-	// gastoRepository.save(gasto);
-	// grupo.agregarGasto(gasto);
-	// grupoRepository.save(grupo);
-
-	// return gasto;
-	// }
-
-	// return null;
-	// }
 
 	private boolean agregarMiembroAGrupo(Grupo grupo, Usuario usuario) {
 		List<Usuario> miembros = grupo.getMiembros();
@@ -260,6 +233,34 @@ public class GrupoService {
 		}
 
 		return false;
+	}
+
+	public Optional<Grupo> updateGroup(Long id, GrupoDTO grupoDTO) {
+		Optional<Grupo> grupoOptional = getGroupById(id);
+		if (grupoOptional.isPresent()) {
+			Grupo grupo = grupoOptional.get();
+
+			if (grupo.getEsPareja()) {
+				throw new GroupException("No se puede actualizar los datos de una pareja");
+			}
+
+			if (grupoDTO.getNombre() != null && !grupoDTO.getNombre().isEmpty()) {
+				grupo.setNombre(grupoDTO.getNombre());
+			}
+
+			if (grupoDTO.getCategoria() != null) {
+				Categoria categoria = categoriaService.getCategoriaById(grupoDTO.getCategoria().getId())
+						.orElseThrow(() -> new GroupException("Categoría no encontrada"));
+				if (!categoria.isGrupo()) {
+					throw new GroupException("La categoría elegida no es para un grupo");
+				}
+				grupo.setCategoria(categoria);
+			}
+
+			return Optional.of(saveGroup(grupo));
+		} else {
+			return Optional.empty();
+		}
 	}
 
 	private boolean tieneDeudasPendientesEnGrupo(Grupo grupo, Usuario usuario) {

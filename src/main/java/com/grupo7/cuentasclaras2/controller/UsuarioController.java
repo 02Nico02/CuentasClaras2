@@ -5,14 +5,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.grupo7.cuentasclaras2.DTO.InvitacionAmistadDTO;
+import com.grupo7.cuentasclaras2.DTO.InvitacionGrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.services.InvitacionAmistadService;
 import com.grupo7.cuentasclaras2.services.InvitacionService;
 import com.grupo7.cuentasclaras2.services.UsuarioService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -90,17 +94,19 @@ public class UsuarioController {
         }
     }
 
-    @GetMapping("/hasFriendRequests/{email}")
-    public ResponseEntity<Boolean> hasFriendRequests(@PathVariable String email) {
-        Optional<Usuario> user = usuarioService.getByEmail(email);
+    @GetMapping("/friendRequests/{userId}")
+    public ResponseEntity<List<InvitacionAmistadDTO>> getFriendRequests(@PathVariable Long userId) {
+        Optional<Usuario> user = usuarioService.getById(userId);
 
         if (user.isPresent()) {
             Usuario usuario = user.get();
 
-            boolean hasFriendRequests = usuario.getInvitacionesAmigosRecibidas() != null
-                    && !usuario.getInvitacionesAmigosRecibidas().isEmpty();
+            List<InvitacionAmistadDTO> friendRequestsDTO = usuario.getInvitacionesAmigosRecibidas()
+                    .stream()
+                    .map(InvitacionAmistadDTO::new)
+                    .collect(Collectors.toList());
 
-            return new ResponseEntity<>(hasFriendRequests, HttpStatus.OK);
+            return new ResponseEntity<>(friendRequestsDTO, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -174,6 +180,24 @@ public class UsuarioController {
             return new ResponseEntity<>("Invitación de grupo rechazada con éxito.", HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Usuario no encontrado.", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/groupInvitations/{userId}")
+    public ResponseEntity<List<InvitacionGrupoDTO>> getGroupInvitations(@PathVariable Long userId) {
+        Optional<Usuario> user = usuarioService.getById(userId);
+
+        if (user.isPresent()) {
+            Usuario usuario = user.get();
+
+            List<InvitacionGrupoDTO> groupInvitationsDTO = usuario.getInvitacionesGrupo()
+                    .stream()
+                    .map(InvitacionGrupoDTO::new)
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(groupInvitationsDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
