@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.grupo7.cuentasclaras2.exception.FriendshipException;
 import com.grupo7.cuentasclaras2.exception.GroupException;
 import com.grupo7.cuentasclaras2.exception.InvitationGroupException;
 import com.grupo7.cuentasclaras2.exception.UserException;
@@ -234,14 +235,16 @@ public class UsuarioServiceTests {
         Usuario destinatario = new Usuario("destinatario", "Carlos", "Gomez", "carlos@gmail.com", "password");
         usuarioRepository.save(remitente);
         usuarioRepository.save(destinatario);
+        assertEquals(0, remitente.getInvitacionesAmigosRecibidas().size());
 
         // Act
-        Optional<Usuario> result = invitacionAmistadService.sendFriendRequest(remitente.getEmail(),
-                destinatario.getEmail());
+        assertDoesNotThrow(() -> {
+            invitacionAmistadService.sendFriendRequest(remitente, destinatario);
+        });
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals(remitente.getEmail(), result.get().getEmail());
+        assertEquals(1, remitente.getInvitacionesAmigosEnviadas().size());
+        assertEquals(1, destinatario.getInvitacionesAmigosRecibidas().size());
 
         // Act
         Optional<InvitacionAmistad> invitacionBuscada = invitacionAmistadRepository
@@ -259,10 +262,14 @@ public class UsuarioServiceTests {
         usuarioRepository.save(remitente);
         usuarioRepository.save(destinatario);
 
-        invitacionAmistadService.sendFriendRequest(remitente.getEmail(), destinatario.getEmail());
+        assertDoesNotThrow(() -> {
+            invitacionAmistadService.sendFriendRequest(remitente, destinatario);
+        });
 
         // Act
-        invitacionAmistadService.aceptarSolicitudAmistad(destinatario, remitente.getId());
+        assertDoesNotThrow(() -> {
+            invitacionAmistadService.aceptarSolicitudAmistad(destinatario, remitente.getId());
+        });
 
         // Assert
         assertTrue(destinatario.getAmigos().contains(remitente));
@@ -277,7 +284,9 @@ public class UsuarioServiceTests {
         usuarioRepository.save(remitente);
         usuarioRepository.save(destinatario);
 
-        invitacionAmistadService.sendFriendRequest(remitente.getEmail(), destinatario.getEmail());
+        assertDoesNotThrow(() -> {
+            invitacionAmistadService.sendFriendRequest(remitente, destinatario);
+        });
 
         Optional<InvitacionAmistad> invitacion = invitacionAmistadRepository.findByRemitenteAndReceptor(remitente,
                 destinatario);
@@ -302,11 +311,11 @@ public class UsuarioServiceTests {
         usuarioRepository.save(remitente);
 
         // Act
-        Optional<Usuario> result = invitacionAmistadService.sendFriendRequest(remitente.getEmail(),
-                destinatario.getEmail());
+        FriendshipException exception = assertThrows(FriendshipException.class, () -> {
+            invitacionAmistadService.sendFriendRequest(remitente, destinatario);
+        });
 
-        // Assert
-        assertTrue(result.isEmpty());
+        assertEquals("Ya son amigos", exception.getMessage());
         assertFalse(invitacionAmistadRepository.findByRemitenteAndReceptor(remitente, destinatario).isPresent());
     }
 
@@ -317,11 +326,12 @@ public class UsuarioServiceTests {
         usuarioRepository.save(usuario);
 
         // Act
-        Optional<Usuario> result = invitacionAmistadService.sendFriendRequest(usuario.getEmail(), usuario.getEmail());
+        FriendshipException exception = assertThrows(FriendshipException.class, () -> {
+            invitacionAmistadService.sendFriendRequest(usuario, usuario);
+        });
 
         // Assert
-        System.out.println("result: " + result);
-        assertTrue(result.isEmpty());
+        assertEquals("El emisor y receptor son el mismo", exception.getMessage());
         assertFalse(invitacionAmistadRepository.findByRemitenteAndReceptor(usuario, usuario).isPresent());
     }
 

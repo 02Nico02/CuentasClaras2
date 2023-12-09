@@ -1,20 +1,24 @@
 package com.grupo7.cuentasclaras2.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.grupo7.cuentasclaras2.DTO.InvitacionAmistadDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionGrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.UsernameAndPassword;
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.services.InvitacionAmistadService;
 import com.grupo7.cuentasclaras2.services.InvitacionService;
+import com.grupo7.cuentasclaras2.services.TokenServices;
 import com.grupo7.cuentasclaras2.services.UsuarioService;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,6 +33,11 @@ public class UsuarioController {
 
     @Autowired
     private InvitacionService invitacionService;
+
+    @Autowired
+    private TokenServices tokenServices;
+
+    private final int EXPIRATION_IN_SEC = 7200;
 
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> getUserById(@PathVariable Long id) {
@@ -70,33 +79,61 @@ public class UsuarioController {
         }
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<UsuarioDTO> login(@RequestBody Map<String, String> credentials) {
-        String usernameOrEmail = credentials.get("usernameOrEmail");
-        String password = credentials.get("password");
+    @PostMapping("/auth")
+    public ResponseEntity<?> authenticate(@RequestBody UsernameAndPassword credentials) {
+        Optional<Usuario> user = usuarioService.login(credentials.getUserName(), credentials.getPassword());
+        if (user.isPresent()) {
+            String token = tokenServices.generateToken(user.get().getUsername(), EXPIRATION_IN_SEC);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+            return ResponseEntity.ok().headers(headers)
+                    .body(new UsuarioDTO(user.get()));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrecta");
+        }
+    }
 
-        Optional<Usuario> user = usuarioService.login(usernameOrEmail, password);
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok().body("Sesión cerrada");
 
-        return user.map(value -> new ResponseEntity<>(new UsuarioDTO(value), HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
     }
 
     @PostMapping("/sendFriendRequest")
     public ResponseEntity<String> sendFriendRequest(
-            @RequestParam String senderEmail,
-            @RequestParam String receiverEmail) {
-        Optional<Usuario> senderOptional = invitacionAmistadService.sendFriendRequest(senderEmail, receiverEmail);
+            @RequestParam String receiverEmail,
+            @RequestAttribute("username") String userName) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+
+        Optional<Usuario> senderOptional = usuarioService.getByUsername((String) principal);
 
         if (senderOptional.isPresent()) {
-            return new ResponseEntity<>("Solicitud de amistad enviada con éxito.", HttpStatus.OK);
+            Usuario sender = senderOptional.get();
+            Optional<Usuario> receiverOptional = usuarioService.getByEmail(receiverEmail);
+
+            if (receiverOptional.isPresent()) {
+                Usuario receiver = receiverOptional.get();
+                invitacionAmistadService.sendFriendRequest(sender, receiver);
+                return new ResponseEntity<>("Solicitud de amistad enviada con éxito.",
+                        HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Usuario destinatario no encontrado.",
+                        HttpStatus.NOT_FOUND);
+            }
         } else {
-            return new ResponseEntity<>("No se pudo enviar la solicitud de amistad.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Usuario remitente no encontrado.",
+                    HttpStatus.NOT_FOUND);
         }
+
     }
 
-    @GetMapping("/friendRequests/{userId}")
-    public ResponseEntity<List<InvitacionAmistadDTO>> getFriendRequests(@PathVariable Long userId) {
-        Optional<Usuario> user = usuarioService.getById(userId);
+    @GetMapping("/friendRequests")
+    public ResponseEntity<List<InvitacionAmistadDTO>> getFriendRequests() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+
+        Optional<Usuario> user = usuarioService.getByUsername((String) principal);
 
         if (user.isPresent()) {
             Usuario usuario = user.get();

@@ -15,6 +15,11 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(FriendshipException.class)
+    public ResponseEntity<String> handleFriendshipException(FriendshipException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
     @ExceptionHandler(PagoException.class)
     public ResponseEntity<String> handlePagoException(PagoException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
