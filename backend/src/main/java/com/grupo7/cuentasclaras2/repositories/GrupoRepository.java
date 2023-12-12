@@ -21,4 +21,6 @@ public interface GrupoRepository extends JpaRepository<Grupo, Long> {
 
     List<Grupo> findByMiembros_IdAndEsParejaIsTrue(Long userId);
 
+    boolean existsByIdAndMiembros_Id(long grupoId, long usuarioId);
+
 }
