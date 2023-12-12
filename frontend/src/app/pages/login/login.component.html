@@ -1,18 +1,45 @@
 <div class="container">
-  <h2>Login</h2>
-  <form>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" class="form-control" name="email" />
-    </div>
-    <div class="form-group">
-      <label>Contraseña</label>
-      <input type="password" class="form-control" name="password" />
-    </div>
-    <button type="submit" class="btn btn-primary w-100 mt-4">Login</button>
-  </form>
+  <h1>Login</h1>
+  <form [formGroup]="loginForm">
+    <div class="mb-3 mt-3">
+      <label for="exampleInputEmail1" class="form-label">Email</label>
+      <input
+        formControlName="email"
+        type="email"
+        class="form-control"
+        id="exampleInputEmail1"
+        aria-describedby="emailHelp"
+      />
+      @if(email.invalid && (email.dirty || email.touched)){
+      <div class="text-danger">
+        @if(email.errors?.['required']){
+        <div>El Email es requerido.</div>
 
-  <button type="button" class="btn btn-secondary mt-4">
-    <a href="/register">Registrate</a>
-  </button>
+        } @if(email.errors?.['email']){
+        <div>El Email debe tener un formato válido.</div>
+        }
+      </div>
+
+      }
+    </div>
+    <div class="mb-3">
+      <label for="exampleInputPassword1" class="form-label">Password</label>
+      <input
+        formControlName="password"
+        type="password"
+        class="form-control"
+        id="exampleInputPassword1"
+      />
+      @if(password.invalid && (password.dirty || password.touched)){
+      @if(password.errors?.['required']){
+
+      <div class="text-danger">
+        <div>El Password es requerido.</div>
+      </div>
+      } }
+    </div>
+    <button type="submit" (click)="login()" class="btn btn-primary">
+      Iniciar Sesión
+    </button>
+  </form>
 </div>
