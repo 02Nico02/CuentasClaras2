@@ -1,13 +1,13 @@
 package com.grupo7.cuentasclaras2.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import com.grupo7.cuentasclaras2.DTO.Credentials;
 import com.grupo7.cuentasclaras2.DTO.DeudaUsuarioDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionAmistadDTO;
@@ -88,16 +88,13 @@ public class UsuarioController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UsuarioDTO> registerUser(@RequestBody Usuario newUser) {
+    public ResponseEntity<Credentials> registerUser(@RequestBody Usuario newUser) {
         Optional<Usuario> registeredUser = usuarioService.registerUser(newUser);
 
         if (registeredUser.isPresent()) {
             Usuario user = registeredUser.get();
             String token = tokenServices.generateToken(user.getUsername(), EXPIRATION_IN_SEC);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-            return ResponseEntity.ok().headers(headers)
-                    .body(new UsuarioDTO(user));
+            return ResponseEntity.ok().body(new Credentials(token, EXPIRATION_IN_SEC, user.getUsername()));
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -127,10 +124,7 @@ public class UsuarioController {
         Optional<Usuario> user = usuarioService.login(credentials.getUserName(), credentials.getPassword());
         if (user.isPresent()) {
             String token = tokenServices.generateToken(user.get().getUsername(), EXPIRATION_IN_SEC);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-            return ResponseEntity.ok().headers(headers)
-                    .body(new UsuarioDTO(user.get()));
+            return ResponseEntity.ok().body(new Credentials(token, EXPIRATION_IN_SEC, user.get().getUsername()));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrecta");
         }
