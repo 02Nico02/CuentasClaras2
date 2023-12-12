@@ -369,7 +369,7 @@ public class UsuarioServiceTests {
 
         // Act & Assert
         assertDoesNotThrow(
-                () -> invitacionService.enviarInvitacion(remitente.getId(), destinatario.getId(), grupo.getId()));
+                () -> invitacionService.enviarInvitacion(remitente, destinatario.getId(), grupo.getId()));
 
         // Verifica que no hay excepciones y que se creó la invitación
         assertEquals(1, invitacionRepository.count());
@@ -388,7 +388,7 @@ public class UsuarioServiceTests {
 
         // Act & Assert
         assertThrows(GroupException.class, () -> {
-            invitacionService.enviarInvitacion(remitente.getId(), destinatario.getId(), grupo.getId());
+            invitacionService.enviarInvitacion(remitente, destinatario.getId(), grupo.getId());
         });
 
         // Verifica que no se creó la invitación
@@ -492,7 +492,7 @@ public class UsuarioServiceTests {
 
         // Act & Assert
         assertThrows(UserException.class, () -> {
-            invitacionService.enviarInvitacion(remitente.getId(), 999L, grupo.getId());
+            invitacionService.enviarInvitacion(remitente, 999L, grupo.getId());
         });
 
         // Verifica que no se creó la invitación
@@ -510,7 +510,7 @@ public class UsuarioServiceTests {
 
         // Act & Assert
         assertThrows(GroupException.class, () -> {
-            invitacionService.enviarInvitacion(remitente.getId(), destinatario.getId(), 999L);
+            invitacionService.enviarInvitacion(remitente, destinatario.getId(), 999L);
         });
 
         // Verifica que no se creó la invitación

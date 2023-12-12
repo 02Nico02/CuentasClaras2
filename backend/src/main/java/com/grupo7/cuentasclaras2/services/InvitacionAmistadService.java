@@ -49,24 +49,39 @@ public class InvitacionAmistadService {
         usuarioRepository.save(recipientUser);
     }
 
-    public void aceptarSolicitudAmistad(Usuario usuario, Long invitationId) {
-        Optional<InvitacionAmistad> invitacionOptional = invitacionAmistadRepository.findById(invitationId);
+    public boolean aceptarSolicitudAmistad(Usuario usuario, Long invitationId) {
+        try {
+            Optional<InvitacionAmistad> invitacionOptional = invitacionAmistadRepository.findById(invitationId);
 
-        invitacionOptional.ifPresent(invitacion -> {
-            if (invitacion.getReceptor().equals(usuario)) {
-                usuario.agregarAmigo(invitacion.getRemitente());
-                invitacionAmistadRepository.delete(invitacion);
+            if (invitacionOptional.isPresent()) {
+                InvitacionAmistad invitacion = invitacionOptional.get();
+                if (invitacion.getReceptor().equals(usuario)) {
+                    usuario.agregarAmigo(invitacion.getRemitente());
+                    invitacionAmistadRepository.delete(invitacion);
+                    return true;
+                }
             }
-        });
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    public void rechazarSolicitudAmistad(Usuario usuario, Long invitationId) {
-        Optional<InvitacionAmistad> invitacionOptional = invitacionAmistadRepository.findById(invitationId);
+    public boolean rechazarSolicitudAmistad(Usuario usuario, Long invitationId) {
+        try {
+            Optional<InvitacionAmistad> invitacionOptional = invitacionAmistadRepository.findById(invitationId);
 
-        invitacionOptional.ifPresent(invitacion -> {
-            if (invitacion.getReceptor().equals(usuario)) {
-                invitacionAmistadRepository.delete(invitacion);
+            if (invitacionOptional.isPresent()) {
+                InvitacionAmistad invitacion = invitacionOptional.get();
+                if (invitacion.getReceptor().equals(usuario)) {
+                    invitacionAmistadRepository.delete(invitacion);
+                    return true;
+                }
             }
-        });
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
+
 }
