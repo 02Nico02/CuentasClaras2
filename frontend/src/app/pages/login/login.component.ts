@@ -16,6 +16,7 @@ export class LoginComponent implements OnInit {
 
   // acá se especifican los campos que van a estar en el formulario
   // con sus respectivas validaciones
+  loginError:string=""
   loginForm=this.formBuilder.group({
     email:["ylucaroni@gmail.com",[Validators.required,Validators.email]],
     password:["",[Validators.required]]
@@ -31,10 +32,22 @@ export class LoginComponent implements OnInit {
 
   login(){
     if(this.loginForm.valid){
-      this.loginService.login(this.loginForm.value as LoginRequest)
+      this.loginService.login(this.loginForm.value as LoginRequest).subscribe({
+        next:(userData) =>{
+          console.log(userData)
+        }
+        ,
+        error:(errorData)=>{
+          console.log(errorData,"vocé no sabe nada")
+          this.loginError=errorData
+        },
+        complete:()=>{
+          console.info("Login completo")
+          this.router.navigateByUrl("/")
+          this.loginForm.reset()
+        }
+      })
       console.log("Llamaar al servicio de login")
-      this.router.navigateByUrl("/")
-      this.loginForm.reset()
     }
     else{
       console.log("Hiciste todo mal")
