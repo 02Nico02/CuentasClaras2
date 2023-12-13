@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.grupo7.cuentasclaras2.exception.GroupException;
+import com.grupo7.cuentasclaras2.exception.InvitacionException;
 import com.grupo7.cuentasclaras2.exception.InvitationGroupException;
 import com.grupo7.cuentasclaras2.exception.UserException;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
@@ -27,9 +28,11 @@ public class InvitacionService {
 	@Autowired
 	private GrupoService grupoService;
 
-	public void enviarInvitacion(Long remitenteId, Long destinatarioId, Long grupoId) {
-		Usuario remitente = usuarioRepository.findById(remitenteId)
-				.orElseThrow(() -> new UserException("Usuario remitente no encontrado"));
+	public void enviarInvitacion(Usuario remitente, Long destinatarioId, Long grupoId) {
+
+		if (remitente.getId() == destinatarioId) {
+			throw new UserException("remitente y destinatario son el mismo");
+		}
 
 		Usuario destinatario = usuarioRepository.findById(destinatarioId)
 				.orElseThrow(() -> new UserException("Usuario destinatario no encontrado"));
@@ -43,6 +46,11 @@ public class InvitacionService {
 
 		if (grupo.getEsPareja()) {
 			throw new GroupException("No se puede enviar invitaciones de un grupo de 2");
+		}
+
+		if (invitacionRepository.existsByRemitenteAndDestinatario(remitente, destinatario)
+				|| invitacionRepository.existsByRemitenteAndDestinatario(destinatario, remitente)) {
+			throw new InvitacionException("Ya existe una invitación entre el remitente y el destinatario");
 		}
 
 		Invitacion invitacion = new Invitacion();

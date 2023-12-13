@@ -467,4 +467,9 @@ public class GastoService {
 				.collect(Collectors.toList());
 	}
 
+	public boolean esUsuarioMiembroDelGrupo(Gasto gasto, Usuario usuario) {
+		Grupo grupo = gasto.getGrupo();
+		return grupo.getMiembros().contains(usuario);
+	}
+
 }

@@ -263,6 +263,10 @@ public class GrupoService {
 		}
 	}
 
+	public boolean usuarioPerteneceAlGrupo(long usuarioId, long grupoId) {
+		return grupoRepository.existsByIdAndMiembros_Id(grupoId, usuarioId);
+	}
+
 	private boolean tieneDeudasPendientesEnGrupo(Grupo grupo, Usuario usuario) {
 		return grupo.getDeudas().stream()
 				.anyMatch(deuda -> deuda.getDeudor().equals(usuario) || deuda.getAcreedor().equals(usuario));
