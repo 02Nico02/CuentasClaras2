@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { LoginService } from '../../services/auth/login.service';
+import { LoginRequest } from '../../services/auth/loginRequest';
 
 
 @Component({
@@ -19,7 +21,7 @@ export class LoginComponent implements OnInit {
     password:["",[Validators.required]]
   })
 
-  constructor(private formBuilder:FormBuilder, private router:Router){
+  constructor(private formBuilder:FormBuilder, private router:Router, private loginService:LoginService){
 
   }
 
@@ -29,6 +31,7 @@ export class LoginComponent implements OnInit {
 
   login(){
     if(this.loginForm.valid){
+      this.loginService.login(this.loginForm.value as LoginRequest)
       console.log("Llamaar al servicio de login")
       this.router.navigateByUrl("/")
       this.loginForm.reset()
