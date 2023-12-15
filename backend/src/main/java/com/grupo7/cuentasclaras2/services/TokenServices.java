@@ -12,12 +12,15 @@ import java.util.Date;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * Servicio para la gestión de tokens JWT.
+ */
 @Service
 public class TokenServices {
     private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     /**
-     * Genera el token de autorización para el usuario.
+     * Genera un token de autorización para el usuario.
      *
      * @param username Nombre de usuario que se guarda dentro del token.
      * @param segundos Tiempo de validez del token en segundos.
@@ -28,10 +31,24 @@ public class TokenServices {
         return Jwts.builder().setSubject(username).signWith(key).setExpiration(exp).compact();
     }
 
+    /**
+     * Obtiene la fecha de vencimiento del token a partir de la fecha de inicio y la
+     * duración en segundos.
+     *
+     * @param startDate Fecha de inicio del token.
+     * @param segundos  Tiempo de validez del token en segundos.
+     * @return Fecha de vencimiento del token.
+     */
     private Date getExpiration(Date startDate, int segundos) {
         return new Date(startDate.getTime() + segundos * 1000);
     }
 
+    /**
+     * Valida la autenticidad y la vigencia de un token.
+     *
+     * @param token El token a validar.
+     * @return true si el token es válido, false de lo contrario.
+     */
     public static boolean validateToken(String token) {
         String prefix = "Bearer";
         try {
@@ -47,6 +64,14 @@ public class TokenServices {
         }
     }
 
+    /**
+     * Obtiene el nombre de usuario desde un token JWT.
+     *
+     * @param token El token JWT.
+     * @return El nombre de usuario.
+     * @throws JwtException Si hay un error al obtener el nombre de usuario desde el
+     *                      token.
+     */
     public static String getUsernameFromToken(String token) {
         String prefix = "Bearer";
         try {
