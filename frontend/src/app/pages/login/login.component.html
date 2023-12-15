@@ -2,21 +2,23 @@
   <h1>Login</h1>
   <form [formGroup]="loginForm">
     <div class="mb-3 mt-3">
-      <label for="exampleInputEmail1" class="form-label">Email</label>
+      <label for="exampleInputEmail1" class="form-label"
+        >Nombre de usuario</label
+      >
       <input
-        formControlName="email"
-        type="email"
+        formControlName="userName"
+        type="text"
         class="form-control"
         id="exampleInputEmail1"
         aria-describedby="emailHelp"
       />
-      @if(email.invalid && (email.dirty || email.touched)){
+      @if(userName.invalid && (userName.dirty || userName.touched)){
       <div class="text-danger">
-        @if(email.errors?.['required']){
-        <div>El Email es requerido.</div>
+        @if(userName.errors?.['required']){
+        <div>El Nombre de usuario es requerido.</div>
 
-        } @if(email.errors?.['email']){
-        <div>El Email debe tener un formato válido.</div>
+        } @if(userName.errors?.['userName']){
+        <div>El Nombre de usuario debe tener un formato válido.</div>
         }
       </div>
 

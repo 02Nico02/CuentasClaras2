@@ -18,8 +18,8 @@ export class LoginComponent implements OnInit {
   // con sus respectivas validaciones
   loginError:string=""
   loginForm=this.formBuilder.group({
-    email:["ylucaroni@gmail.com",[Validators.required,Validators.email]],
-    password:["",[Validators.required]]
+    userName:["usuario1@ejemplo.com",[Validators.required]],
+    password:["1234User",[Validators.required]]
   })
 
   constructor(private formBuilder:FormBuilder, private router:Router, private loginService:LoginService){
@@ -34,7 +34,7 @@ export class LoginComponent implements OnInit {
     if(this.loginForm.valid){
       this.loginService.login(this.loginForm.value as LoginRequest).subscribe({
         next:(userData) =>{
-          console.log(userData)
+          console.log({userData})
         }
         ,
         error:(errorData)=>{
@@ -47,7 +47,6 @@ export class LoginComponent implements OnInit {
           this.loginForm.reset()
         }
       })
-      console.log("Llamaar al servicio de login")
     }
     else{
       console.log("Hiciste todo mal")
@@ -55,8 +54,8 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  get email(){
-    return this.loginForm.controls.email;
+  get userName(){
+    return this.loginForm.controls.userName;
   }
 
   get password()
