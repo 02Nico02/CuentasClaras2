@@ -9,7 +9,6 @@ import com.grupo7.cuentasclaras2.DTO.DivisionIndividualDTO;
 import com.grupo7.cuentasclaras2.DTO.FormaDividirDTO;
 import com.grupo7.cuentasclaras2.DTO.GastoAutorDTO;
 import com.grupo7.cuentasclaras2.DTO.GastoDTO;
-import com.grupo7.cuentasclaras2.exception.BDErrorException;
 import com.grupo7.cuentasclaras2.exception.GastoException;
 import com.grupo7.cuentasclaras2.exception.GroupException;
 import com.grupo7.cuentasclaras2.modelos.Categoria;
@@ -676,15 +675,11 @@ public class GastoService {
 				Double montoDeuda = Math.min(Math.abs(diferenciaBalance.get(deudorId)),
 						diferenciaBalance.get(acreedorId));
 
-				Optional<DeudaUsuario> deudaActONueva = deudaUsuarioService.crearDeudaUsuario(deudorId, acreedorId,
+				deudaUsuarioService.crearDeudaUsuario(deudorId, acreedorId,
 						montoDeuda, grupo.getId());
 
-				if (deudaActONueva.isPresent()) {
-					diferenciaBalance.put(deudorId, diferenciaBalance.get(deudorId) + montoDeuda);
-					diferenciaBalance.put(acreedorId, diferenciaBalance.get(acreedorId) - montoDeuda);
-				} else {
-					throw new BDErrorException("Ocurrio un error inesperado");
-				}
+				diferenciaBalance.put(deudorId, diferenciaBalance.get(deudorId) + montoDeuda);
+				diferenciaBalance.put(acreedorId, diferenciaBalance.get(acreedorId) - montoDeuda);
 			} else {
 				break;
 			}

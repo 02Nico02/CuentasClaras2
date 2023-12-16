@@ -156,15 +156,19 @@ public class DeudaUsuarioService {
 											return deudaUsuarioRepository.save(deudaInvertida.get());
 										} else {
 											// Eliminar la DeudaUsuario invertida
+											deudaInvertida.get().getGrupo().eliminarDeudaUsuario(deudaInvertida.get());
 											deudaUsuarioRepository.delete(deudaInvertida.get());
 
-											// Crear nueva DeudaUsuario
-											DeudaUsuario nuevaDeuda = new DeudaUsuario();
-											nuevaDeuda.setDeudor(deudor);
-											nuevaDeuda.setAcreedor(acreedor);
-											nuevaDeuda.setMonto(-diferencia);
-											nuevaDeuda.setGrupo(grupo);
-											return deudaUsuarioRepository.save(nuevaDeuda);
+											// Crear nueva DeudaUsuario solo si la diferencia no es 0
+											if (diferencia < 0) {
+												DeudaUsuario nuevaDeuda = new DeudaUsuario();
+												nuevaDeuda.setDeudor(deudor);
+												nuevaDeuda.setAcreedor(acreedor);
+												nuevaDeuda.setMonto(-diferencia);
+												nuevaDeuda.setGrupo(grupo);
+												return deudaUsuarioRepository.save(nuevaDeuda);
+											}
+											return null;
 										}
 									} else {
 										// Crear nueva DeudaUsuario
@@ -190,6 +194,9 @@ public class DeudaUsuarioService {
 						deudaUsuario.getAcreedor(),
 						grupo);
 
+				if (deudasAcreedor.size() == 0) {
+					continue;
+				}
 				double montoPendiente = deudaUsuario.getMonto();
 				Map<Long, Double> nuevasDeudasAsumidas = new HashMap<>();
 
