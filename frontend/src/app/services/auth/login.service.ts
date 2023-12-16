@@ -20,15 +20,8 @@ export class LoginService {
    }
 
   login(credentials:LoginRequest):Observable<any>{
-    console.log(credentials)
-    console.log(typeof(credentials))
-    JSON.stringify(credentials);
-    console.log(credentials)
-    console.log(typeof(credentials))
     return this.http.post<any>(environment.urlApi+"users/auth",credentials).pipe(
       tap((userData)=>{
-        console.log({userData})
-        console.log(userData.token)
         sessionStorage.setItem("token",userData.token)
         this.currentUserData.next(userData)
         this.currentUserLoginOn.next(true)

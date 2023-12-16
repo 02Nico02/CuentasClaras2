@@ -1,40 +1,118 @@
 <div class="container">
   <h2>Registrarse</h2>
-  <form>
-    <div class="form-group">
-      <label for="usuario">Usuario</label>
-      <input type="text" id="usuario" name="usuario" required />
-    </div>
-    <div class="form-group">
-      <label for="nombres">Nombres</label>
-      <input type="text" id="nombres" name="nombres" required />
-    </div>
-    <div class="form-group">
-      <label for="apellidos">Apellido/s</label>
-      <input type="text" id="apellidos" name="apellidos" required />
-    </div>
-    <div class="form-group">
-      <label for="email">Email address</label>
-      <input type="email" id="email" name="email" required />
-    </div>
-    <div class="form-group">
-      <label for="password">Contraseña</label>
-      <input type="password" id="password" name="password" required />
-    </div>
-    <div class="form-group">
-      <label for="repite_password">Repite Contraseña</label>
+
+  <form [formGroup]="registerForm">
+    <div class="mb-3 mt-3">
+      <label for="exampleInputEmail1" class="form-label"
+        >Nombre de usuario</label
+      >
       <input
-        type="password"
-        id="repite_password"
-        name="repite_password"
-        required
+        formControlName="username"
+        type="text"
+        class="form-control"
+        id="exampleInputEmail1"
+        aria-describedby="emailHelp"
       />
+      @if(username.invalid && (username.dirty || username.touched)){
+      <div class="text-danger">
+        @if(username.errors?.['required']){
+        <div>El Nombre de usuario es requerido.</div>
+
+        } @if(username.errors?.['username']){
+        <div>El Nombre de usuario debe tener un formato válido.</div>
+        }
+      </div>
+
+      }
     </div>
-    <button type="submit" class="btn btn-primary w-100 mt-4">
+
+    <div class="mb-3 mt-3">
+      <label for="exampleInputEmail1" class="form-label">Nombres</label>
+      <input
+        formControlName="nombres"
+        type="text"
+        class="form-control"
+        id="exampleInputEmail1"
+        aria-describedby="emailHelp"
+      />
+      @if(nombres.invalid && (nombres.dirty || nombres.touched)){
+      <div class="text-danger">
+        @if(nombres.errors?.['required']){
+        <div>El Nombre de usuario es requerido.</div>
+
+        } @if(nombres.errors?.['nombres']){
+        <div>El Nombre de usuario debe tener un formato válido.</div>
+        }
+      </div>
+
+      }
+    </div>
+
+    <div class="mb-3 mt-3">
+      <label for="exampleInputEmail1" class="form-label">Apellidos</label>
+      <input
+        formControlName="apellido"
+        type="text"
+        class="form-control"
+        id="exampleInputEmail1"
+        aria-describedby="emailHelp"
+      />
+      @if(apellido.invalid && (apellido.dirty || apellido.touched)){
+      <div class="text-danger">
+        @if(apellido.errors?.['required']){
+        <div>El Nombre de usuario es requerido.</div>
+
+        } @if(apellido.errors?.['apellido']){
+        <div>El Nombre de usuario debe tener un formato válido.</div>
+        }
+      </div>
+
+      }
+    </div>
+
+    <div class="mb-3 mt-3">
+      <label for="exampleInputEmail1" class="form-label">Email</label>
+      <input
+        formControlName="email"
+        type="text"
+        class="form-control"
+        id="exampleInputEmail1"
+        aria-describedby="emailHelp"
+      />
+      @if(email.invalid && (email.dirty || email.touched)){
+      <div class="text-danger">
+        @if(email.errors?.['required']){
+        <div>El Nombre de usuario es requerido.</div>
+
+        } @if(email.errors?.['email']){
+        <div>El Nombre de usuario debe tener un formato válido.</div>
+        }
+      </div>
+
+      }
+    </div>
+
+    <div class="mb-3">
+      <label for="exampleInputPassword1" class="form-label">Password</label>
+      <input
+        formControlName="password"
+        type="password"
+        class="form-control"
+        id="exampleInputPassword1"
+      />
+      @if(password.invalid && (password.dirty || password.touched)){
+      @if(password.errors?.['required']){
+
+      <div class="text-danger">
+        <div>El Password es requerido.</div>
+      </div>
+      } }
+    </div>
+    <!-- <p class="text-danger">{{ loginError }}</p> -->
+    <button type="submit" (click)="register()" class="btn btn-primary">
       Registrarse
     </button>
   </form>
-
   <button type="button" class="btn btn-secondary mt-4">
     <a href="/login">Inicia sesión</a>
   </button>
