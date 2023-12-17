@@ -21,6 +21,14 @@ public class CategoriaController {
 	@Autowired
 	private CategoriaService categoriaService;
 
+	/**
+	 * Obtiene los detalles de una categoría por su identificador.
+	 *
+	 * @param categoryId Identificador único de la categoría.
+	 * @return ResponseEntity con la información de la categoría en formato
+	 *         CategoriaDTO si existe, o ResponseEntity.notFound() si la categoría
+	 *         no se encuentra.
+	 */
 	@GetMapping("/{categoryId}")
 	public ResponseEntity<CategoriaDTO> getCategoriaById(@PathVariable Long categoryId) {
 		Optional<Categoria> categoriaOptional = categoriaService.getCategoriaById(categoryId);
@@ -34,6 +42,12 @@ public class CategoriaController {
 		}
 	}
 
+	/**
+	 * Obtiene todas las categorías de grupo.
+	 *
+	 * @return ResponseEntity con la lista de categorías de grupo en formato
+	 *         CategoriaDTO.
+	 */
 	@GetMapping("/groups")
 	public ResponseEntity<List<CategoriaDTO>> getGroupCategories() {
 		List<Categoria> groupCategories = categoriaService.getGroupCategories();
@@ -43,6 +57,12 @@ public class CategoriaController {
 		return ResponseEntity.ok(groupCategoriesDTO);
 	}
 
+	/**
+	 * Obtiene todas las categorías de gastos.
+	 *
+	 * @return ResponseEntity con la lista de categorías de gastos en formato
+	 *         CategoriaDTO.
+	 */
 	@GetMapping("/expenses")
 	public ResponseEntity<List<CategoriaDTO>> getExpenseCategories() {
 		List<Categoria> expenseCategories = categoriaService.getExpenseCategories();

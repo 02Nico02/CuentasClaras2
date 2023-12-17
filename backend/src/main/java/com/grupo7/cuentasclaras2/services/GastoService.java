@@ -554,9 +554,9 @@ public class GastoService {
 	}
 
 	/**
-	 * Actualiza los saldos de deudas y pagos entre los miembros de un grupo.
+	 * Actualiza los saldos de deudas entre los miembros de un grupo.
 	 *
-	 * @param grupo El grupo del cual se actualizarán los saldos de deudas y pagos.
+	 * @param grupo El grupo del cual se actualizarán los saldos de deudas.
 	 */
 	private void actualizarDeudasUsuarios(Grupo grupo) {
 
@@ -647,11 +647,9 @@ public class GastoService {
 			Map<Long, Double> balancePagosGastos) {
 		Map<Long, Double> diferenciaBalance = new HashMap<>();
 
-		for (Long usuarioId : balanceDeudas.keySet()) {
-			Double diferencia = balancePagosGastos.getOrDefault(usuarioId, 0.0)
-					- balanceDeudas.getOrDefault(usuarioId, 0.0);
-			diferenciaBalance.put(usuarioId, diferencia);
-		}
+		balanceDeudas.forEach((usuarioId, balanceDeuda) -> diferenciaBalance.merge(usuarioId,
+				balancePagosGastos.getOrDefault(usuarioId, 0.0) - balanceDeuda,
+				(oldValue, newValue) -> oldValue + newValue));
 
 		return diferenciaBalance;
 	}

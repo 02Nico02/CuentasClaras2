@@ -9,20 +9,39 @@ import org.springframework.stereotype.Component;
 import com.grupo7.cuentasclaras2.modelos.Categoria;
 import com.grupo7.cuentasclaras2.repositories.CategoriaRepository;
 
+/**
+ * Inicializador de la base de datos que carga categorías predeterminadas si la
+ * base de datos está vacía.
+ */
 @Component
 public class DatabaseInitializer implements ApplicationRunner {
 
     private final CategoriaRepository categoriaRepository;
 
+    /**
+     * Constructor del inicializador que recibe una instancia de
+     * CategoriaRepository.
+     *
+     * @param categoriaRepository Repositorio de categorías.
+     */
     public DatabaseInitializer(CategoriaRepository categoriaRepository) {
         this.categoriaRepository = categoriaRepository;
     }
 
+    /**
+     * Método que se ejecuta al arrancar la aplicación para inicializar la base de
+     * datos.
+     *
+     * @param args Argumentos de la aplicación.
+     */
     @Override
     public void run(ApplicationArguments args) {
         initializeCategorias();
     }
 
+    /**
+     * Inicializa las categorías predeterminadas si la base de datos está vacía.
+     */
     private void initializeCategorias() {
         List<Categoria> categorias = categoriaRepository.findAll();
 

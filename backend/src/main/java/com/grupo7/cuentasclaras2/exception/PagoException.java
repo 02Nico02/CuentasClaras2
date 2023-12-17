@@ -1,5 +1,8 @@
 package com.grupo7.cuentasclaras2.exception;
 
+/**
+ * Excepción personalizada para representar problemas en el proceso de pagos.
+ */
 public class PagoException extends RuntimeException {
 
     public PagoException(String message) {

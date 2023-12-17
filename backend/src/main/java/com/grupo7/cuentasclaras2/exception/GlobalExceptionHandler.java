@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+/**
+ * Clase que maneja las excepciones globalmente en la aplicación.
+ * Proporciona respuestas HTTP adecuadas para diferentes tipos de excepciones.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
