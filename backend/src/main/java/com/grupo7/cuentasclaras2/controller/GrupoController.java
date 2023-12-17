@@ -90,43 +90,6 @@ public class GrupoController {
 				.orElseGet(() -> ResponseEntity.badRequest().build());
 	}
 
-	// Hay que ver cuando se va a crear las parejas. al agregarse un amigo o en
-	// algun momento especifico. Dependiendo de eso, este endpoint puede desaparecer
-	/**
-	 * Crea un nuevo grupo de pareja.
-	 *
-	 * @param grupoDTO Datos del grupo de pareja a crear.
-	 * @return ResponseEntity con el GrupoDTO del grupo creado y HttpStatus
-	 *         correspondiente.
-	 */
-	@PostMapping("/couple")
-	public ResponseEntity<GrupoDTO> crearGrupoPareja(@RequestBody GrupoDTO grupoDTO) {
-		try {
-			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			Object principal = authentication.getPrincipal();
-
-			Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
-
-			if (!usuarioOptional.isPresent()) {
-				return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-			}
-
-			Usuario usuarioAutenticado = usuarioOptional.get();
-
-			List<IdEmailUsuarioDTO> miembrosDTO = grupoDTO.getMiembros();
-			if (miembrosDTO == null || miembrosDTO.isEmpty()
-					|| !contieneUsuario(miembrosDTO, usuarioAutenticado.getId())) {
-				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-			}
-
-			Optional<Grupo> grupoOptional = grupoService.newCoupleGroupByDTO(grupoDTO);
-			GrupoDTO nuevoGrupoDTO = new GrupoDTO(grupoOptional.orElse(null));
-			return ResponseEntity.status(HttpStatus.CREATED).body(nuevoGrupoDTO);
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.badRequest().build();
-		}
-	}
-
 	// Hay que ver en que contexto y bajo que reglas se puede eliminar un grupo y/o
 	// pareja
 	// @DeleteMapping("/delete/{id}")
@@ -259,24 +222,6 @@ public class GrupoController {
 				.collect(Collectors.toList());
 
 		return ResponseEntity.ok(gastos);
-	}
-
-	/**
-	 * Verifica si una lista de usuarios contiene un usuario específico.
-	 *
-	 * @param miembrosDTO Lista de usuarios representados como objetos
-	 *                    IdEmailUsuarioDTO.
-	 * @param usuarioId   Identificador del usuario a buscar en la lista.
-	 * @return true si la lista contiene al usuario con el ID especificado, false de
-	 *         lo contrario.
-	 */
-	private boolean contieneUsuario(List<IdEmailUsuarioDTO> miembrosDTO, long usuarioId) {
-		for (IdEmailUsuarioDTO usuarioDTO : miembrosDTO) {
-			if (usuarioDTO.getId() == usuarioId) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 }

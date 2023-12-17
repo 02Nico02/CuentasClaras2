@@ -1,5 +1,6 @@
 package com.grupo7.cuentasclaras2.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class InvitacionAmistadService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private GrupoService grupoService;
 
     /**
      * Envía una solicitud de amistad desde el remitente al destinatario.
@@ -62,7 +66,7 @@ public class InvitacionAmistadService {
     }
 
     /**
-     * Acepta una solicitud de amistad.
+     * Acepta una solicitud de amistad y crea el grupo de pareja
      *
      * @param usuario      El usuario que acepta la solicitud.
      * @param invitationId El ID de la invitación que se acepta.
@@ -76,8 +80,10 @@ public class InvitacionAmistadService {
             if (invitacionOptional.isPresent()) {
                 InvitacionAmistad invitacion = invitacionOptional.get();
                 if (invitacion.getReceptor().equals(usuario)) {
-                    usuario.agregarAmigo(invitacion.getRemitente());
+                    Usuario remitente = invitacion.getRemitente();
+                    usuario.agregarAmigo(remitente);
                     invitacionAmistadRepository.delete(invitacion);
+                    grupoService.newCoupleGroup(List.of(usuario, remitente));
                     return true;
                 }
             }

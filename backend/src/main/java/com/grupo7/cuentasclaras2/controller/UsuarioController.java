@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import com.grupo7.cuentasclaras2.DTO.AmigoDTO;
 import com.grupo7.cuentasclaras2.DTO.Credentials;
 import com.grupo7.cuentasclaras2.DTO.DeudaUsuarioDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
@@ -182,6 +183,43 @@ public class UsuarioController {
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok().body("Sesión cerrada");
 
+    }
+
+    /**
+     * Obtiene la lista de amigos del usuario autenticado.
+     *
+     * @return ResponseEntity con la lista de amigos en formato DTO y HttpStatus
+     *         correspondiente.
+     */
+    @GetMapping("/friendsList")
+    public ResponseEntity<List<AmigoDTO>> getFriendsList() {
+        // Obtiene la información del usuario autenticado
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+
+        Optional<Usuario> userOptional = usuarioService.getByUsername((String) principal);
+
+        if (userOptional.isPresent()) {
+            Usuario usuario = userOptional.get();
+
+            List<AmigoDTO> friendsDTO = usuario.getAmigos()
+                    .stream()
+                    .map(amigo -> {
+                        Optional<Grupo> pairGroup = grupoService.getPairGroupByUserIds(usuario.getId(), amigo.getId());
+
+                        double saldoDisponible = pairGroup
+                                .map(grupo -> usuarioService.calcularSaldoDisponibleEnGrupo(usuario, grupo))
+                                .orElse(0.0);
+
+                        return new AmigoDTO(amigo.getId(), amigo.getUsername(), pairGroup.get().getId(),
+                                saldoDisponible);
+                    })
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(friendsDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     /**

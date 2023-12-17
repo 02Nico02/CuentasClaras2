@@ -110,6 +110,20 @@ public class GrupoService {
 	}
 
 	/**
+	 * Busca un grupo de tipo pareja en el que participen dos usuarios.
+	 *
+	 * @param userId1 Identificador del primer usuario.
+	 * @param userId2 Identificador del segundo usuario.
+	 * @return Grupo de tipo pareja en el que participan los dos usuarios.
+	 */
+	public Optional<Grupo> getPairGroupByUserIds(Long userId1, Long userId2) {
+		// Verifica si ambos usuarios pertenecen al mismo grupo de tipo pareja
+		List<Grupo> pairGroups = grupoRepository.findByMiembros_IdInAndEsParejaIsTrue(Arrays.asList(userId1, userId2));
+
+		return pairGroups.stream().findFirst();
+	}
+
+	/**
 	 * Agrega un miembro a un grupo.
 	 *
 	 * @param groupId Identificador del grupo.
@@ -248,6 +262,24 @@ public class GrupoService {
 		grupo.setEsPareja(true);
 
 		List<Usuario> miembros = convertirDTOaUsuariosValidados(grupoDTO.getMiembros());
+
+		validarMiembrosParaGrupoPareja(miembros);
+
+		grupo.agregarMiembros(miembros);
+		Grupo grupoGuardado = grupoRepository.save(grupo);
+		usuarioRepository.saveAll(miembros);
+
+		return Optional.of(grupoGuardado);
+	}
+
+	@Transactional
+	public Optional<Grupo> newCoupleGroup(List<Usuario> miembros) {
+		if (miembros == null || miembros.size() != 2) {
+			throw new GroupException("Un grupo de pareja debe tener exactamente 2 miembros.");
+		}
+
+		Grupo grupo = new Grupo();
+		grupo.setEsPareja(true);
 
 		validarMiembrosParaGrupoPareja(miembros);
 
