@@ -157,15 +157,15 @@ public class GastoServiceTest {
                 DivisionIndividualDTO divisionIndividualDTO5 = new DivisionIndividualDTO();
                 DivisionIndividualDTO divisionIndividualDTO6 = new DivisionIndividualDTO();
                 divisionIndividualDTO4.setUserId(usuario1.getId());
-                divisionIndividualDTO4.setMonto(300);
+                divisionIndividualDTO4.setMonto(50);
                 divisionIndividualDTO5.setUserId(usuario2.getId());
-                divisionIndividualDTO5.setMonto(300);
+                divisionIndividualDTO5.setMonto(50);
                 divisionIndividualDTO6.setUserId(usuario3.getId());
                 divisionIndividualDTO6.setMonto(0);
 
                 // Segundo FormaDividir
                 FormaDividirDTO formaDividirDTO2 = new FormaDividirDTO();
-                formaDividirDTO2.setFormaDividir(FormatosDivision.MONTO);
+                formaDividirDTO2.setFormaDividir(FormatosDivision.PORCENTAJE);
                 formaDividirDTO2
                                 .setDivisionIndividual(List.of(divisionIndividualDTO4, divisionIndividualDTO5,
                                                 divisionIndividualDTO6));
@@ -267,10 +267,14 @@ public class GastoServiceTest {
                 GastoDTO gastoDTO2Actualizar = new GastoDTO(gasto2);
 
                 gastoDTO2Actualizar.getGastoAutor().get(0).setMonto(700.0);
+                gastoDTO2Actualizar.getFormaDividir().setFormaDividir(FormatosDivision.MONTO);
                 for (DivisionIndividualDTO divInd : gastoDTO2Actualizar.getFormaDividir().getDivisionIndividual()) {
-                        if (divInd.getUserId() == usuario3.getId()) {
+                        if (divInd.getUserId() == usuario1.getId()) {
+                                divInd.setMonto(300);
+                        } else if (divInd.getUserId() == usuario2.getId()) {
+                                divInd.setMonto(300);
+                        } else if (divInd.getUserId() == usuario3.getId()) {
                                 divInd.setMonto(100);
-                                break;
                         }
                 }
 

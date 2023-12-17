@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import com.grupo7.cuentasclaras2.DTO.AmigoDTO;
 import com.grupo7.cuentasclaras2.DTO.Credentials;
 import com.grupo7.cuentasclaras2.DTO.DeudaUsuarioDTO;
-import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoPreviewDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionAmistadDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionGrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.NotificationDTO;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
 import com.grupo7.cuentasclaras2.DTO.UsernameAndPassword;
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
@@ -28,9 +28,11 @@ import com.grupo7.cuentasclaras2.services.PagoService;
 import com.grupo7.cuentasclaras2.services.TokenServices;
 import com.grupo7.cuentasclaras2.services.UsuarioService;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/users")
@@ -259,33 +261,6 @@ public class UsuarioController {
     }
 
     /**
-     * Obtiene las solicitudes de amistad recibidas por el usuario autenticado.
-     *
-     * @return ResponseEntity con la lista de solicitudes de amistad en formato DTO
-     *         y HttpStatus correspondiente.
-     */
-    @GetMapping("/friendRequests")
-    public ResponseEntity<List<InvitacionAmistadDTO>> getFriendRequests() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-
-        Optional<Usuario> user = usuarioService.getByUsername((String) principal);
-
-        if (user.isPresent()) {
-            Usuario usuario = user.get();
-
-            List<InvitacionAmistadDTO> friendRequestsDTO = usuario.getInvitacionesAmigosRecibidas()
-                    .stream()
-                    .map(InvitacionAmistadDTO::new)
-                    .collect(Collectors.toList());
-
-            return new ResponseEntity<>(friendRequestsDTO, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    /**
      * Acepta una solicitud de amistad pendiente.
      *
      * @param invitationId Identificador de la invitación de amistad a aceptar.
@@ -412,13 +387,15 @@ public class UsuarioController {
     }
 
     /**
-     * Obtiene las invitaciones de grupo pendientes para el usuario actual.
+     * Obtiene las notificaciones del usuario autenticado, incluyendo invitaciones
+     * de amistad y de grupo.
      *
-     * @return ResponseEntity con la lista de InvitacionGrupoDTO y HttpStatus
-     *         correspondiente.
+     * @return ResponseEntity con la lista de NotificationDTO ordenadas por fecha de
+     *         creación
+     *         y HttpStatus correspondiente.
      */
-    @GetMapping("/groupInvitations")
-    public ResponseEntity<List<InvitacionGrupoDTO>> getGroupInvitations() {
+    @GetMapping("/notifications")
+    public ResponseEntity<List<NotificationDTO>> getNotifications() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
@@ -427,12 +404,24 @@ public class UsuarioController {
         if (user.isPresent()) {
             Usuario usuario = user.get();
 
-            List<InvitacionGrupoDTO> groupInvitationsDTO = usuario.getInvitacionesGrupo()
+            List<NotificationDTO> friendRequestsDTO = usuario.getInvitacionesAmigosRecibidas()
                     .stream()
-                    .map(InvitacionGrupoDTO::new)
+                    .map(InvitacionAmistadDTO::new)
+                    .map(NotificationDTO::new)
                     .collect(Collectors.toList());
 
-            return new ResponseEntity<>(groupInvitationsDTO, HttpStatus.OK);
+            List<NotificationDTO> groupInvitationsDTO = usuario.getInvitacionesGrupo()
+                    .stream()
+                    .map(InvitacionGrupoDTO::new)
+                    .map(NotificationDTO::new)
+                    .collect(Collectors.toList());
+
+            List<NotificationDTO> notificationsDTO = Stream
+                    .concat(friendRequestsDTO.stream(), groupInvitationsDTO.stream())
+                    .sorted(Comparator.comparing(NotificationDTO::getFechaCreacion).reversed())
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(notificationsDTO, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -511,29 +500,6 @@ public class UsuarioController {
                 })
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(groupDTOs);
-    }
-
-    /**
-     * Obtiene los grupos pareja del usuario actual.
-     *
-     * @return ResponseEntity con la lista de GrupoDTO y HttpStatus correspondiente.
-     */
-    @GetMapping("/my-couple-groups")
-    public ResponseEntity<List<GrupoDTO>> getCoupleGroupsByUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-
-        Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
-
-        if (!usuarioOptional.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        List<Grupo> groups = grupoService.getGroupsWhereEsPareja(usuarioOptional.get().getId());
-        List<GrupoDTO> groupDTOs = groups.stream()
-                .map(GrupoDTO::new)
-                .collect(Collectors.toList());
         return ResponseEntity.ok(groupDTOs);
     }
 
