@@ -11,6 +11,7 @@ import com.grupo7.cuentasclaras2.DTO.AmigoDTO;
 import com.grupo7.cuentasclaras2.DTO.Credentials;
 import com.grupo7.cuentasclaras2.DTO.DeudaUsuarioDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.GrupoPreviewDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionAmistadDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionGrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
@@ -488,10 +489,11 @@ public class UsuarioController {
     /**
      * Obtiene los grupos del usuario actual.
      *
-     * @return ResponseEntity con la lista de GrupoDTO y HttpStatus correspondiente.
+     * @return ResponseEntity con la lista de GrupoPreviewDTO y HttpStatus
+     *         correspondiente.
      */
     @GetMapping("/my-groups")
-    public ResponseEntity<List<GrupoDTO>> getGroupsByUser() {
+    public ResponseEntity<List<GrupoPreviewDTO>> getGroupsByUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
@@ -502,9 +504,13 @@ public class UsuarioController {
         }
 
         List<Grupo> groups = grupoService.getGroupsByUserId(usuarioOptional.get().getId());
-        List<GrupoDTO> groupDTOs = groups.stream()
-                .map(GrupoDTO::new)
+        List<GrupoPreviewDTO> groupDTOs = groups.stream()
+                .map(grupo -> {
+                    double balance = usuarioService.calcularSaldoDisponibleEnGrupo(usuarioOptional.get(), grupo);
+                    return new GrupoPreviewDTO(grupo, balance);
+                })
                 .collect(Collectors.toList());
+
         return ResponseEntity.ok(groupDTOs);
     }
 

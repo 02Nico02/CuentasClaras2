@@ -4,16 +4,16 @@ public class AmigoDTO {
     private long idUser;
     private String userName;
     private long idGroup;
-    private double saldoDisponible;
+    private double balance;
 
     public AmigoDTO() {
     }
 
-    public AmigoDTO(long idUser, String userName, long idGroup, double saldoDisponible) {
+    public AmigoDTO(long idUser, String userName, long idGroup, double balance) {
         this.idUser = idUser;
         this.userName = userName;
         this.idGroup = idGroup;
-        this.saldoDisponible = saldoDisponible;
+        this.balance = balance;
     }
 
     public long getId() {
@@ -32,12 +32,12 @@ public class AmigoDTO {
         this.userName = userName;
     }
 
-    public double getSaldoDisponible() {
-        return saldoDisponible;
+    public double getBalance() {
+        return balance;
     }
 
-    public void setSaldoDisponible(double saldoDisponible) {
-        this.saldoDisponible = saldoDisponible;
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 
     public long getIdGroup() {
