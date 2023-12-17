@@ -1,5 +1,9 @@
 package com.grupo7.cuentasclaras2.exception;
 
+/**
+ * Excepción personalizada para representar problemas en el manejo de
+ * invitaciones.
+ */
 public class InvitacionException extends RuntimeException {
 
     public InvitacionException(String message) {

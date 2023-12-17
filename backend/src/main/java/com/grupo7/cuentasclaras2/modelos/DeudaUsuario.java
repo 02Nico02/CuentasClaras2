@@ -55,6 +55,7 @@ public class DeudaUsuario {
 
     public void setGrupo(Grupo grupo) {
         this.grupo = grupo;
+        grupo.agregarDeudaUsuario(this);
     }
 
     public void pagar(double unMonto) {

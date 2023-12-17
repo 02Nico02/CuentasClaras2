@@ -25,6 +25,20 @@ public class DivisionIndividualService {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 
+	/**
+	 * Crea una nueva DivisionIndividual a partir de un DTO y la asocia a una
+	 * FormaDividir.
+	 *
+	 * @param divisionIndividualDTO El DTO que contiene la información de la
+	 *                              DivisionIndividual.
+	 * @param formaDividir          La FormaDividir a la cual se asociará la
+	 *                              DivisionIndividual.
+	 * @return La nueva DivisionIndividual creada.
+	 * @throws GastoException   Si el monto del DTO es negativo.
+	 * @throws UserException    Si el usuario no existe.
+	 * @throws BDErrorException Si hay un error al guardar la entidad
+	 *                          DivisionIndividual en la base de datos.
+	 */
 	@Transactional
 	public DivisionIndividual createDivisionIndividualByDTO(DivisionIndividualDTO divisionIndividualDTO,
 			FormaDividir formaDividir) {
@@ -48,6 +62,18 @@ public class DivisionIndividualService {
 		}
 	}
 
+	/**
+	 * Actualiza una DivisionIndividual existente a partir de un DTO actualizado.
+	 *
+	 * @param existingDivisionIndividual   La DivisionIndividual existente a
+	 *                                     actualizar.
+	 * @param updatedDivisionIndividualDTO El DTO actualizado que contiene la nueva
+	 *                                     información de la DivisionIndividual.
+	 * @return La DivisionIndividual actualizada.
+	 * @throws GastoException   Si el monto del DTO es negativo.
+	 * @throws BDErrorException Si hay un error al actualizar la entidad
+	 *                          DivisionIndividual en la base de datos.
+	 */
 	@Transactional
 	public DivisionIndividual updateDivisionIndividual(DivisionIndividual existingDivisionIndividual,
 			DivisionIndividualDTO updatedDivisionIndividualDTO) {

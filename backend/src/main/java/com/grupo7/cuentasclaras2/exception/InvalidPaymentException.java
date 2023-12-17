@@ -1,5 +1,8 @@
 package com.grupo7.cuentasclaras2.exception;
 
+/**
+ * Excepción personalizada para representar pagos inválidos.
+ */
 public class InvalidPaymentException extends RuntimeException {
 
     public InvalidPaymentException(String message) {

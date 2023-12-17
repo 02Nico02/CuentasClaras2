@@ -56,6 +56,12 @@ public class UsuarioController {
 
     private final int EXPIRATION_IN_SEC = 7200;
 
+    /**
+     * Obtiene información detallada sobre un usuario mediante su identificador.
+     *
+     * @param id Identificador único del usuario.
+     * @return ResponseEntity con el UsuarioDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -72,6 +78,12 @@ public class UsuarioController {
     }
 
     // No creo que se use. eliminar
+    /**
+     * Obtiene información detallada sobre un usuario mediante su nombre de usuario.
+     *
+     * @param username Nombre de usuario del usuario.
+     * @return ResponseEntity con el UsuarioDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/username/{username}")
     public ResponseEntity<UsuarioDTO> getUserByUsername(@PathVariable String username) {
         Optional<Usuario> user = usuarioService.getByUsername(username);
@@ -80,6 +92,13 @@ public class UsuarioController {
     }
 
     // No creo que se use. eliminar
+    /**
+     * Obtiene información detallada sobre un usuario mediante su dirección de
+     * correo electrónico.
+     *
+     * @param email Dirección de correo electrónico del usuario.
+     * @return ResponseEntity con el UsuarioDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/email/{email}")
     public ResponseEntity<UsuarioDTO> getUserByEmail(@PathVariable String email) {
         Optional<Usuario> user = usuarioService.getByEmail(email);
@@ -87,6 +106,13 @@ public class UsuarioController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    /**
+     * Registra un nuevo usuario en el sistema.
+     *
+     * @param newUser Datos del nuevo usuario.
+     * @return ResponseEntity con las credenciales (token, duración y nombre de
+     *         usuario) y HttpStatus correspondiente.
+     */
     @PostMapping("/register")
     public ResponseEntity<Credentials> registerUser(@RequestBody Usuario newUser) {
         Optional<Usuario> registeredUser = usuarioService.registerUser(newUser);
@@ -100,6 +126,14 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Actualiza la información de un usuario existente.
+     *
+     * @param userId     Identificador único del usuario a actualizar.
+     * @param usuarioDTO Datos actualizados del usuario.
+     * @return ResponseEntity con el UsuarioDTO actualizado y HttpStatus
+     *         correspondiente.
+     */
     @PutMapping("/{userId}")
     public ResponseEntity<?> actualizarUsuario(@PathVariable long userId, @RequestBody UsuarioDTO usuarioDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -119,6 +153,14 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Autentica a un usuario utilizando las credenciales proporcionadas (nombre de
+     * usuario y contraseña).
+     *
+     * @param credentials Credenciales del usuario (nombre de usuario y contraseña).
+     * @return ResponseEntity con las credenciales (token, duración y nombre de
+     *         usuario) y HttpStatus correspondiente.
+     */
     @PostMapping("/auth")
     public ResponseEntity<?> authenticate(@RequestBody UsernameAndPassword credentials) {
         Optional<Usuario> user = usuarioService.login(credentials.getUserName(), credentials.getPassword());
@@ -130,12 +172,25 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Cierra la sesión del usuario actual.
+     *
+     * @return ResponseEntity con un mensaje indicando que la sesión se ha cerrado y
+     *         HttpStatus correspondiente.
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok().body("Sesión cerrada");
 
     }
 
+    /**
+     * Envía una solicitud de amistad desde el usuario actual al usuario
+     * destinatario.
+     *
+     * @param receiverEmail Correo electrónico del usuario destinatario.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/sendFriendRequest")
     public ResponseEntity<String> sendFriendRequest(
             @RequestParam String receiverEmail) {
@@ -164,6 +219,12 @@ public class UsuarioController {
 
     }
 
+    /**
+     * Obtiene las solicitudes de amistad recibidas por el usuario autenticado.
+     *
+     * @return ResponseEntity con la lista de solicitudes de amistad en formato DTO
+     *         y HttpStatus correspondiente.
+     */
     @GetMapping("/friendRequests")
     public ResponseEntity<List<InvitacionAmistadDTO>> getFriendRequests() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -185,6 +246,12 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Acepta una solicitud de amistad pendiente.
+     *
+     * @param invitationId Identificador de la invitación de amistad a aceptar.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/acceptFriendRequest")
     public ResponseEntity<String> acceptFriendRequest(
             @RequestParam Long invitationId) {
@@ -206,6 +273,12 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Rechaza una solicitud de amistad pendiente.
+     *
+     * @param invitationId Identificador de la invitación de amistad a rechazar.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/rejectFriendRequest")
     public ResponseEntity<String> rejectFriendRequest(
             @RequestParam Long invitationId) {
@@ -227,6 +300,13 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Envia una solicitud de grupo a otro usuario.
+     *
+     * @param receiverId Identificador del usuario destinatario.
+     * @param groupId    Identificador del grupo al que se invita.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/sendGroupInvitation")
     public ResponseEntity<String> sendGroupInvitation(
             @RequestParam Long receiverId,
@@ -246,6 +326,12 @@ public class UsuarioController {
 
     }
 
+    /**
+     * Acepta una invitación de grupo pendiente.
+     *
+     * @param invitationId Identificador de la invitación de grupo a aceptar.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/acceptGroupInvitation")
     public ResponseEntity<String> acceptGroupInvitation(
             @RequestParam Long invitationId) {
@@ -263,6 +349,12 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Rechaza una invitación de grupo pendiente.
+     *
+     * @param invitationId Identificador de la invitación de grupo a rechazar.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/rejectGroupInvitation")
     public ResponseEntity<String> rejectGroupInvitation(
             @RequestParam Long invitationId) {
@@ -280,6 +372,12 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Obtiene las invitaciones de grupo pendientes para el usuario actual.
+     *
+     * @return ResponseEntity con la lista de InvitacionGrupoDTO y HttpStatus
+     *         correspondiente.
+     */
     @GetMapping("/groupInvitations")
     public ResponseEntity<List<InvitacionGrupoDTO>> getGroupInvitations() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -301,6 +399,11 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Obtiene los pagos realizados por el usuario actual.
+     *
+     * @return ResponseEntity con la lista de PagoDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/myPayments")
     public ResponseEntity<List<PagoDTO>> getMyPayments() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -320,6 +423,11 @@ public class UsuarioController {
         return ResponseEntity.ok(myPayments);
     }
 
+    /**
+     * Obtiene los pagos recibidos por el usuario actual.
+     *
+     * @return ResponseEntity con la lista de PagoDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/receivedPayments")
     public ResponseEntity<List<PagoDTO>> getReceivedPayments() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -339,8 +447,13 @@ public class UsuarioController {
         return ResponseEntity.ok(receivedPayments);
     }
 
+    /**
+     * Obtiene los grupos del usuario actual.
+     *
+     * @return ResponseEntity con la lista de GrupoDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/my-groups")
-    public ResponseEntity<List<GrupoDTO>> getGroupsByUserId() {
+    public ResponseEntity<List<GrupoDTO>> getGroupsByUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
@@ -357,8 +470,13 @@ public class UsuarioController {
         return ResponseEntity.ok(groupDTOs);
     }
 
+    /**
+     * Obtiene los grupos pareja del usuario actual.
+     *
+     * @return ResponseEntity con la lista de GrupoDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/my-couple-groups")
-    public ResponseEntity<List<GrupoDTO>> getCoupleGroupsByUserId() {
+    public ResponseEntity<List<GrupoDTO>> getCoupleGroupsByUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
@@ -375,6 +493,12 @@ public class UsuarioController {
         return ResponseEntity.ok(groupDTOs);
     }
 
+    /**
+     * Obtiene las deudas pendientes del usuario actual como deudor.
+     *
+     * @return ResponseEntity con la lista de DeudaUsuarioDTO y HttpStatus
+     *         correspondiente.
+     */
     @GetMapping("/my-debts")
     public ResponseEntity<List<DeudaUsuarioDTO>> getMyDebts() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -393,6 +517,12 @@ public class UsuarioController {
         return new ResponseEntity<>(myDebts, HttpStatus.OK);
     }
 
+    /**
+     * Obtiene las deudas pendientes del usuario actual como acreedor.
+     *
+     * @return ResponseEntity con la lista de DeudaUsuarioDTO y HttpStatus
+     *         correspondiente.
+     */
     @GetMapping("/debts-owed-to-me")
     public ResponseEntity<List<DeudaUsuarioDTO>> getDebtsOwedToMe() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

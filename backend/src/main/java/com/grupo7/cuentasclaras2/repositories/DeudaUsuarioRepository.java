@@ -35,4 +35,6 @@ public interface DeudaUsuarioRepository extends JpaRepository<DeudaUsuario, Long
 
     List<DeudaUsuario> findByAcreedorAndGrupo(Usuario deudor, Grupo grupo);
 
+    List<DeudaUsuario> findByDeudorAndAcreedorAndMonto(Usuario deudor, Usuario acreedor, double monto);
+
 }

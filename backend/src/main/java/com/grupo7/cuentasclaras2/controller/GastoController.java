@@ -36,6 +36,13 @@ public class GastoController {
 	@Autowired
 	private GrupoService grupoService;
 
+	/**
+	 * Obtiene los detalles de un gasto específico por su identificador.
+	 *
+	 * @param id Identificador único del gasto.
+	 * @return ResponseEntity con el detalle del gasto en formato GastoDTO, o
+	 *         HttpStatus.NOT_FOUND si el gasto no existe o no es accesible.
+	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<GastoDTO> getSpentById(@PathVariable Long id) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -64,6 +71,16 @@ public class GastoController {
 		return new ResponseEntity<>(new GastoDTO(gasto), HttpStatus.OK);
 	}
 
+	/**
+	 * Crea un nuevo gasto utilizando la información proporcionada en el objeto
+	 * GastoDTO.
+	 *
+	 * @param gastoDTO Objeto que contiene los detalles del nuevo gasto.
+	 * @return ResponseEntity con el detalle del gasto recién creado en formato
+	 *         GastoDTO, o HttpStatus.UNAUTHORIZED si el usuario no está autenticado
+	 *         o no es miembro del grupo, o HttpStatus.FORBIDDEN si el usuario no es
+	 *         miembro del grupo especificado.
+	 */
 	@PostMapping("/create")
 	public ResponseEntity<GastoDTO> createGasto(@RequestBody GastoDTO gastoDTO) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -86,6 +103,16 @@ public class GastoController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GastoDTO(gasto));
 	}
 
+	/**
+	 * Actualiza los detalles de un gasto existente por su identificador.
+	 *
+	 * @param id       Identificador único del gasto que se va a actualizar.
+	 * @param gastoDTO Objeto que contiene los detalles actualizados del gasto.
+	 * @return ResponseEntity con el detalle del gasto actualizado en formato
+	 *         GastoDTO, o HttpStatus.UNAUTHORIZED si el usuario no está
+	 *         autenticado, HttpStatus.FORBIDDEN si el usuario no es miembro del
+	 *         grupo especificado, o HttpStatus.NOT_FOUND si el gasto no existe.
+	 */
 	@PutMapping("/update/{id}")
 	public ResponseEntity<GastoDTO> updateGasto(@PathVariable Long id, @RequestBody GastoDTO gastoDTO) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -112,6 +139,16 @@ public class GastoController {
 		return ResponseEntity.status(HttpStatus.OK).body(new GastoDTO(gasto));
 	}
 
+	/**
+	 * Obtiene todos los gastos de un grupo y una categoría específicos.
+	 *
+	 * @param groupId    Identificador único del grupo.
+	 * @param categoryId Identificador único de la categoría.
+	 * @return ResponseEntity con la lista de gastos en formato GastoDTO, o
+	 *         HttpStatus.UNAUTHORIZED si el usuario no está autenticado,
+	 *         HttpStatus.FORBIDDEN si el usuario no es miembro del grupo
+	 *         especificado, o HttpStatus.NOT_FOUND si no hay gastos disponibles.
+	 */
 	@GetMapping("/all/by-group-and-category/{groupId}/{categoryId}")
 	public ResponseEntity<List<GastoDTO>> getGastosByGroupAndCategory(
 			@PathVariable Long groupId,

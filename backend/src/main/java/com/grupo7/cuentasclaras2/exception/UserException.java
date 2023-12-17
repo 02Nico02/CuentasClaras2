@@ -1,5 +1,9 @@
 package com.grupo7.cuentasclaras2.exception;
 
+/**
+ * Excepción personalizada para representar errores relacionados con usuarios en
+ * la aplicación.
+ */
 public class UserException extends RuntimeException {
 
     public UserException(String message) {

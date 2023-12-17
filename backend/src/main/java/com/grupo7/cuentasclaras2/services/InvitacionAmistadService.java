@@ -21,6 +21,18 @@ public class InvitacionAmistadService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    /**
+     * Envía una solicitud de amistad desde el remitente al destinatario.
+     *
+     * @param senderUser    El usuario que envía la solicitud.
+     * @param recipientUser El usuario que recibe la solicitud.
+     * @throws FriendshipException Si senderUser o recipientUser son nulos.
+     * @throws FriendshipException Si senderUser y recipientUser son el mismo
+     *                             usuario.
+     * @throws FriendshipException Si senderUser y recipientUser ya son amigos.
+     * @throws FriendshipException Si ya se envió una solicitud de amistad entre
+     *                             senderUser y recipientUser.
+     */
     public void sendFriendRequest(Usuario senderUser, Usuario recipientUser) {
         if (senderUser == null || recipientUser == null) {
             throw new FriendshipException("SenderUser y recipientUser no pueden ser nulos");
@@ -49,6 +61,14 @@ public class InvitacionAmistadService {
         usuarioRepository.save(recipientUser);
     }
 
+    /**
+     * Acepta una solicitud de amistad.
+     *
+     * @param usuario      El usuario que acepta la solicitud.
+     * @param invitationId El ID de la invitación que se acepta.
+     * @return true si la operación se realiza con éxito, false si ocurre algún
+     *         error.
+     */
     public boolean aceptarSolicitudAmistad(Usuario usuario, Long invitationId) {
         try {
             Optional<InvitacionAmistad> invitacionOptional = invitacionAmistadRepository.findById(invitationId);
@@ -67,6 +87,14 @@ public class InvitacionAmistadService {
         }
     }
 
+    /**
+     * Rechaza una solicitud de amistad.
+     *
+     * @param usuario      El usuario que rechaza la solicitud.
+     * @param invitationId El ID de la invitación que se rechaza.
+     * @return true si la operación se realiza con éxito, false si ocurre algún
+     *         error.
+     */
     public boolean rechazarSolicitudAmistad(Usuario usuario, Long invitationId) {
         try {
             Optional<InvitacionAmistad> invitacionOptional = invitacionAmistadRepository.findById(invitationId);
