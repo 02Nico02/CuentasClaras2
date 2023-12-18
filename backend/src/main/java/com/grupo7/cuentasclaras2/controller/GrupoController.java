@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.grupo7.cuentasclaras2.DTO.GastoDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
-import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
+import com.grupo7.cuentasclaras2.DTO.MiembrosGrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
 import com.grupo7.cuentasclaras2.exception.UnauthorizedException;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
@@ -46,7 +46,6 @@ public class GrupoController {
 	@Autowired
 	private GastoService gastoService;
 
-	// Hay que ver si necesita permisos para ver el grupo, y ver que datos se mandan
 	/**
 	 * Obtiene un grupo por su ID.
 	 *
@@ -56,8 +55,24 @@ public class GrupoController {
 	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<GrupoDTO> getGroupById(@PathVariable Long id) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Object principal = authentication.getPrincipal();
+
+		Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
+
+		if (!usuarioOptional.isPresent()) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
+		Usuario usuarioAutenticado = usuarioOptional.get();
+		boolean esMiembro = grupoService.usuarioPerteneceAlGrupo(usuarioAutenticado.getId(), id);
+
+		if (!esMiembro) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+
 		return grupoService.getGroupById(id)
-				.map(group -> ResponseEntity.ok(new GrupoDTO(group)))
+				.map(group -> ResponseEntity.ok(new GrupoDTO(group, usuarioAutenticado)))
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
@@ -81,12 +96,13 @@ public class GrupoController {
 
 		Usuario usuarioAutenticado = usuarioOptional.get();
 
-		List<IdEmailUsuarioDTO> miembrosDTO = new ArrayList<>();
-		miembrosDTO.add(new IdEmailUsuarioDTO(usuarioAutenticado));
+		List<MiembrosGrupoDTO> miembrosDTO = new ArrayList<>();
+		miembrosDTO.add(new MiembrosGrupoDTO(usuarioAutenticado));
 		grupoDTO.setMiembros(miembrosDTO);
 
 		return grupoService.newGroupByDTO(grupoDTO)
-				.map(grupoGuardado -> new ResponseEntity<>(new GrupoDTO(grupoGuardado), HttpStatus.CREATED))
+				.map(grupoGuardado -> new ResponseEntity<>(new GrupoDTO(grupoGuardado, usuarioAutenticado),
+						HttpStatus.CREATED))
 				.orElseGet(() -> ResponseEntity.badRequest().build());
 	}
 
@@ -156,7 +172,7 @@ public class GrupoController {
 
 		Optional<Grupo> updatedGroup = grupoService.updateGroup(id, grupoDTO);
 
-		return updatedGroup.map(group -> ResponseEntity.ok(new GrupoDTO(group)))
+		return updatedGroup.map(group -> ResponseEntity.ok(new GrupoDTO(group, usuarioAutenticado)))
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 

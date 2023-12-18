@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
-import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
+import com.grupo7.cuentasclaras2.DTO.MiembrosGrupoDTO;
 import com.grupo7.cuentasclaras2.exception.GroupException;
 import com.grupo7.cuentasclaras2.modelos.Categoria;
 import com.grupo7.cuentasclaras2.modelos.Gasto;
@@ -542,7 +542,7 @@ public class GrupoService {
 	 *                    validar.
 	 * @return La lista de usuarios validados.
 	 */
-	private List<Usuario> convertirDTOaUsuariosValidados(List<IdEmailUsuarioDTO> miembrosDTO) {
+	private List<Usuario> convertirDTOaUsuariosValidados(List<MiembrosGrupoDTO> miembrosDTO) {
 		return miembrosDTO.stream()
 				.map(this::obtenerUsuarioValidado)
 				.collect(Collectors.toList());
@@ -551,14 +551,14 @@ public class GrupoService {
 	/**
 	 * Obtiene y valida un usuario por su identificador.
 	 *
-	 * @param idEmailUsuarioDTO El DTO que contiene el identificador del usuario que
-	 *                          se desea obtener y validar.
+	 * @param miembrosGrupoDTO El DTO que contiene el identificador del usuario que
+	 *                         se desea obtener y validar.
 	 * @return El usuario validado.
 	 * @throws GroupException Si el usuario con el identificador especificado no
 	 *                        existe.
 	 */
-	private Usuario obtenerUsuarioValidado(IdEmailUsuarioDTO idEmailUsuarioDTO) {
-		Long usuarioId = idEmailUsuarioDTO.getId();
+	private Usuario obtenerUsuarioValidado(MiembrosGrupoDTO miembrosGrupoDTO) {
+		Long usuarioId = miembrosGrupoDTO.getIdUsuario();
 		Optional<Usuario> usuarioOptional = usuarioService.getById(usuarioId);
 
 		if (usuarioOptional.isEmpty()) {

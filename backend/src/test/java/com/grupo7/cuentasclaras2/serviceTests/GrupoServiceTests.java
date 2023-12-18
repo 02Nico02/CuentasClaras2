@@ -13,7 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import com.grupo7.cuentasclaras2.DTO.CategoriaDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
-import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
+import com.grupo7.cuentasclaras2.DTO.MiembrosGrupoDTO;
 import com.grupo7.cuentasclaras2.exception.GroupException;
 import com.grupo7.cuentasclaras2.modelos.Categoria;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
@@ -253,11 +253,11 @@ public class GrupoServiceTests {
         Usuario usuario2 = new Usuario("usuario2", "Nombre", "Apellido", "usuario2@example.com", "password");
         List<Usuario> usuarios = usuarioRepository.saveAll(Arrays.asList(usuario1, usuario2));
 
-        IdEmailUsuarioDTO idEmailUsuarioDTO1 = new IdEmailUsuarioDTO();
-        idEmailUsuarioDTO1.setUsername(usuarios.get(0).getUsername());
-        idEmailUsuarioDTO1.setId(usuarios.get(0).getId());
+        MiembrosGrupoDTO miembroGrupoDTO1 = new MiembrosGrupoDTO();
+        miembroGrupoDTO1.setUserName(usuarios.get(0).getUsername());
+        miembroGrupoDTO1.setIdUsuario(usuarios.get(0).getId());
 
-        List<IdEmailUsuarioDTO> miembrosDTO = Arrays.asList(idEmailUsuarioDTO1);
+        List<MiembrosGrupoDTO> miembrosDTO = Arrays.asList(miembroGrupoDTO1);
         grupoDTO.setMiembros(miembrosDTO);
 
         Optional<Grupo> grupoGuardado = grupoService.newGroupByDTO(grupoDTO);
@@ -273,14 +273,14 @@ public class GrupoServiceTests {
         Usuario usuario2 = new Usuario("usuario2", "Nombre", "Apellido", "usuario2@example.com", "password");
         List<Usuario> usuarios = usuarioRepository.saveAll(Arrays.asList(usuario1, usuario2));
 
-        IdEmailUsuarioDTO idEmailUsuarioDTO1 = new IdEmailUsuarioDTO();
-        idEmailUsuarioDTO1.setUsername(usuarios.get(0).getUsername());
-        idEmailUsuarioDTO1.setId(usuarios.get(0).getId());
-        IdEmailUsuarioDTO idEmailUsuarioDTO2 = new IdEmailUsuarioDTO();
-        idEmailUsuarioDTO2.setUsername(usuarios.get(1).getUsername());
-        idEmailUsuarioDTO2.setId(usuarios.get(1).getId());
+        MiembrosGrupoDTO miembrosGrupoDTO1 = new MiembrosGrupoDTO();
+        miembrosGrupoDTO1.setUserName(usuarios.get(0).getUsername());
+        miembrosGrupoDTO1.setIdUsuario(usuarios.get(0).getId());
+        MiembrosGrupoDTO miembrosGrupoDTO2 = new MiembrosGrupoDTO();
+        miembrosGrupoDTO2.setUserName(usuarios.get(1).getUsername());
+        miembrosGrupoDTO2.setIdUsuario(usuarios.get(1).getId());
 
-        List<IdEmailUsuarioDTO> miembrosDTO = Arrays.asList(idEmailUsuarioDTO1, idEmailUsuarioDTO2);
+        List<MiembrosGrupoDTO> miembrosDTO = Arrays.asList(miembrosGrupoDTO1, miembrosGrupoDTO2);
         coupleGroupDTO.setMiembros(miembrosDTO);
 
         Optional<Grupo> coupleGroupGuardado = grupoService.newCoupleGroupByDTO(coupleGroupDTO);
@@ -296,11 +296,11 @@ public class GrupoServiceTests {
         Usuario usuario1 = new Usuario("usuario1", "Nombre", "Apellido", "usuario1@example.com", "password");
         usuarioRepository.save(usuario1);
 
-        IdEmailUsuarioDTO idEmailUsuarioDTO1 = new IdEmailUsuarioDTO();
-        idEmailUsuarioDTO1.setUsername(usuario1.getUsername());
-        idEmailUsuarioDTO1.setId(usuario1.getId());
+        MiembrosGrupoDTO miembrosGrupoDTO1 = new MiembrosGrupoDTO();
+        miembrosGrupoDTO1.setUserName(usuario1.getUsername());
+        miembrosGrupoDTO1.setIdUsuario(usuario1.getId());
 
-        List<IdEmailUsuarioDTO> miembrosDTO = Collections.singletonList(idEmailUsuarioDTO1);
+        List<MiembrosGrupoDTO> miembrosDTO = Collections.singletonList(miembrosGrupoDTO1);
         coupleGroupDTO.setMiembros(miembrosDTO);
 
         assertThrows(GroupException.class, () -> grupoService.newCoupleGroupByDTO(coupleGroupDTO),
