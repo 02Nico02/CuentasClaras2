@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
-import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
+import com.grupo7.cuentasclaras2.DTO.MiembrosGrupoDTO;
 import com.grupo7.cuentasclaras2.exception.GroupException;
 import com.grupo7.cuentasclaras2.modelos.Categoria;
 import com.grupo7.cuentasclaras2.modelos.Gasto;
@@ -107,6 +107,20 @@ public class GrupoService {
 	 */
 	public List<Grupo> getGroupsWhereEsPareja(Long userId) {
 		return grupoRepository.findByMiembros_IdAndEsParejaIsTrue(userId);
+	}
+
+	/**
+	 * Busca un grupo de tipo pareja en el que participen dos usuarios.
+	 *
+	 * @param userId1 Identificador del primer usuario.
+	 * @param userId2 Identificador del segundo usuario.
+	 * @return Grupo de tipo pareja en el que participan los dos usuarios.
+	 */
+	public Optional<Grupo> getPairGroupByUserIds(Long userId1, Long userId2) {
+		// Verifica si ambos usuarios pertenecen al mismo grupo de tipo pareja
+		List<Grupo> pairGroups = grupoRepository.findByMiembros_IdInAndEsParejaIsTrue(Arrays.asList(userId1, userId2));
+
+		return pairGroups.stream().findFirst();
 	}
 
 	/**
@@ -248,6 +262,24 @@ public class GrupoService {
 		grupo.setEsPareja(true);
 
 		List<Usuario> miembros = convertirDTOaUsuariosValidados(grupoDTO.getMiembros());
+
+		validarMiembrosParaGrupoPareja(miembros);
+
+		grupo.agregarMiembros(miembros);
+		Grupo grupoGuardado = grupoRepository.save(grupo);
+		usuarioRepository.saveAll(miembros);
+
+		return Optional.of(grupoGuardado);
+	}
+
+	@Transactional
+	public Optional<Grupo> newCoupleGroup(List<Usuario> miembros) {
+		if (miembros == null || miembros.size() != 2) {
+			throw new GroupException("Un grupo de pareja debe tener exactamente 2 miembros.");
+		}
+
+		Grupo grupo = new Grupo();
+		grupo.setEsPareja(true);
 
 		validarMiembrosParaGrupoPareja(miembros);
 
@@ -510,7 +542,7 @@ public class GrupoService {
 	 *                    validar.
 	 * @return La lista de usuarios validados.
 	 */
-	private List<Usuario> convertirDTOaUsuariosValidados(List<IdEmailUsuarioDTO> miembrosDTO) {
+	private List<Usuario> convertirDTOaUsuariosValidados(List<MiembrosGrupoDTO> miembrosDTO) {
 		return miembrosDTO.stream()
 				.map(this::obtenerUsuarioValidado)
 				.collect(Collectors.toList());
@@ -519,14 +551,14 @@ public class GrupoService {
 	/**
 	 * Obtiene y valida un usuario por su identificador.
 	 *
-	 * @param idEmailUsuarioDTO El DTO que contiene el identificador del usuario que
-	 *                          se desea obtener y validar.
+	 * @param miembrosGrupoDTO El DTO que contiene el identificador del usuario que
+	 *                         se desea obtener y validar.
 	 * @return El usuario validado.
 	 * @throws GroupException Si el usuario con el identificador especificado no
 	 *                        existe.
 	 */
-	private Usuario obtenerUsuarioValidado(IdEmailUsuarioDTO idEmailUsuarioDTO) {
-		Long usuarioId = idEmailUsuarioDTO.getId();
+	private Usuario obtenerUsuarioValidado(MiembrosGrupoDTO miembrosGrupoDTO) {
+		Long usuarioId = miembrosGrupoDTO.getIdUsuario();
 		Optional<Usuario> usuarioOptional = usuarioService.getById(usuarioId);
 
 		if (usuarioOptional.isEmpty()) {

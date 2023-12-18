@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
 import com.grupo7.cuentasclaras2.exception.UserException;
+import com.grupo7.cuentasclaras2.modelos.DeudaUsuario;
+import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 import com.grupo7.cuentasclaras2.repositories.UsuarioRepository;
 
@@ -165,6 +167,22 @@ public class UsuarioService {
         usuarioExistente.setEmail(nuevoEmail);
 
         return usuarioRepository.save(usuarioExistente);
+    }
+
+    public double calcularSaldoDisponibleEnGrupo(Usuario usuario, Grupo grupo) {
+        List<DeudaUsuario> deudas = grupo.getDeudas();
+
+        double saldoDisponible = 0.0;
+
+        for (DeudaUsuario deuda : deudas) {
+            if (deuda.getDeudor().equals(usuario)) {
+                saldoDisponible -= deuda.getMonto();
+            } else if (deuda.getAcreedor().equals(usuario)) {
+                saldoDisponible += deuda.getMonto();
+            }
+        }
+
+        return saldoDisponible;
     }
 
 }

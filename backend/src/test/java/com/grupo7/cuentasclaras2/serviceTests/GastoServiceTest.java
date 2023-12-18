@@ -2,6 +2,7 @@ package com.grupo7.cuentasclaras2.serviceTests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import com.grupo7.cuentasclaras2.repositories.GastoRepository;
 import com.grupo7.cuentasclaras2.repositories.GrupoRepository;
 import com.grupo7.cuentasclaras2.repositories.UsuarioRepository;
 import com.grupo7.cuentasclaras2.services.GastoService;
+import com.grupo7.cuentasclaras2.services.UsuarioService;
 
 @DataJpaTest
 public class GastoServiceTest {
@@ -58,6 +60,9 @@ public class GastoServiceTest {
 
         @Autowired
         private GrupoRepository grupoRepository;
+
+        @Autowired
+        private UsuarioService usuarioService;
 
         @Test
         public void testCrearGastos() {
@@ -130,7 +135,6 @@ public class GastoServiceTest {
                 Gasto gasto1 = gastoService.newSpendingByDTO(gastoDTO1);
 
                 // Verificar el estado de la base de datos
-                assertEquals(1, grupoRepository.findAll().size());
                 assertEquals(1, gastoRepository.findAll().size());
                 assertEquals(1, gastoAutorRepository.findAll().size());
                 assertEquals(1, formaDividirRepository.findAll().size());
@@ -139,6 +143,9 @@ public class GastoServiceTest {
                 // Verificar las deudas después del primer gasto
                 verificarExistenciaDeuda(usuario3, usuario1, 400.0);
                 verificarExistenciaDeuda(usuario2, usuario1, 400.0);
+                assertEquals(800, usuarioService.calcularSaldoDisponibleEnGrupo(usuario1, grupo));
+                assertEquals(-400, usuarioService.calcularSaldoDisponibleEnGrupo(usuario2, grupo));
+                assertEquals(-400, usuarioService.calcularSaldoDisponibleEnGrupo(usuario3, grupo));
 
                 // Segundo gastoAutor
                 GastoAutorDTO gastoAutorDTO2 = new GastoAutorDTO();
@@ -150,15 +157,15 @@ public class GastoServiceTest {
                 DivisionIndividualDTO divisionIndividualDTO5 = new DivisionIndividualDTO();
                 DivisionIndividualDTO divisionIndividualDTO6 = new DivisionIndividualDTO();
                 divisionIndividualDTO4.setUserId(usuario1.getId());
-                divisionIndividualDTO4.setMonto(300);
+                divisionIndividualDTO4.setMonto(50);
                 divisionIndividualDTO5.setUserId(usuario2.getId());
-                divisionIndividualDTO5.setMonto(300);
+                divisionIndividualDTO5.setMonto(50);
                 divisionIndividualDTO6.setUserId(usuario3.getId());
                 divisionIndividualDTO6.setMonto(0);
 
                 // Segundo FormaDividir
                 FormaDividirDTO formaDividirDTO2 = new FormaDividirDTO();
-                formaDividirDTO2.setFormaDividir(FormatosDivision.MONTO);
+                formaDividirDTO2.setFormaDividir(FormatosDivision.PORCENTAJE);
                 formaDividirDTO2
                                 .setDivisionIndividual(List.of(divisionIndividualDTO4, divisionIndividualDTO5,
                                                 divisionIndividualDTO6));
@@ -175,7 +182,6 @@ public class GastoServiceTest {
                 Gasto gasto2 = gastoService.newSpendingByDTO(gastoDTO2);
 
                 // Verificar el estado de la base de datos
-                assertEquals(1, grupoRepository.findAll().size());
                 assertEquals(2, gastoRepository.findAll().size());
                 assertEquals(2, gastoAutorRepository.findAll().size());
                 assertEquals(2, formaDividirRepository.findAll().size());
@@ -185,6 +191,9 @@ public class GastoServiceTest {
                 // Verificar las deudas después del segundo gasto
                 verificarExistenciaDeuda(usuario2, usuario1, 100.0);
                 verificarExistenciaDeuda(usuario3, usuario1, 400.0);
+                assertEquals(500, usuarioService.calcularSaldoDisponibleEnGrupo(usuario1, grupo));
+                assertEquals(-100, usuarioService.calcularSaldoDisponibleEnGrupo(usuario2, grupo));
+                assertEquals(-400, usuarioService.calcularSaldoDisponibleEnGrupo(usuario3, grupo));
 
                 // DTO de gasto para actualizar
                 GastoDTO gastoDTOActualizar = new GastoDTO(gasto1);
@@ -194,7 +203,6 @@ public class GastoServiceTest {
                 gastoService.updateSpendingByDTO(gasto1.getId(), gastoDTOActualizar);
 
                 // Verificar el estado de la base de datos
-                assertEquals(1, grupoRepository.findAll().size());
                 assertEquals(2, gastoRepository.findAll().size());
                 assertEquals(2, gastoAutorRepository.findAll().size());
                 assertEquals(2, formaDividirRepository.findAll().size());
@@ -204,6 +212,9 @@ public class GastoServiceTest {
                 // Verificar las deudas después de la modificación
                 verificarExistenciaDeuda(usuario1, usuario3, 700.0);
                 verificarExistenciaDeuda(usuario2, usuario3, 100.0);
+                assertEquals(-700, usuarioService.calcularSaldoDisponibleEnGrupo(usuario1, grupo));
+                assertEquals(-100, usuarioService.calcularSaldoDisponibleEnGrupo(usuario2, grupo));
+                assertEquals(800, usuarioService.calcularSaldoDisponibleEnGrupo(usuario3, grupo));
 
                 // tercer gastoAutor
                 GastoAutorDTO gastoAutorDTO3 = new GastoAutorDTO();
@@ -240,7 +251,6 @@ public class GastoServiceTest {
                 gastoService.newSpendingByDTO(gastoDTO3);
 
                 // Verificar el estado de la base de datos
-                assertEquals(1, grupoRepository.findAll().size());
                 assertEquals(3, gastoRepository.findAll().size());
                 assertEquals(3, gastoAutorRepository.findAll().size());
                 assertEquals(3, formaDividirRepository.findAll().size());
@@ -249,30 +259,174 @@ public class GastoServiceTest {
 
                 // Verificar las deudas después del tercer gasto
                 verificarExistenciaDeuda(usuario2, usuario3, 100.0);
-                // verificarExistenciaDeuda(usuario3, usuario1, 800.0);
-                // verificarExistenciaDeuda(usuario2, usuario3, 800.0);
+                assertEquals(0, usuarioService.calcularSaldoDisponibleEnGrupo(usuario1, grupo));
+                assertEquals(-100, usuarioService.calcularSaldoDisponibleEnGrupo(usuario2, grupo));
+                assertEquals(100, usuarioService.calcularSaldoDisponibleEnGrupo(usuario3, grupo));
 
                 // DTO de gasto para actualizar
                 GastoDTO gastoDTO2Actualizar = new GastoDTO(gasto2);
 
                 gastoDTO2Actualizar.getGastoAutor().get(0).setMonto(700.0);
+                gastoDTO2Actualizar.getFormaDividir().setFormaDividir(FormatosDivision.MONTO);
                 for (DivisionIndividualDTO divInd : gastoDTO2Actualizar.getFormaDividir().getDivisionIndividual()) {
-                        if (divInd.getUserId() == usuario3.getId()) {
+                        if (divInd.getUserId() == usuario1.getId()) {
+                                divInd.setMonto(300);
+                        } else if (divInd.getUserId() == usuario2.getId()) {
+                                divInd.setMonto(300);
+                        } else if (divInd.getUserId() == usuario3.getId()) {
                                 divInd.setMonto(100);
-                                break;
                         }
                 }
 
                 gastoService.updateSpendingByDTO(gasto2.getId(), gastoDTO2Actualizar);
 
                 // Verificar el estado de la base de datos
-                assertEquals(1, grupoRepository.findAll().size());
                 assertEquals(3, gastoRepository.findAll().size());
                 assertEquals(3, gastoAutorRepository.findAll().size());
                 assertEquals(3, formaDividirRepository.findAll().size());
                 assertEquals(9, divisionIndividualRepository.findAll().size());
                 assertEquals(0, deudaUsuarioRepository.findAll().size());
 
+        }
+
+        @Test
+        public void testCrearGastosEnGrupoPareja() {
+                // Crear dos usuarios
+                Usuario usuario1 = new Usuario("JuanPerez", "Juan", "Perez", "juan@gmail.com", "123456");
+                Usuario usuario2 = new Usuario("MariaLopez", "Maria", "Lopez", "maria@gmail.com", "abcdef");
+
+                usuarioRepository.saveAll(List.of(usuario1, usuario2));
+
+                // Crear un grupo de tipo pareja
+                Grupo grupo = new Grupo();
+                grupo.setEsPareja(true);
+
+                grupo.agregarMiembro(usuario1);
+                grupo.agregarMiembro(usuario2);
+
+                grupoRepository.save(grupo);
+
+                Categoria categoriaGasto = new Categoria();
+                categoriaGasto.setEsGrupo(false);
+                categoriaGasto.setNombre("Cena");
+                categoriaGasto.setIcono("algo");
+                categoriaRepository.save(categoriaGasto);
+
+                // GastoAutor para el primer usuario
+                GastoAutorDTO gastoAutorDTO1 = new GastoAutorDTO();
+                gastoAutorDTO1.setUserId(usuario1.getId());
+                gastoAutorDTO1.setMonto(100.0);
+
+                // GastoAutor para el segundo usuario
+                GastoAutorDTO gastoAutorDTO2 = new GastoAutorDTO();
+                gastoAutorDTO2.setUserId(usuario2.getId());
+                gastoAutorDTO2.setMonto(150.0);
+
+                // divisionIndividuales para el primer gasto
+                DivisionIndividualDTO divisionIndividualDTO1 = new DivisionIndividualDTO();
+                DivisionIndividualDTO divisionIndividualDTO2 = new DivisionIndividualDTO();
+                divisionIndividualDTO1.setUserId(usuario1.getId());
+                divisionIndividualDTO1.setMonto(50);
+                divisionIndividualDTO2.setUserId(usuario2.getId());
+                divisionIndividualDTO2.setMonto(200);
+
+                // FormaDividir para el gasto
+                FormaDividirDTO formaDividirDTO = new FormaDividirDTO();
+                formaDividirDTO.setFormaDividir(FormatosDivision.MONTO);
+                formaDividirDTO.setDivisionIndividual(List.of(divisionIndividualDTO1, divisionIndividualDTO2));
+
+                // Gasto
+                GastoDTO gastoDTO = new GastoDTO();
+                gastoDTO.setGastoAutor(List.of(gastoAutorDTO1, gastoAutorDTO2));
+                gastoDTO.setNombre("Cena Romántica");
+                gastoDTO.setFecha(new Date());
+                gastoDTO.setGrupoId(grupo.getId());
+                gastoDTO.setFormaDividir(formaDividirDTO);
+                gastoDTO.setCategoria(new CategoriaDTO(categoriaGasto));
+
+                // Crear el gasto
+                Gasto gasto = gastoService.newSpendingByDTO(gastoDTO);
+
+                // Verificar el estado de la base de datos
+                assertEquals(1, gastoRepository.findAll().size());
+                assertEquals(2, gastoAutorRepository.findAll().size());
+                assertEquals(1, formaDividirRepository.findAll().size());
+                assertEquals(2, divisionIndividualRepository.findAll().size());
+                assertEquals(1, deudaUsuarioRepository.findAll().size());
+
+                // Verificar las deudas después del gasto en pareja
+                verificarExistenciaDeuda(usuario2, usuario1, 50.0);
+                assertEquals(-50, usuarioService.calcularSaldoDisponibleEnGrupo(usuario2, grupo));
+                assertEquals(50, usuarioService.calcularSaldoDisponibleEnGrupo(usuario1, grupo));
+
+                // Segundo gastoAutor
+                GastoAutorDTO gastoAutorDTO3 = new GastoAutorDTO();
+                gastoAutorDTO3.setUserId(usuario2.getId());
+                gastoAutorDTO3.setMonto(200.0);
+
+                // divisionIndividuales para el segundo gasto
+                DivisionIndividualDTO divisionIndividualDTO3 = new DivisionIndividualDTO();
+                DivisionIndividualDTO divisionIndividualDTO4 = new DivisionIndividualDTO();
+                divisionIndividualDTO3.setUserId(usuario1.getId());
+                divisionIndividualDTO3.setMonto(170);
+                divisionIndividualDTO4.setUserId(usuario2.getId());
+                divisionIndividualDTO4.setMonto(30);
+
+                // FormaDividir para el segundo gasto
+                FormaDividirDTO formaDividirDTO2 = new FormaDividirDTO();
+                formaDividirDTO2.setFormaDividir(FormatosDivision.MONTO);
+                formaDividirDTO2.setDivisionIndividual(List.of(divisionIndividualDTO3, divisionIndividualDTO4));
+
+                // Segundo gasto
+                GastoDTO gastoDTO2 = new GastoDTO();
+                gastoDTO2.setGastoAutor(List.of(gastoAutorDTO3));
+                gastoDTO2.setNombre("Regalo Sorpresa");
+                gastoDTO2.setFecha(new Date());
+                gastoDTO2.setGrupoId(grupo.getId());
+                gastoDTO2.setFormaDividir(formaDividirDTO2);
+                gastoDTO2.setCategoria(new CategoriaDTO(categoriaGasto));
+
+                // Crear el segundo gasto
+                gastoService.newSpendingByDTO(gastoDTO2);
+
+                // Verificar el estado de la base de datos después del segundo gasto
+                assertEquals(2, gastoRepository.findAll().size());
+                assertEquals(3, gastoAutorRepository.findAll().size());
+                assertEquals(2, formaDividirRepository.findAll().size());
+                assertEquals(4, divisionIndividualRepository.findAll().size());
+                assertEquals(1, deudaUsuarioRepository.findAll().size());
+
+                // Verificar las deudas después del gasto en pareja
+                verificarExistenciaDeuda(usuario1, usuario2, 120.0);
+                assertEquals(-120, usuarioService.calcularSaldoDisponibleEnGrupo(usuario1, grupo));
+                assertEquals(120, usuarioService.calcularSaldoDisponibleEnGrupo(usuario2, grupo));
+
+                // Modificar el primer gasto
+                GastoDTO gastoDTOActualizar = new GastoDTO(gasto);
+                gastoDTOActualizar.setNombre("Cena Fuera");
+                gastoDTOActualizar.setGastoAutor(Collections.singletonList(gastoDTOActualizar.getGastoAutor().get(0)));
+                gastoDTOActualizar.getGastoAutor().get(0).setMonto(220.0);
+                for (DivisionIndividualDTO divInd : gastoDTOActualizar.getFormaDividir().getDivisionIndividual()) {
+                        if (divInd.getUserId() == usuario1.getId()) {
+                                divInd.setMonto(50);
+                        } else if (divInd.getUserId() == usuario2.getId()) {
+                                divInd.setMonto(170);
+                        }
+                }
+
+                gastoService.updateSpendingByDTO(gasto.getId(), gastoDTOActualizar);
+
+                // Verificar el estado de la base de datos después de la modificación del primer
+                // gasto
+                assertEquals(2, gastoRepository.findAll().size());
+                assertEquals(2, gastoAutorRepository.findAll().size());
+                assertEquals(2, formaDividirRepository.findAll().size());
+                assertEquals(4, divisionIndividualRepository.findAll().size());
+                assertEquals(0, deudaUsuarioRepository.findAll().size());
+
+                // Verificar las deudas después del gasto en pareja
+                assertEquals(0, usuarioService.calcularSaldoDisponibleEnGrupo(usuario1, grupo));
+                assertEquals(0, usuarioService.calcularSaldoDisponibleEnGrupo(usuario2, grupo));
         }
 
         private void verificarExistenciaDeuda(Usuario deudor, Usuario acreedor, double monto) {
