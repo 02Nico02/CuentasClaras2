@@ -209,6 +209,12 @@ public class Usuario {
         return fechaActualizacion;
     }
 
+    /**
+     * Obtiene la lista de invitaciones de amistad recibidas por el usuario.
+     * Si la lista es nula, se inicializa como una nueva lista antes de devolverla.
+     *
+     * @return La lista de invitaciones de amistad recibidas.
+     */
     public List<InvitacionAmistad> getInvitacionesAmigosRecibidas() {
         if (invitacionesAmigosRecibidas == null) {
             invitacionesAmigosRecibidas = new ArrayList<>();
@@ -217,10 +223,21 @@ public class Usuario {
         return invitacionesAmigosRecibidas;
     }
 
+    /**
+     * Establece la lista de invitaciones de amistad recibidas por el usuario.
+     *
+     * @param invitacionesAmigosRecibidas La lista de invitaciones de amistad
+     *                                    recibidas.
+     */
     public void setInvitacionesAmigosRecibidas(List<InvitacionAmistad> invitacionesAmigosRecibidas) {
         this.invitacionesAmigosRecibidas = invitacionesAmigosRecibidas;
     }
 
+    /**
+     * Agrega una invitación de amistad enviada a la lista.
+     *
+     * @param invitacion La invitación de amistad enviada que se desea agregar.
+     */
     public void agregarInvitacionAmistadEnviada(InvitacionAmistad invitacion) {
         if (invitacionesAmigosEnviadas == null) {
             invitacionesAmigosEnviadas = new ArrayList<>();
@@ -230,6 +247,11 @@ public class Usuario {
         }
     }
 
+    /**
+     * Agrega una invitación de amistad recibida a la lista.
+     *
+     * @param invitacion La invitación de amistad recibida que se desea agregar.
+     */
     public void agregarInvitacionAmistadRecibida(InvitacionAmistad invitacion) {
         if (invitacionesAmigosRecibidas == null) {
             invitacionesAmigosRecibidas = new ArrayList<>();
@@ -239,6 +261,11 @@ public class Usuario {
         }
     }
 
+    /**
+     * Acepta una invitación de amistad.
+     *
+     * @param invitacion La invitación de amistad que se desea aceptar.
+     */
     public void aceptarInvitacionAmistad(InvitacionAmistad invitacion) {
         if (invitacionesAmigosRecibidas != null &&
                 invitacionesAmigosRecibidas.contains(invitacion)) {
@@ -248,12 +275,22 @@ public class Usuario {
         }
     }
 
+    /**
+     * Rechaza una invitación de amistad.
+     *
+     * @param invitacion La invitación de amistad que se desea rechazar.
+     */
     public void rechazarInvitacionAmistad(InvitacionAmistad invitacion) {
         if (invitacionesAmigosRecibidas != null) {
             invitacionesAmigosRecibidas.remove(invitacion);
         }
     }
 
+    /**
+     * Elimina a un amigo de la lista.
+     *
+     * @param amigo El usuario que se desea eliminar de la lista de amigos.
+     */
     public void eliminarAmigo(Usuario amigo) {
         if (amigos != null) {
             amigos.remove(amigo);
@@ -261,10 +298,15 @@ public class Usuario {
         }
     }
 
-    public static Usuario builder() {
-        return null;
-    }
+    // public static Usuario builder() {
+    // return null;
+    // }
 
+    /**
+     * Agrega una invitación a grupo recibida a la lista.
+     *
+     * @param invitacion La invitación a grupo que se desea agregar.
+     */
     public void addGroupInvitationReceived(Invitacion invitacion) {
         if (invitacionesGrupo == null) {
             invitacionesGrupo = new ArrayList<>();

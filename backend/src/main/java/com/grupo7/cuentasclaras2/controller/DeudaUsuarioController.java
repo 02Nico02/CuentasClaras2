@@ -36,6 +36,16 @@ public class DeudaUsuarioController {
 	@Autowired
 	private GrupoService grupoService;
 
+	/**
+	 * Obtiene los detalles de una deuda por su identificador.
+	 *
+	 * @param debtId Identificador único de la deuda.
+	 * @return ResponseEntity con la información de la deuda en formato
+	 *         DeudaUsuarioDTO, o HttpStatus.UNAUTHORIZED si el usuario no está
+	 *         autenticado, HttpStatus.NOT_FOUND si la deuda no existe, o
+	 *         HttpStatus.FORBIDDEN si el usuario no es miembro del grupo al que
+	 *         pertenece la deuda.
+	 */
 	@GetMapping("/{debtId}")
 	public ResponseEntity<DeudaUsuarioDTO> getDebtById(@PathVariable long debtId) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -66,6 +76,15 @@ public class DeudaUsuarioController {
 		return new ResponseEntity<>(new DeudaUsuarioDTO(deudaUsuario), HttpStatus.OK);
 	}
 
+	/**
+	 * Obtiene todas las deudas de un grupo específico.
+	 *
+	 * @param groupId Identificador único del grupo.
+	 * @return ResponseEntity con la lista de deudas en formato DeudaUsuarioDTO, o
+	 *         HttpStatus.UNAUTHORIZED si el usuario no está autenticado,
+	 *         HttpStatus.FORBIDDEN si el usuario no es miembro del grupo
+	 *         especificado, o HttpStatus.OK con la lista de deudas.
+	 */
 	@GetMapping("/by-group/{groupId}")
 	public ResponseEntity<List<DeudaUsuarioDTO>> getDebtsByGroup(@PathVariable long groupId) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -89,6 +108,18 @@ public class DeudaUsuarioController {
 		return new ResponseEntity<>(debts, HttpStatus.OK);
 	}
 
+	/**
+	 * Obtiene los detalles de una deuda entre dos usuarios en un grupo específico.
+	 *
+	 * @param groupId    Identificador único del grupo.
+	 * @param deudorId   Identificador único del deudor.
+	 * @param acreedorId Identificador único del acreedor.
+	 * @return ResponseEntity con la información de la deuda en formato
+	 *         DeudaUsuarioDTO, o HttpStatus.UNAUTHORIZED si el usuario no está
+	 *         autenticado, HttpStatus.FORBIDDEN si el usuario no es miembro del
+	 *         grupo especificado, o HttpStatus.OK si la deuda entre los usuarios
+	 *         existe.
+	 */
 	@GetMapping("/between-users-and-group")
 	public ResponseEntity<DeudaUsuarioDTO> getDebtsBetweenUsersInGroup(
 			@RequestParam long groupId,

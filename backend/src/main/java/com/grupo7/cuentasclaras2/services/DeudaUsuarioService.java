@@ -31,16 +31,34 @@ public class DeudaUsuarioService {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 
+	/**
+	 * Obtiene una deuda de usuario por su identificador.
+	 *
+	 * @param deudaId El identificador de la deuda de usuario.
+	 * @return La deuda de usuario encontrada, si existe.
+	 */
 	@Transactional(readOnly = true)
 	public Optional<DeudaUsuario> getById(long deudaId) {
 		return deudaUsuarioRepository.findById(deudaId);
 	}
 
+	/**
+	 * Obtiene las deudas de usuario asociadas a un grupo.
+	 *
+	 * @param grupo El grupo del cual se obtendrán las deudas.
+	 * @return Lista de deudas de usuario asociadas al grupo.
+	 */
 	@Transactional(readOnly = true)
 	public List<DeudaUsuario> obtenerDeudasPorGrupo(Grupo grupo) {
 		return deudaUsuarioRepository.findByGrupo(grupo);
 	}
 
+	/**
+	 * Obtiene las deudas de usuario asociadas a un grupo mediante su identificador.
+	 *
+	 * @param grupoId El identificador del grupo del cual se obtendrán las deudas.
+	 * @return Lista de deudas de usuario asociadas al grupo.
+	 */
 	@Transactional(readOnly = true)
 	public List<DeudaUsuario> obtenerDeudasPorIdGrupo(long grupoId) {
 		return grupoRepository.findById(grupoId)
@@ -48,16 +66,36 @@ public class DeudaUsuarioService {
 				.orElse(Collections.emptyList());
 	}
 
+	/**
+	 * Obtiene las deudas de usuario entre dos usuarios.
+	 *
+	 * @param acreedor El usuario acreedor.
+	 * @param deudor   El usuario deudor.
+	 * @return Lista de deudas de usuario entre los dos usuarios.
+	 */
 	@Transactional(readOnly = true)
 	public List<DeudaUsuario> obtenerDeudasEntreUsuarios(Usuario acreedor, Usuario deudor) {
 		return deudaUsuarioRepository.findByAcreedorAndDeudor(acreedor, deudor);
 	}
 
+	/**
+	 * Obtiene las deudas de usuario donde el usuario es el acreedor.
+	 *
+	 * @param acreedor El usuario acreedor.
+	 * @return Lista de deudas de usuario donde el usuario es el acreedor.
+	 */
 	@Transactional(readOnly = true)
 	public List<DeudaUsuario> obtenerDeudasDeAcreedor(Usuario acreedor) {
 		return deudaUsuarioRepository.findByAcreedor(acreedor);
 	}
 
+	/**
+	 * Obtiene las deudas de usuario donde el usuario es el acreedor mediante su
+	 * identificador.
+	 *
+	 * @param acreedorID El identificador del usuario acreedor.
+	 * @return Lista de deudas de usuario donde el usuario es el acreedor.
+	 */
 	@Transactional(readOnly = true)
 	public List<DeudaUsuario> obtenerDeudasDeAcreedorID(long acreedorID) {
 		return usuarioRepository.findById(acreedorID)
@@ -65,11 +103,24 @@ public class DeudaUsuarioService {
 				.orElse(Collections.emptyList());
 	}
 
+	/**
+	 * Obtiene las deudas de usuario donde el usuario es el deudor.
+	 *
+	 * @param deudor El usuario deudor.
+	 * @return Lista de deudas de usuario donde el usuario es el deudor.
+	 */
 	@Transactional(readOnly = true)
 	public List<DeudaUsuario> obtenerDeudasDeDeudor(Usuario deudor) {
 		return deudaUsuarioRepository.findByDeudor(deudor);
 	}
 
+	/**
+	 * Obtiene las deudas de usuario donde el usuario es el deudor mediante su
+	 * identificador.
+	 *
+	 * @param deudorID El identificador del usuario deudor.
+	 * @return Lista de deudas de usuario donde el usuario es el deudor.
+	 */
 	@Transactional(readOnly = true)
 	public List<DeudaUsuario> obtenerDeudasDeDeudorID(long deudorID) {
 		return usuarioRepository.findById(deudorID)
@@ -77,16 +128,36 @@ public class DeudaUsuarioService {
 				.orElse(Collections.emptyList());
 	}
 
+	/**
+	 * Obtiene las deudas de usuario con un monto mayor que el especificado.
+	 *
+	 * @param monto El monto mínimo para las deudas a recuperar.
+	 * @return Lista de deudas de usuario con un monto mayor que el especificado.
+	 */
 	@Transactional(readOnly = true)
 	public List<DeudaUsuario> obtenerDeudasConMontoMayorQue(double monto) {
 		return deudaUsuarioRepository.findByMontoGreaterThan(monto);
 	}
 
+	/**
+	 * Obtiene las deudas de usuario con un monto menor que el especificado.
+	 *
+	 * @param monto El monto máximo para las deudas a recuperar.
+	 * @return Lista de deudas de usuario con un monto menor que el especificado.
+	 */
 	@Transactional(readOnly = true)
 	public List<DeudaUsuario> obtenerDeudasConMontoMenorQue(double monto) {
 		return deudaUsuarioRepository.findByMontoLessThan(monto);
 	}
 
+	/**
+	 * Realiza un pago para reducir una deuda de usuario.
+	 *
+	 * @param deudaId   El identificador de la deuda de usuario.
+	 * @param montoPago El monto a pagar.
+	 * @return `true` si el pago se realizó con éxito, `false` si no se encontró la
+	 *         deuda.
+	 */
 	@Transactional
 	public boolean realizarPago(long deudaId, double montoPago) {
 		return deudaUsuarioRepository.findById(deudaId)
@@ -105,6 +176,16 @@ public class DeudaUsuarioService {
 				.orElse(false);
 	}
 
+	/**
+	 * Obtiene una deuda de usuario entre dos usuarios en un grupo específico.
+	 *
+	 * @param groupId    El identificador del grupo.
+	 * @param deudorId   El identificador del usuario deudor.
+	 * @param acreedorId El identificador del usuario acreedor.
+	 * @return La deuda de usuario encontrada, si existe.
+	 * @throws GroupException Si el grupo no se encuentra.
+	 * @throws UserException  Si no se encuentran los usuarios deudor o acreedor.
+	 */
 	@Transactional(readOnly = true)
 	public Optional<DeudaUsuario> obtenerDeudaEntreUsuariosEnGrupo(long groupId, long deudorId, long acreedorId) {
 		Optional<Grupo> grupoOptional = grupoRepository.findById(groupId);
@@ -131,6 +212,15 @@ public class DeudaUsuarioService {
 		return deudaUsuarioRepository.findByAcreedorAndDeudorAndGrupo(acreedor, deudor, grupo);
 	}
 
+	/**
+	 * Crea una nueva deuda de usuario entre dos usuarios en un grupo específico.
+	 *
+	 * @param deudorId   El identificador del usuario deudor.
+	 * @param acreedorId El identificador del usuario acreedor.
+	 * @param monto      El monto de la nueva deuda.
+	 * @param grupoId    El identificador del grupo.
+	 * @return La deuda de usuario creada.
+	 */
 	@Transactional
 	public Optional<DeudaUsuario> crearDeudaUsuario(long deudorId, long acreedorId, double monto, long grupoId) {
 		return usuarioRepository.findById(deudorId)
@@ -156,15 +246,19 @@ public class DeudaUsuarioService {
 											return deudaUsuarioRepository.save(deudaInvertida.get());
 										} else {
 											// Eliminar la DeudaUsuario invertida
+											deudaInvertida.get().getGrupo().eliminarDeudaUsuario(deudaInvertida.get());
 											deudaUsuarioRepository.delete(deudaInvertida.get());
 
-											// Crear nueva DeudaUsuario
-											DeudaUsuario nuevaDeuda = new DeudaUsuario();
-											nuevaDeuda.setDeudor(deudor);
-											nuevaDeuda.setAcreedor(acreedor);
-											nuevaDeuda.setMonto(-diferencia);
-											nuevaDeuda.setGrupo(grupo);
-											return deudaUsuarioRepository.save(nuevaDeuda);
+											// Crear nueva DeudaUsuario solo si la diferencia no es 0
+											if (diferencia < 0) {
+												DeudaUsuario nuevaDeuda = new DeudaUsuario();
+												nuevaDeuda.setDeudor(deudor);
+												nuevaDeuda.setAcreedor(acreedor);
+												nuevaDeuda.setMonto(-diferencia);
+												nuevaDeuda.setGrupo(grupo);
+												return deudaUsuarioRepository.save(nuevaDeuda);
+											}
+											return null;
 										}
 									} else {
 										// Crear nueva DeudaUsuario
@@ -178,6 +272,12 @@ public class DeudaUsuarioService {
 								})));
 	}
 
+	/**
+	 * Consolida las deudas dentro de un grupo, redistribuyendo los montos entre los
+	 * usuarios.
+	 *
+	 * @param grupo El grupo en el cual se consolidarán las deudas.
+	 */
 	@Transactional
 	public void consolidarDeudasEnGrupo(Grupo grupo) {
 		List<Usuario> miembros = grupo.getMiembros();
@@ -190,6 +290,9 @@ public class DeudaUsuarioService {
 						deudaUsuario.getAcreedor(),
 						grupo);
 
+				if (deudasAcreedor.size() == 0) {
+					continue;
+				}
 				double montoPendiente = deudaUsuario.getMonto();
 				Map<Long, Double> nuevasDeudasAsumidas = new HashMap<>();
 
