@@ -1,45 +1,47 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder,ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { RegisterService } from '../../services/auth/register.service';
 import { RegisterRequest } from '../../services/auth/registerRequest';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [RouterModule,ReactiveFormsModule],
+  imports: [RouterModule, ReactiveFormsModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
 export class RegisterComponent implements OnInit {
-  registerForm=this.formBuilder.group({
-    username:["yana",[Validators.required]],
-    nombres:["yanasu ariel",[Validators.required]],
-    apellido:["lucaroni",[Validators.required]],
-    email:["ylucaroni@ejemplo.com",[Validators.required]],
-    password:["1234User",[Validators.required]],
-  })
+  registerForm: FormGroup;
+  registerError: string = "";
 
-  constructor(private formBuilder:FormBuilder, private router:Router, private registerService:RegisterService){
-
+  constructor(private formBuilder: FormBuilder, private router: Router, private registerService: RegisterService, private titleService: Title) {
+    this.registerForm = this.formBuilder.group({
+      username: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(20), Validators.pattern('[a-zA-Z0-9]*')]],
+      nombres: ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]*$')]],
+      apellido: ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]*$')]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(20)]],
+    })
   }
 
   ngOnInit(): void {
-      
+    this.titleService.setTitle('Cuentas Claras - Registrarse');
   }
 
-  register(){
+  register() {
     console.log(this.registerForm.valid)
-    if(this.registerForm.valid){
+    if (this.registerForm.valid) {
       this.registerService.register(this.registerForm.value as RegisterRequest).subscribe({
-        next:(userData)=>{
+        next: (userData) => {
           console.log(userData)
         },
-        error:(errorData)=>{
-          console.log(errorData,"vocé no sabe nada")
-          // this.loginError=errorData
+        error: (errorData) => {
+          console.log(errorData, "vocé no sabe nada")
+          this.registerError = errorData;
         },
-        complete:()=>{
+        complete: () => {
           console.info("Registro completado la rompimos toda")
           this.router.navigateByUrl("/login")
           // this.loginForm.reset()
@@ -48,21 +50,20 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  get username(){
-    return this.registerForm.controls.username;
+  get username() {
+    return this.registerForm.controls["username"];
   }
-  get nombres(){
-    return this.registerForm.controls.nombres;
+  get nombres() {
+    return this.registerForm.controls["nombres"];
   }
-  get apellido(){
-    return this.registerForm.controls.apellido;
+  get apellido() {
+    return this.registerForm.controls["apellido"];
   }
-  get email(){
-    return this.registerForm.controls.email;
+  get email() {
+    return this.registerForm.controls["email"];
   }
 
-  get password()
-  {
-    return this.registerForm.controls.password;
+  get password() {
+    return this.registerForm.controls["password"];
   }
 }
