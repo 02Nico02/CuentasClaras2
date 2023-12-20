@@ -28,6 +28,7 @@ import com.grupo7.cuentasclaras2.services.PagoService;
 import com.grupo7.cuentasclaras2.services.TokenServices;
 import com.grupo7.cuentasclaras2.services.UsuarioService;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -120,15 +121,9 @@ public class UsuarioController {
      */
     @PostMapping("/register")
     public ResponseEntity<Credentials> registerUser(@RequestBody Usuario newUser) {
-        Optional<Usuario> registeredUser = usuarioService.registerUser(newUser);
-
-        if (registeredUser.isPresent()) {
-            Usuario user = registeredUser.get();
-            String token = tokenServices.generateToken(user.getUsername(), EXPIRATION_IN_SEC);
-            return ResponseEntity.ok().body(new Credentials(token, EXPIRATION_IN_SEC, user.getUsername()));
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        Usuario registeredUser = usuarioService.registerUser(newUser);
+        String token = tokenServices.generateToken(registeredUser.getUsername(), EXPIRATION_IN_SEC);
+        return ResponseEntity.ok().body(new Credentials(token, EXPIRATION_IN_SEC, registeredUser.getUsername()));
     }
 
     /**
