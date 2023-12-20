@@ -20,6 +20,15 @@ public class GastoAutorService {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 
+	/**
+	 * Crea un nuevo autor de gasto a partir de un DTO y lo asocia a un gasto.
+	 *
+	 * @param gastoAutorDTO El DTO que contiene la información del autor de gasto.
+	 * @param gasto         El gasto al cual se asociará el nuevo autor.
+	 * @return El autor de gasto creado y guardado en la base de datos.
+	 * @throws GastoException Si el monto proporcionado es negativo o si el usuario
+	 *                        no se encuentra.
+	 */
 	@Transactional
 	public GastoAutor createGastoAutorByDTO(GastoAutorDTO gastoAutorDTO, Gasto gasto) {
 		if (gastoAutorDTO.getMonto() < 0) {
@@ -37,6 +46,16 @@ public class GastoAutorService {
 		return gastoAutorRepository.save(gastoAutor);
 	}
 
+	/**
+	 * Actualiza la información de un autor de gasto existente a partir de un DTO.
+	 *
+	 * @param gastoAutorDTO       El DTO que contiene la nueva información del autor
+	 *                            de gasto.
+	 * @param gastoAutorExistente El autor de gasto existente que se actualizará.
+	 * @return El autor de gasto actualizado y guardado en la base de datos.
+	 * @throws GastoException Si el monto proporcionado es negativo o si el usuario
+	 *                        no se encuentra.
+	 */
 	@Transactional
 	public GastoAutor updateGastoAutorByDTO(GastoAutorDTO gastoAutorDTO, GastoAutor gastoAutorExistente) {
 		if (gastoAutorDTO.getMonto() < 0) {

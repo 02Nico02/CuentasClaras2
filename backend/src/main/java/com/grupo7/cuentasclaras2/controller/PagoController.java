@@ -26,6 +26,13 @@ public class PagoController {
 	private UsuarioService usuarioService;
 
 	// No se si se va a usar.
+	/**
+	 * Obtiene un pago por su ID.
+	 *
+	 * @param id ID del pago.
+	 * @return ResponseEntity con el PagoDTO correspondiente si se encuentra, o
+	 *         ResponseEntity.notFound() si no se encuentra.
+	 */
 	@GetMapping("/{id}")
 	public ResponseEntity<PagoDTO> obtenerPagoPorId(@PathVariable long id) {
 		return pagoService.obtenerPagoPorId(id)
@@ -33,6 +40,13 @@ public class PagoController {
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
+	/**
+	 * Crea un nuevo pago.
+	 *
+	 * @param pagoDTO Datos del pago a crear.
+	 * @return ResponseEntity con el PagoDTO del pago creado y HttpStatus
+	 *         correspondiente.
+	 */
 	@PostMapping("/new")
 	public ResponseEntity<PagoDTO> crearPago(@RequestBody PagoDTO pagoDTO) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -51,5 +65,4 @@ public class PagoController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(new PagoDTO(pagoGuardado));
 	}
 
-	// Se movio todo a UsuarioController y a GrupoController
 }

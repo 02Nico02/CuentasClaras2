@@ -28,6 +28,22 @@ public class InvitacionService {
 	@Autowired
 	private GrupoService grupoService;
 
+	/**
+	 * Envía una invitación desde el remitente a un destinatario para unirse a un
+	 * grupo.
+	 *
+	 * @param remitente      El remitente de la invitación.
+	 * @param destinatarioId El ID del destinatario de la invitación.
+	 * @param grupoId        El ID del grupo al que se invita al destinatario.
+	 * @throws UserException       Si remitente y destinatario son el mismo usuario.
+	 * @throws UserException       Si el usuario destinatario no se encuentra.
+	 * @throws GroupException      Si el grupo no se encuentra o el remitente no es
+	 *                             miembro del grupo.
+	 * @throws GroupException      Si el grupo es una pareja (no se pueden enviar
+	 *                             invitaciones en grupos de 2).
+	 * @throws InvitacionException Si ya existe una invitación entre el remitente y
+	 *                             el destinatario.
+	 */
 	public void enviarInvitacion(Usuario remitente, Long destinatarioId, Long grupoId) {
 
 		if (remitente.getId() == destinatarioId) {
@@ -65,6 +81,15 @@ public class InvitacionService {
 		usuarioRepository.save(destinatario);
 	}
 
+	/**
+	 * Acepta una invitación para unirse a un grupo.
+	 *
+	 * @param usuario      El usuario que acepta la invitación.
+	 * @param invitacionId El ID de la invitación que se acepta.
+	 * @throws InvitationGroupException Si la invitación no se encuentra.
+	 * @throws InvitationGroupException Si el usuario no es el destinatario de la
+	 *                                  invitación.
+	 */
 	public void aceptarInvitacion(Usuario usuario, Long invitacionId) {
 		Invitacion invitacion = invitacionRepository.findById(invitacionId)
 				.orElseThrow(() -> new InvitationGroupException("Invitación no encontrada"));
@@ -78,6 +103,15 @@ public class InvitacionService {
 		invitacionRepository.delete(invitacion);
 	}
 
+	/**
+	 * Rechaza una invitación para unirse a un grupo.
+	 *
+	 * @param usuario      El usuario que rechaza la invitación.
+	 * @param invitacionId El ID de la invitación que se rechaza.
+	 * @throws InvitationGroupException Si la invitación no se encuentra.
+	 * @throws InvitationGroupException Si el usuario no es el destinatario de la
+	 *                                  invitación.
+	 */
 	public void rechazarInvitacion(Usuario usuario, Long invitacionId) {
 		Invitacion invitacion = invitacionRepository.findById(invitacionId)
 				.orElseThrow(() -> new InvitationGroupException("Invitación no encontrada"));

@@ -7,11 +7,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import com.grupo7.cuentasclaras2.DTO.AmigoDTO;
 import com.grupo7.cuentasclaras2.DTO.Credentials;
 import com.grupo7.cuentasclaras2.DTO.DeudaUsuarioDTO;
-import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.GrupoPreviewDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionAmistadDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionGrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.NotificationDTO;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
 import com.grupo7.cuentasclaras2.DTO.UsernameAndPassword;
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
@@ -26,10 +28,11 @@ import com.grupo7.cuentasclaras2.services.PagoService;
 import com.grupo7.cuentasclaras2.services.TokenServices;
 import com.grupo7.cuentasclaras2.services.UsuarioService;
 
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/users")
@@ -58,6 +61,12 @@ public class UsuarioController {
 
     private final int EXPIRATION_IN_SEC = 7200;
 
+    /**
+     * Obtiene información detallada sobre un usuario mediante su identificador.
+     *
+     * @param id Identificador único del usuario.
+     * @return ResponseEntity con el UsuarioDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -74,6 +83,12 @@ public class UsuarioController {
     }
 
     // No creo que se use. eliminar
+    /**
+     * Obtiene información detallada sobre un usuario mediante su nombre de usuario.
+     *
+     * @param username Nombre de usuario del usuario.
+     * @return ResponseEntity con el UsuarioDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/username/{username}")
     public ResponseEntity<UsuarioDTO> getUserByUsername(@PathVariable String username) {
         Optional<Usuario> user = usuarioService.getByUsername(username);
@@ -82,6 +97,13 @@ public class UsuarioController {
     }
 
     // No creo que se use. eliminar
+    /**
+     * Obtiene información detallada sobre un usuario mediante su dirección de
+     * correo electrónico.
+     *
+     * @param email Dirección de correo electrónico del usuario.
+     * @return ResponseEntity con el UsuarioDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/email/{email}")
     public ResponseEntity<UsuarioDTO> getUserByEmail(@PathVariable String email) {
         Optional<Usuario> user = usuarioService.getByEmail(email);
@@ -89,13 +111,34 @@ public class UsuarioController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    /**
+     * Registra un nuevo usuario en el sistema.
+     *
+     * @param newUser Datos del nuevo usuario.
+     * @return ResponseEntity con las credenciales (token, duración y nombre de
+     *         usuario) y HttpStatus correspondiente.
+     */
     @PostMapping("/register")
     public ResponseEntity<Credentials> registerUser(@RequestBody Usuario newUser) {
-        Usuario registeredUser = usuarioService.registerUser(newUser);
-        String token = tokenServices.generateToken(registeredUser.getUsername(), EXPIRATION_IN_SEC);
-        return ResponseEntity.ok().body(new Credentials(token, EXPIRATION_IN_SEC, registeredUser.getUsername()));
+        Optional<Usuario> registeredUser = usuarioService.registerUser(newUser);
+
+        if (registeredUser.isPresent()) {
+            Usuario user = registeredUser.get();
+            String token = tokenServices.generateToken(user.getUsername(), EXPIRATION_IN_SEC);
+            return ResponseEntity.ok().body(new Credentials(token, EXPIRATION_IN_SEC, user.getUsername()));
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
+    /**
+     * Actualiza la información de un usuario existente.
+     *
+     * @param userId     Identificador único del usuario a actualizar.
+     * @param usuarioDTO Datos actualizados del usuario.
+     * @return ResponseEntity con el UsuarioDTO actualizado y HttpStatus
+     *         correspondiente.
+     */
     @PutMapping("/{userId}")
     public ResponseEntity<?> actualizarUsuario(@PathVariable long userId, @RequestBody UsuarioDTO usuarioDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -115,6 +158,14 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Autentica a un usuario utilizando las credenciales proporcionadas (nombre de
+     * usuario y contraseña).
+     *
+     * @param credentials Credenciales del usuario (nombre de usuario y contraseña).
+     * @return ResponseEntity con las credenciales (token, duración y nombre de
+     *         usuario) y HttpStatus correspondiente.
+     */
     @PostMapping("/auth")
     public ResponseEntity<?> authenticate(@RequestBody UsernameAndPassword credentials) {
         Optional<Usuario> user = usuarioService.login(credentials.getUserName(), credentials.getPassword());
@@ -127,12 +178,62 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Cierra la sesión del usuario actual.
+     *
+     * @return ResponseEntity con un mensaje indicando que la sesión se ha cerrado y
+     *         HttpStatus correspondiente.
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok().body("Sesión cerrada");
 
     }
 
+    /**
+     * Obtiene la lista de amigos del usuario autenticado.
+     *
+     * @return ResponseEntity con la lista de amigos en formato DTO y HttpStatus
+     *         correspondiente.
+     */
+    @GetMapping("/friendsList")
+    public ResponseEntity<List<AmigoDTO>> getFriendsList() {
+        // Obtiene la información del usuario autenticado
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+
+        Optional<Usuario> userOptional = usuarioService.getByUsername((String) principal);
+
+        if (userOptional.isPresent()) {
+            Usuario usuario = userOptional.get();
+
+            List<AmigoDTO> friendsDTO = usuario.getAmigos()
+                    .stream()
+                    .map(amigo -> {
+                        Optional<Grupo> pairGroup = grupoService.getPairGroupByUserIds(usuario.getId(), amigo.getId());
+
+                        double saldoDisponible = pairGroup
+                                .map(grupo -> usuarioService.calcularSaldoDisponibleEnGrupo(usuario, grupo))
+                                .orElse(0.0);
+
+                        return new AmigoDTO(amigo.getId(), amigo.getUsername(), pairGroup.get().getId(),
+                                saldoDisponible);
+                    })
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(friendsDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * Envía una solicitud de amistad desde el usuario actual al usuario
+     * destinatario.
+     *
+     * @param receiverEmail Correo electrónico del usuario destinatario.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/sendFriendRequest")
     public ResponseEntity<String> sendFriendRequest(
             @RequestParam String receiverEmail) {
@@ -161,27 +262,12 @@ public class UsuarioController {
 
     }
 
-    @GetMapping("/friendRequests")
-    public ResponseEntity<List<InvitacionAmistadDTO>> getFriendRequests() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-
-        Optional<Usuario> user = usuarioService.getByUsername((String) principal);
-
-        if (user.isPresent()) {
-            Usuario usuario = user.get();
-
-            List<InvitacionAmistadDTO> friendRequestsDTO = usuario.getInvitacionesAmigosRecibidas()
-                    .stream()
-                    .map(InvitacionAmistadDTO::new)
-                    .collect(Collectors.toList());
-
-            return new ResponseEntity<>(friendRequestsDTO, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
+    /**
+     * Acepta una solicitud de amistad pendiente.
+     *
+     * @param invitationId Identificador de la invitación de amistad a aceptar.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/acceptFriendRequest")
     public ResponseEntity<String> acceptFriendRequest(
             @RequestParam Long invitationId) {
@@ -203,6 +289,12 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Rechaza una solicitud de amistad pendiente.
+     *
+     * @param invitationId Identificador de la invitación de amistad a rechazar.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/rejectFriendRequest")
     public ResponseEntity<String> rejectFriendRequest(
             @RequestParam Long invitationId) {
@@ -224,6 +316,13 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Envia una solicitud de grupo a otro usuario.
+     *
+     * @param receiverId Identificador del usuario destinatario.
+     * @param groupId    Identificador del grupo al que se invita.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/sendGroupInvitation")
     public ResponseEntity<String> sendGroupInvitation(
             @RequestParam Long receiverId,
@@ -243,6 +342,12 @@ public class UsuarioController {
 
     }
 
+    /**
+     * Acepta una invitación de grupo pendiente.
+     *
+     * @param invitationId Identificador de la invitación de grupo a aceptar.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/acceptGroupInvitation")
     public ResponseEntity<String> acceptGroupInvitation(
             @RequestParam Long invitationId) {
@@ -260,6 +365,12 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Rechaza una invitación de grupo pendiente.
+     *
+     * @param invitationId Identificador de la invitación de grupo a rechazar.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
     @PostMapping("/rejectGroupInvitation")
     public ResponseEntity<String> rejectGroupInvitation(
             @RequestParam Long invitationId) {
@@ -277,8 +388,16 @@ public class UsuarioController {
         }
     }
 
-    @GetMapping("/groupInvitations")
-    public ResponseEntity<List<InvitacionGrupoDTO>> getGroupInvitations() {
+    /**
+     * Obtiene las notificaciones del usuario autenticado, incluyendo invitaciones
+     * de amistad y de grupo.
+     *
+     * @return ResponseEntity con la lista de NotificationDTO ordenadas por fecha de
+     *         creación
+     *         y HttpStatus correspondiente.
+     */
+    @GetMapping("/notifications")
+    public ResponseEntity<List<NotificationDTO>> getNotifications() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
@@ -287,17 +406,34 @@ public class UsuarioController {
         if (user.isPresent()) {
             Usuario usuario = user.get();
 
-            List<InvitacionGrupoDTO> groupInvitationsDTO = usuario.getInvitacionesGrupo()
+            List<NotificationDTO> friendRequestsDTO = usuario.getInvitacionesAmigosRecibidas()
                     .stream()
-                    .map(InvitacionGrupoDTO::new)
+                    .map(InvitacionAmistadDTO::new)
+                    .map(NotificationDTO::new)
                     .collect(Collectors.toList());
 
-            return new ResponseEntity<>(groupInvitationsDTO, HttpStatus.OK);
+            List<NotificationDTO> groupInvitationsDTO = usuario.getInvitacionesGrupo()
+                    .stream()
+                    .map(InvitacionGrupoDTO::new)
+                    .map(NotificationDTO::new)
+                    .collect(Collectors.toList());
+
+            List<NotificationDTO> notificationsDTO = Stream
+                    .concat(friendRequestsDTO.stream(), groupInvitationsDTO.stream())
+                    .sorted(Comparator.comparing(NotificationDTO::getFechaCreacion).reversed())
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(notificationsDTO, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
+    /**
+     * Obtiene los pagos realizados por el usuario actual.
+     *
+     * @return ResponseEntity con la lista de PagoDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/myPayments")
     public ResponseEntity<List<PagoDTO>> getMyPayments() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -317,6 +453,11 @@ public class UsuarioController {
         return ResponseEntity.ok(myPayments);
     }
 
+    /**
+     * Obtiene los pagos recibidos por el usuario actual.
+     *
+     * @return ResponseEntity con la lista de PagoDTO y HttpStatus correspondiente.
+     */
     @GetMapping("/receivedPayments")
     public ResponseEntity<List<PagoDTO>> getReceivedPayments() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -336,8 +477,14 @@ public class UsuarioController {
         return ResponseEntity.ok(receivedPayments);
     }
 
+    /**
+     * Obtiene los grupos del usuario actual.
+     *
+     * @return ResponseEntity con la lista de GrupoPreviewDTO y HttpStatus
+     *         correspondiente.
+     */
     @GetMapping("/my-groups")
-    public ResponseEntity<List<GrupoDTO>> getGroupsByUserId() {
+    public ResponseEntity<List<GrupoPreviewDTO>> getGroupsByUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
@@ -348,30 +495,22 @@ public class UsuarioController {
         }
 
         List<Grupo> groups = grupoService.getGroupsByUserId(usuarioOptional.get().getId());
-        List<GrupoDTO> groupDTOs = groups.stream()
-                .map(GrupoDTO::new)
+        List<GrupoPreviewDTO> groupDTOs = groups.stream()
+                .map(grupo -> {
+                    double balance = usuarioService.calcularSaldoDisponibleEnGrupo(usuarioOptional.get(), grupo);
+                    return new GrupoPreviewDTO(grupo, balance);
+                })
                 .collect(Collectors.toList());
+
         return ResponseEntity.ok(groupDTOs);
     }
 
-    @GetMapping("/my-couple-groups")
-    public ResponseEntity<List<GrupoDTO>> getCoupleGroupsByUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-
-        Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
-
-        if (!usuarioOptional.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        List<Grupo> groups = grupoService.getGroupsWhereEsPareja(usuarioOptional.get().getId());
-        List<GrupoDTO> groupDTOs = groups.stream()
-                .map(GrupoDTO::new)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(groupDTOs);
-    }
-
+    /**
+     * Obtiene las deudas pendientes del usuario actual como deudor.
+     *
+     * @return ResponseEntity con la lista de DeudaUsuarioDTO y HttpStatus
+     *         correspondiente.
+     */
     @GetMapping("/my-debts")
     public ResponseEntity<List<DeudaUsuarioDTO>> getMyDebts() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -390,6 +529,12 @@ public class UsuarioController {
         return new ResponseEntity<>(myDebts, HttpStatus.OK);
     }
 
+    /**
+     * Obtiene las deudas pendientes del usuario actual como acreedor.
+     *
+     * @return ResponseEntity con la lista de DeudaUsuarioDTO y HttpStatus
+     *         correspondiente.
+     */
     @GetMapping("/debts-owed-to-me")
     public ResponseEntity<List<DeudaUsuarioDTO>> getDebtsOwedToMe() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

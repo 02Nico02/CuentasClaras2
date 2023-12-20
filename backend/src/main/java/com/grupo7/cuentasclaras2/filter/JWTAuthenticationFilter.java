@@ -14,6 +14,7 @@ import com.grupo7.cuentasclaras2.services.TokenServices;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -60,5 +61,13 @@ public class JWTAuthenticationFilter implements Filter {
             res.setStatus(HttpStatus.FORBIDDEN.value());
             res.getWriter().write("Error de autorización: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+    }
+
+    @Override
+    public void destroy() {
     }
 }

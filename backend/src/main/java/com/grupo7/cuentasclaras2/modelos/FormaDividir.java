@@ -18,6 +18,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
+/**
+ * Clase que representa la forma de dividir un gasto en el sistema.
+ *
+ * Una forma de dividir especifica cómo se distribuirá un gasto entre diferentes
+ * usuarios, ya sea mediante un monto fijo o un porcentaje del total.
+ */
 @Entity
 public class FormaDividir {
     @Id

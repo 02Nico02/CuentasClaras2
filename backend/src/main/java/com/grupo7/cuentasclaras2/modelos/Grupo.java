@@ -237,6 +237,47 @@ public class Grupo {
         return total;
     }
 
+    public double calcularTotalGastosPorMiembro(Usuario miembro) {
+        double total = 0;
+        if (gastos != null) {
+            for (Gasto gasto : gastos) {
+                List<GastoAutor> gastoAutores = gasto.getGastoAutor();
+                if (gastoAutores != null) {
+                    for (GastoAutor gastoAutor : gastoAutores) {
+                        if (gastoAutor.getIntegrante().equals(miembro)) {
+                            total += gastoAutor.getMonto();
+                        }
+                    }
+                }
+            }
+        }
+        return total;
+    }
+
+    public double calcularTotalPagosPorMiembro(Usuario miembro) {
+        double total = 0;
+        if (pagos != null) {
+            for (Pago pago : pagos) {
+                if (pago.getAutor().equals(miembro)) {
+                    total += pago.getMonto();
+                }
+            }
+        }
+        return total;
+    }
+
+    public double calcularTotalDeudasPorMiembro(Usuario miembro) {
+        double total = 0;
+        if (deudas != null) {
+            for (DeudaUsuario deuda : deudas) {
+                if (deuda.getDeudor().equals(miembro)) {
+                    total += deuda.getMonto();
+                }
+            }
+        }
+        return total;
+    }
+
     public void liquidarDeuda(Usuario usuario) {
         if (deudas != null) {
             for (DeudaUsuario deuda : deudas) {
