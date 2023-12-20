@@ -15,11 +15,11 @@
         @if(username.errors?.['required']){
         <div>El Nombre de usuario es requerido.</div>
         }@if(username.errors?.['minlength']){
-        <div>El Nombre de usuario debe tener al menos 4 caracteres.</div>
+        <div>El nombre de usuario debe tener al menos 4 caracteres.</div>
         } @if(username.errors?.['maxlength']){
-        <div>El Nombre de usuario no debe tener más de 20 caracteres.</div>
+        <div>El nombre de usuario no debe tener más de 20 caracteres.</div>
         } @if(username.errors?.['pattern']){
-        <div>El Nombre de usuario debe contener solo letras y números.</div>
+        <div>El nombre de usuario debe contener solo letras y números.</div>
         }
       </div>
 
@@ -33,9 +33,9 @@
       @if(nombres.invalid && (nombres.dirty || nombres.touched)){
       <div class="text-danger mt-2">
         @if(nombres.errors?.['required']){
-        <div>El Nombre es requerido.</div>
+        <div>El nombre es requerido.</div>
         } @if(nombres.errors?.['pattern']){
-        <div>El Nombre debe contener solo letras.</div>
+        <div>El nombre debe contener solo letras.</div>
         }
       </div>
 
@@ -65,7 +65,7 @@
       @if(email.invalid && (email.dirty || email.touched)){
       <div class="text-danger mt-2">
         @if(email.errors?.['required']){
-        <div>El Email es requerido.</div>
+        <div>El email es requerido.</div>
         } @if(email.errors?.['email']){
         <div>Por favor, ingresa un email válido.</div>
         }
@@ -81,11 +81,11 @@
       @if(password.invalid && (password.dirty || password.touched)){
       <div class="text-danger mt-2">
         @if(password.errors?.['required']){
-        <div>El Nombre de usuario es requerido.</div>
+        <div>La contraseña es requerida.</div>
         }@if(password.errors?.['minlength']){
-        <div>El Contraseña debe tener al menos 8 caracteres.</div>
+        <div>La contraseña debe tener al menos 8 caracteres.</div>
         } @if(password.errors?.['maxlength']){
-        <div>El Contraseña no debe tener más de 20 caracteres.</div>
+        <div>La contraseña no debe tener más de 20 caracteres.</div>
         }
       </div>
 

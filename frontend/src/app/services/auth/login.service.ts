@@ -31,12 +31,19 @@ export class LoginService {
     )
   }
 
-  logout(): void {
-    sessionStorage.removeItem("token")
-    this.currentUserLoginOn.next(false)
+  logout(): Observable<any> {
+    console.log("por cerrar sesion")
+    return this.http.post<any>(environment.urlApi + "users/logout", {}).pipe(
+      tap(() => {
+        sessionStorage.removeItem("token");
+        this.currentUserLoginOn.next(false);
+      }),
+      catchError(this.handleError)
+    );
   }
 
   private handleError(error: HttpErrorResponse) {
+    console.log("error")
     let errorMessage = "Algo falló. Por favor intente nuevamente";
 
     if (error.error instanceof ErrorEvent) {

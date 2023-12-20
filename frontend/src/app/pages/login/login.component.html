@@ -6,16 +6,15 @@
   <h1 class="text-center mb-4">Iniciar Sesión</h1>
   <form [formGroup]="loginForm" class="form">
     <div class="mb-3">
-      <label for="exampleInputEmail1" class="form-label">Correo electronico</label>
+      <label for="exampleInputEmail1" class="form-label">Correo electrónico</label>
       <input formControlName="userName" type="text" name="email" class="form-control" id="exampleInputEmail1"
         aria-describedby="emailHelp" placeholder="usuario@ejemplo.com" />
       @if(userName.invalid && (userName.dirty || userName.touched)){
       <div class="text-danger mt-2">
         @if(userName.errors?.['required']){
-        <div>El correo electronico es requerido.</div>
-
-        } @if(userName.errors?.['userName']){
-        <div>El correo electronico debe tener un formato válido.</div>
+        <div>El correo electrónico es requerido.</div>
+        } @if(userName.errors?.['email']){
+        <div>El correo electrónico debe tener un formato válido.</div>
         }
       </div>
 
@@ -29,7 +28,7 @@
       @if(password.errors?.['required']){
 
       <div class="text-danger mt-2">
-        <div>La Contraseña es requerido.</div>
+        <div>La contraseña es requerida.</div>
       </div>
       } }
     </div>
@@ -40,7 +39,5 @@
       Iniciar Sesión
     </button>
   </form>
-  <button type="button" class="btn btn-secondary mt-4">
-    <a href="/register" class="text-white">Registrarse</a>
-  </button>
+  <a href="/register" class="btn btn-secondary mt-4 text-white">Registrarse</a>
 </div>

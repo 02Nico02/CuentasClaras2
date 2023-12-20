@@ -8,17 +8,18 @@ import { LoginService } from './login.service';
 })
 export class JwtInterceptorService implements HttpInterceptor {
 
-  constructor(private loginService:LoginService) { }
+  constructor(private loginService: LoginService) { }
 
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    let token:String=this.loginService.userToken
-
-    if(token!=""){
-      req=req.clone({
-        setHeaders:{
-          "Content-Type":"application/json;charset=utf-8",
-          "Accept":"application/json",
+    console.log("Interceptor: Entrando en el interceptor");
+    let token: String = this.loginService.userToken
+    console.log("Token:", token);
+    if (token != "") {
+      req = req.clone({
+        setHeaders: {
+          "Content-Type": "application/json;charset=utf-8",
+          "Accept": "application/json",
           "Authorization": `Bearer ${token}`
         }
       })

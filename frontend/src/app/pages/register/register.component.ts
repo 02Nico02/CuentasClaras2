@@ -38,11 +38,9 @@ export class RegisterComponent implements OnInit {
           console.log(userData)
         },
         error: (errorData) => {
-          console.log(errorData, "vocé no sabe nada")
           this.registerError = errorData;
         },
         complete: () => {
-          console.info("Registro completado la rompimos toda")
           this.router.navigateByUrl("/login")
           // this.loginForm.reset()
         }

@@ -124,3 +124,16 @@ a {
   text-align: center;
   z-index: 1;
 }
+
+.btn-secondary {
+  display: inline-block;
+  padding: .375rem .75rem;
+  color: #fff;
+  border-color: #6c757d;
+  border-radius: .25rem;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.btn-secondary:hover {
+  border-color: #545b62;
+}

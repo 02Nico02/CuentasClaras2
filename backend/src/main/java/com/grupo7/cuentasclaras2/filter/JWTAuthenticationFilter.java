@@ -28,13 +28,17 @@ public class JWTAuthenticationFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
 
         // El login y register del usuarios son públicos
+        System.out.println("error");
         if ("/api/users/register".equals(req.getRequestURI()) || "/api/users/auth".equals(req.getRequestURI())
                 || "OPTIONS".equals(req.getMethod())) {
+            System.out.println("dentro");
             chain.doFilter(request, response);
             return;
         }
+        System.out.println("error 2");
 
         String token = req.getHeader(HttpHeaders.AUTHORIZATION);
+        System.out.println(token);
 
         try {
             if (token == null || TokenBlacklist.isTokenBlacklisted(token) || !TokenServices.validateToken(token)) {
