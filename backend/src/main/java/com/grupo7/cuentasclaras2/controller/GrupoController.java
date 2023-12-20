@@ -17,12 +17,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grupo7.cuentasclaras2.DTO.GastoDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
 import com.grupo7.cuentasclaras2.DTO.MiembrosGrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
+import com.grupo7.cuentasclaras2.DTO.PosiblesMiembrosDTO;
 import com.grupo7.cuentasclaras2.exception.UnauthorizedException;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
@@ -238,6 +241,41 @@ public class GrupoController {
 				.collect(Collectors.toList());
 
 		return ResponseEntity.ok(gastos);
+	}
+
+	@GetMapping("/{idGrupo}/searchUsers")
+	public ResponseEntity<PosiblesMiembrosDTO> searchUsersByGroupAndUsername(
+			@PathVariable Long idGrupo,
+			@RequestParam String usernameQuery) {
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Object principal = authentication.getPrincipal();
+
+		Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
+
+		if (!usuarioOptional.isPresent()) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
+		Usuario usuarioAutenticado = usuarioOptional.get();
+
+		List<Usuario> amigosFiltrados = usuarioService.findFriendsNotInGroupByQuery(usuarioAutenticado, idGrupo,
+				usernameQuery);
+
+		List<IdEmailUsuarioDTO> amigosFiltradosDTO = amigosFiltrados.stream()
+				.map(IdEmailUsuarioDTO::new)
+				.collect(Collectors.toList());
+
+		List<Usuario> usuariosFiltrados = usuarioService.findUsersNotInGroupAndNotFriends(usuarioAutenticado, idGrupo,
+				usernameQuery);
+
+		List<IdEmailUsuarioDTO> usuariosFiltradosDTO = usuariosFiltrados.stream()
+				.map(IdEmailUsuarioDTO::new)
+				.collect(Collectors.toList());
+
+		PosiblesMiembrosDTO posiblesMiembrosDTO = new PosiblesMiembrosDTO(amigosFiltradosDTO, usuariosFiltradosDTO);
+
+		return ResponseEntity.ok(posiblesMiembrosDTO);
 	}
 
 }

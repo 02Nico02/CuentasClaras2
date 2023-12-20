@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.grupo7.cuentasclaras2.modelos.Usuario;
@@ -29,4 +31,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByIdAndGrupos_Id(long usuarioId, long grupoId);
+
+    @Query("SELECT u FROM Usuario u WHERE NOT EXISTS (SELECT 1 FROM Grupo g JOIN g.miembros m WHERE g.id = :idGrupo AND u = m) AND u.username LIKE %:usernameQuery%")
+    List<Usuario> findUsersNotInGroupByQuery(@Param("idGrupo") Long idGrupo,
+            @Param("usernameQuery") String usernameQuery);
+
 }
