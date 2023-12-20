@@ -2,6 +2,7 @@ package com.grupo7.cuentasclaras2.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
+import com.grupo7.cuentasclaras2.exception.UserAlreadyExistsException;
 import com.grupo7.cuentasclaras2.exception.UserException;
 import com.grupo7.cuentasclaras2.modelos.DeudaUsuario;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
@@ -105,16 +107,17 @@ public class UsuarioService {
      *         usuario con el mismo nombre de usuario o correo electrónico, o vacío
      *         de lo contrario.
      */
-    public Optional<Usuario> registerUser(Usuario newUser) {
-        return usuarioRepository.findByUsername(newUser.getUsername())
-                .or(() -> usuarioRepository.findByEmail(newUser.getEmail()))
-                .map(existingUser -> {
-                    return Optional.<Usuario>empty();
-                })
-                .orElseGet(() -> {
-                    newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-                    return Optional.of(usuarioRepository.save(newUser));
-                });
+    public Usuario registerUser(Usuario newUser) {
+        if (usuarioRepository.findByUsername(newUser.getUsername()).isPresent()) {
+            throw new UserAlreadyExistsException("El nombre de usuario ya existe.", "username");
+        }
+
+        if (usuarioRepository.findByEmail(newUser.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException("El correo electrónico ya está en uso.", "email");
+        }
+
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        return usuarioRepository.save(newUser);
     }
 
     /**
@@ -183,6 +186,38 @@ public class UsuarioService {
         }
 
         return saldoDisponible;
+    }
+
+    public List<Usuario> findUsersNotInGroupAndNotFriends(Usuario usuario, Long idGrupo, String usernameQuery) {
+        List<Usuario> amigosUsuarioAutenticado = usuario.getAmigos();
+
+        List<Usuario> usuariosFueraDelGrupo = usuarioRepository.findUsersNotInGroupByQuery(idGrupo,
+                usernameQuery);
+
+        if (!amigosUsuarioAutenticado.isEmpty()) {
+            usuariosFueraDelGrupo = usuariosFueraDelGrupo.stream()
+                    .filter(u -> !amigosUsuarioAutenticado.contains(u))
+                    .collect(Collectors.toList());
+        }
+
+        return usuariosFueraDelGrupo;
+    }
+
+    public List<Usuario> findFriendsNotInGroupByQuery(Usuario usuario, Long idGrupo, String usernameQuery) {
+        List<Usuario> amigosUsuarioAutenticado = usuario.getAmigos();
+
+        List<Usuario> usuariosFueraDelGrupo = usuarioRepository.findUsersNotInGroupByQuery(idGrupo,
+                usernameQuery);
+
+        if (!amigosUsuarioAutenticado.isEmpty()) {
+            usuariosFueraDelGrupo = usuariosFueraDelGrupo.stream()
+                    .filter(u -> amigosUsuarioAutenticado.contains(u))
+                    .collect(Collectors.toList());
+        } else {
+            usuariosFueraDelGrupo.clear();
+        }
+
+        return usuariosFueraDelGrupo;
     }
 
 }

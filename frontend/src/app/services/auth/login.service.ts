@@ -15,49 +15,68 @@ export class LoginService {
   currentUserData: BehaviorSubject<String> = new BehaviorSubject<String>("")
 
   constructor(private http: HttpClient) {
-    this.currentUserLoginOn= new BehaviorSubject<boolean>(sessionStorage.getItem("token")!=null)
-    this.currentUserData= new BehaviorSubject<String>(sessionStorage.getItem("token")||"")
-   }
+    this.currentUserLoginOn = new BehaviorSubject<boolean>(sessionStorage.getItem("token") != null)
+    this.currentUserData = new BehaviorSubject<String>(sessionStorage.getItem("token") || "")
+  }
 
-  login(credentials:LoginRequest):Observable<any>{
-    return this.http.post<any>(environment.urlApi+"users/auth",credentials).pipe(
-      tap((userData)=>{
-        sessionStorage.setItem("token",userData.token)
+  login(credentials: LoginRequest): Observable<any> {
+    return this.http.post<any>(environment.urlApi + "users/auth", credentials).pipe(
+      tap((userData) => {
+        sessionStorage.setItem("token", userData.token)
         this.currentUserData.next(userData)
         this.currentUserLoginOn.next(true)
       }),
-      map((userData)=>userData.token),
+      map((userData) => userData.token),
       catchError(this.handleError)
     )
   }
 
-  logout():void{
-    sessionStorage.removeItem("token")
-    this.currentUserLoginOn.next(false)
+  logout(): Observable<any> {
+    console.log("por cerrar sesion")
+    return this.http.post<any>(environment.urlApi + "users/logout", {}).pipe(
+      tap(() => {
+        sessionStorage.removeItem("token");
+        this.currentUserLoginOn.next(false);
+      }),
+      catchError(this.handleError)
+    );
   }
 
-  private handleError(error:HttpErrorResponse){
-    if(error.status===0){
-      
-      console.log("Se ha producido un error", error.error)
+  private handleError(error: HttpErrorResponse) {
+    console.log("error")
+    let errorMessage = "Algo falló. Por favor intente nuevamente";
+
+    if (error.error instanceof ErrorEvent) {
+      console.error('Ocurrió un error:', error.error.message);
+    } else {
+      errorMessage = error.error || error.statusText || errorMessage;
+
+      if (error.status === 401) {
+        console.log("El error es: ", error);
+        if (error.error && typeof error.error === 'object' && error.error.error) {
+          errorMessage = error.error.error;
+        } else {
+          errorMessage = "Usuario o contraseña incorrecta";
+        }
+      }
+
+      console.error(`El backend retornó el código de estado ${error.status}, con el mensaje: ${errorMessage}`);
     }
-    else{
-      console.log("El backend retornó el código de estado", error.status, error.error)   
-    }
-    return throwError(()=> new Error("Algo falló. Por favor intente nuevamente"))
+
+    return throwError(() => errorMessage);
   }
 
-  get userData():Observable<String>{
+  get userData(): Observable<String> {
     return this.currentUserData.asObservable();
   }
 
-  get userLoginOn(): Observable<boolean>{
-    return this.currentUserLoginOn.asObservable()  
+  get userLoginOn(): Observable<boolean> {
+    return this.currentUserLoginOn.asObservable()
   }
 
-  get userToken():String{
+  get userToken(): String {
     return this.currentUserData.value
   }
 
-  
+
 }

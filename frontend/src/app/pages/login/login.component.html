@@ -1,51 +1,43 @@
-<div class="container">
-  <h1>Login</h1>
-  <form [formGroup]="loginForm">
-    <div class="mb-3 mt-3">
-      <label for="exampleInputEmail1" class="form-label"
-        >Nombre de usuario</label
-      >
-      <input
-        formControlName="userName"
-        type="text"
-        class="form-control"
-        id="exampleInputEmail1"
-        aria-describedby="emailHelp"
-      />
+<div class="container relative mt-5">
+  <div class="div-logo">
+    <img src="../../assets/logo.png" alt="Logo Cuentas Claras" class="logo">
+    <p class="web-name">Cuentas Claras</p>
+  </div>
+  <h1 class="text-center mb-4">Iniciar Sesión</h1>
+  <form [formGroup]="loginForm" class="form">
+    <div class="mb-3">
+      <label for="exampleInputEmail1" class="form-label">Correo electrónico</label>
+      <input formControlName="userName" type="text" name="email" class="form-control" id="exampleInputEmail1"
+        aria-describedby="emailHelp" placeholder="usuario@ejemplo.com" />
       @if(userName.invalid && (userName.dirty || userName.touched)){
-      <div class="text-danger">
+      <div class="text-danger mt-2">
         @if(userName.errors?.['required']){
-        <div>El Nombre de usuario es requerido.</div>
-
-        } @if(userName.errors?.['userName']){
-        <div>El Nombre de usuario debe tener un formato válido.</div>
+        <div>El correo electrónico es requerido.</div>
+        } @if(userName.errors?.['email']){
+        <div>El correo electrónico debe tener un formato válido.</div>
         }
       </div>
 
       }
     </div>
     <div class="mb-3">
-      <label for="exampleInputPassword1" class="form-label">Password</label>
-      <input
-        formControlName="password"
-        type="password"
-        class="form-control"
-        id="exampleInputPassword1"
-      />
+      <label for="exampleInputPassword1" class="form-label">Contraseña</label>
+      <input formControlName="password" type="password" name="password" class="form-control" id="exampleInputPassword1"
+        placeholder="**********" />
       @if(password.invalid && (password.dirty || password.touched)){
       @if(password.errors?.['required']){
 
-      <div class="text-danger">
-        <div>El Password es requerido.</div>
+      <div class="text-danger mt-2">
+        <div>La contraseña es requerida.</div>
       </div>
       } }
     </div>
-    <p class="text-danger">{{ loginError }}</p>
-    <button type="submit" (click)="login()" class="btn btn-primary">
+    @if(loginError){
+    <p class="text-danger-error">{{ loginError }}</p>
+    }
+    <button type="submit" (click)="login()" class="btn btn-primary mt-3">
       Iniciar Sesión
     </button>
   </form>
-  <button type="button" class="btn btn-secondary mt-4">
-    <a href="/register">Registrarse</a>
-  </button>
+  <a href="/register" class="btn btn-secondary mt-4 text-white">Registrarse</a>
 </div>

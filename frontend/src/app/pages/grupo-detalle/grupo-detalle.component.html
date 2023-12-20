@@ -1,0 +1,122 @@
+<div *ngIf="grupo" class="container mt-5">
+
+    <!-- Grupo Section -->
+    <div class="grupo-section">
+        <h2 class="grupo-name">{{ grupo.nombre }}</h2>
+        <div class="grupo-category">
+            <div class="category-icon">
+                <img [src]="grupo.categoria.icon" alt="{{ grupo.categoria.nombre }}">
+            </div>
+            <span>{{ grupo.categoria.nombre }}</span>
+        </div>
+        <p class="grupo-balance">
+            Saldo:
+            <span [ngClass]="{'saldo-positivo': grupo.balance > 0, 'saldo-negativo': grupo.balance < 0}">
+                {{ formatBalanceString(grupo.balance) }}
+            </span>
+        </p>
+
+        <!-- Botones dentro de grupo-section -->
+        <div class="buttons-section">
+            <button data-bs-toggle="modal" data-bs-target="#modalAgregarMiembro">Agregar
+                Miembro</button>
+            <button (click)="agregarGasto()">Agregar Gasto</button>
+        </div>
+    </div>
+
+    <!-- Secciones -->
+    <div class="sections">
+        <!-- Integrantes del grupo -->
+        <div class="section-box">
+            <h3>Integrantes del Grupo</h3>
+            <ul class="members-grid">
+                <li *ngFor="let miembro of grupo.miembros">
+                    <span class="userName">{{ miembro.userName }}</span>
+                    <span *ngIf="miembro.balance != 0"
+                        [ngClass]="{'saldo-positivo': miembro.balance > 0, 'saldo-negativo': miembro.balance < 0}">
+                        {{ miembro.balance > 0 ? '+$' + miembro.balance.toFixed(2) : '-$' +
+                        (-miembro.balance).toFixed(2) }}
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Actividades -->
+        <div class="section-box">
+            <h3>Actividades Recientes</h3>
+            <ul class="activities-list">
+                <li *ngFor="let actividad of visibleActividades" class="activity-item"
+                    [ngClass]="{'click': actividad.type === 'gasto'}"
+                    (click)="actividad.type === 'gasto' ? mostrarDetallesActividad(actividad) : null">
+                    <div class="activity-content">
+                        <div class="activity-date">{{ actividad.fecha | date:'medium' }}</div>
+                        <div class="activity-data">{{actividad.data }}</div>
+                    </div>
+                </li>
+            </ul>
+            <div class="activity-buttons">
+                <button *ngIf="visibleActividades.length < grupo.actividades.length"
+                    (click)="mostrarMasActividades()">Ver más</button>
+                <button *ngIf="visibleActividades.length > 5" (click)="mostrarMenosActividades()">Ver menos</button>
+            </div>
+        </div>
+
+        <!-- Deudas -->
+        <div class="section-box">
+            <h3>Deudas</h3>
+            <ul class="deudas-grid">
+                <li *ngFor="let deuda of grupo.deudasUsuarios" class="deuda-item">
+                    <div class="deuda-data">{{ deuda.data }}{{deuda.monto}}</div>
+                    <button *ngIf="deuda.usuarioDebe" (click)="pagarDeuda(deuda.id)" class="button pagar">Pagar</button>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+    <div class="modal fade" id="modalAgregarMiembro" tabindex="-1" aria-labelledby="modalAgregarMiembroLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAgregarMiembroLabel">Agregar Miembro al Grupo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control mb-3" placeholder="Buscar usuarios..."
+                        [(ngModel)]="filtroUsuarios">
+
+                    <h6>Amigos</h6>
+                    <ul class="scroll-list list-group">
+                        <li *ngFor="let amigo of amigos"
+                            class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ amigo.userName }}</span>
+                            <button (click)="agregarMiembroSeleccionado(amigo)" class="btn btn-success">Enviar
+                                invitación</button>
+                        </li>
+                        <li *ngIf="amigos && amigos.length === 0" class="list-group-item">No hay amigos disponibles para
+                            mostrar.</li>
+                    </ul>
+                    <ng-template #noAmigos>
+                        <p>No hay amigos disponibles para mostrar.</p>
+                    </ng-template>
+
+                    <h6>Usuarios</h6>
+                    <ul class="scroll-list list-group">
+                        <li *ngFor="let usuario of usuarios"
+                            class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ usuario.userName }}</span>
+                            <button (click)="agregarMiembroSeleccionado(usuario)" class="btn btn-primary">Enviar
+                                invitación</button>
+                        </li>
+                        <li *ngIf="usuarios && usuarios.length === 0" class="list-group-item">No hay usuarios
+                            disponibles para mostrar.</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

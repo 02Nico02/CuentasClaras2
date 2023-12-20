@@ -1,3 +1,23 @@
+.container {
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #E7A4FE 0%, rgba(206, 195, 254, 0.64) 36.46%, rgba(164, 249, 254, 0.00) 100%);
+  padding: 20px;
+  padding-top: 90px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 341px;
+  height: auto;
+  min-height: 551px;
+  margin: auto;
+  /* margin-top: 50px; */
+  background-color: #f9f9f9;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Arial', sans-serif;
+}
+
 .container,
 .form-group {
   display: flex;
@@ -5,9 +25,17 @@
   align-items: center;
   justify-content: center;
 }
-.container {
-  height: 800px;
+
+.form {
+  width: 100%;
 }
+
+.form-label {
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 8px;
+}
+
 
 .form-button {
   margin-top: 10px;
@@ -18,6 +46,7 @@
   border-radius: 8px;
   width: 100%;
 }
+
 a {
   color: #ffffff;
   text-decoration: none;
@@ -29,4 +58,82 @@ a {
 
 .ng-invalid:not(form).ng-touched {
   border-left: 5px solid red;
+}
+
+.text-danger-error {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #d9534f;
+  font-weight: bold;
+  text-align: center;
+  background-color: #f2dede;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #d9534f;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.btn {
+  width: 100%;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background-color: #545b62;
+}
+
+.container .div-logo {
+  position: absolute;
+  top: -60px;
+  left: calc(50% - 75px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.container .logo {
+  width: 120px;
+  height: 120px;
+}
+
+.web-name {
+  font-size: 23px;
+  color: #333;
+  text-align: center;
+  z-index: 1;
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: .375rem .75rem;
+  color: #fff;
+  border-color: #6c757d;
+  border-radius: .25rem;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.btn-secondary:hover {
+  border-color: #545b62;
 }
