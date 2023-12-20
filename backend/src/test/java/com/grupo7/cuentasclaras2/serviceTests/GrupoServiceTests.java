@@ -1,7 +1,13 @@
 package com.grupo7.cuentasclaras2.serviceTests;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +28,7 @@ import com.grupo7.cuentasclaras2.repositories.CategoriaRepository;
 import com.grupo7.cuentasclaras2.repositories.GrupoRepository;
 import com.grupo7.cuentasclaras2.repositories.UsuarioRepository;
 import com.grupo7.cuentasclaras2.services.GrupoService;
+import com.grupo7.cuentasclaras2.services.UsuarioService;
 
 @DataJpaTest
 public class GrupoServiceTests {
@@ -37,6 +44,9 @@ public class GrupoServiceTests {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     @Test
     void testAddMemberToGroup() {
@@ -307,4 +317,55 @@ public class GrupoServiceTests {
                 "Se esperaba una excepción GroupException");
     }
 
+    @Test
+    public void testFindUsersNotInGroupAndNotFriends() {
+        Grupo grupo = new Grupo();
+        grupo.setNombre("Grupo de Prueba");
+        grupo.setEsPareja(false);
+        Categoria categoria = new Categoria();
+        categoria.setEsGrupo(true);
+        categoria.setNombre("Familiar");
+        categoria.setIcono("algo");
+        categoriaRepository.save(categoria);
+        grupo.setCategoria(categoria);
+        grupoRepository.save(grupo);
+
+        // Crear y guardar un usuario
+        Usuario usuario1 = new Usuario("usuario1", "Nombre", "Apellido", "usuario1@example.com", "password");
+        usuario1 = usuarioRepository.save(usuario1);
+
+        // Agregar el usuario al grupo
+        grupoService.addMemberToGroup(grupo.getId(), usuario1.getId());
+        grupoRepository.save(grupo);
+
+        String usernameQuery = "io";
+
+        // Lista de usuarios esperados
+        List<Usuario> usuariosEsperados = new ArrayList<>();
+        Usuario usuario2 = new Usuario("usuario2", "Nombre", "Apellido", "usuario2@example.com", "password");
+        usuariosEsperados.add(usuario2);
+        usuario2 = usuarioRepository.save(usuario2);
+
+        Usuario usuario3 = new Usuario("usuario3", "Nombre", "Apellido", "usuario3@example.com", "password");
+        usuario3.agregarAmigo(usuario1);
+        usuario3 = usuarioRepository.save(usuario3);
+        usuario1 = usuarioRepository.save(usuario1);
+
+        // Ejecutar el método a probar
+        List<Usuario> resultado = usuarioService.findUsersNotInGroupAndNotFriends(usuario1, grupo.getId(),
+                usernameQuery);
+
+        // Verificar el resultado
+        assertNotNull(resultado);
+        assertEquals(1, resultado.size());
+        assertEquals("usuario2", resultado.get(0).getUsername());
+
+        List<Usuario> resultado2 = usuarioService.findFriendsNotInGroupByQuery(usuario1, grupo.getId(),
+                usernameQuery);
+
+        // Verificar el resultado
+        assertNotNull(resultado2);
+        assertEquals(1, resultado2.size());
+        assertEquals("usuario3", resultado2.get(0).getUsername());
+    }
 }

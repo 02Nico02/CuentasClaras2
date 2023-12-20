@@ -5,12 +5,13 @@ import { Title } from '@angular/platform-browser';
 import { GroupService } from '../../services/group/group.service';
 import { GrupoDTO } from '../../services/group/grupo.dto';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 
 @Component({
   selector: 'app-grupo-detalle',
   standalone: true,
-  imports: [RouterModule, ReactiveFormsModule, CommonModule],
+  imports: [RouterModule, ReactiveFormsModule, CommonModule, FormsModule],
   templateUrl: './grupo-detalle.component.html',
   styleUrl: './grupo-detalle.component.css'
 })
@@ -59,6 +60,39 @@ export class GrupoDetalleComponent implements OnInit {
         type: "gasto",
         data: "Usuario1 gasto $600 en cena",
         fecha: new Date()
+      }, {
+        id: 1,
+        type: "pago",
+        data: "Usuario2 pago $400 al usuario3",
+        fecha: new Date()
+      },
+      {
+        id: 1,
+        type: "gasto",
+        data: "Usuario1 gasto $600 en cena",
+        fecha: new Date()
+      }, {
+        id: 1,
+        type: "pago",
+        data: "Usuario2 pago $400 al usuario3",
+        fecha: new Date()
+      },
+      {
+        id: 1,
+        type: "gasto",
+        data: "Usuario1 gasto $600 en cena",
+        fecha: new Date()
+      }, {
+        id: 1,
+        type: "pago",
+        data: "Usuario2 pago $400 al usuario3",
+        fecha: new Date()
+      },
+      {
+        id: 1,
+        type: "gasto",
+        data: "Usuario1 gasto $600 en cena",
+        fecha: new Date()
       }
     ],
     deudasUsuarios: [
@@ -93,6 +127,16 @@ export class GrupoDetalleComponent implements OnInit {
 
   limiteActividades = 5;
 
+  filtroUsuarios: string = '';
+  amigos: any[] = [
+    { id: 6, userName: 'usuario6' },
+    { id: 7, userName: 'usuario7' },
+  ];
+  usuarios: any[] = [
+    { id: 8, userName: 'usuario8' },
+    { id: 9, userName: 'usuario9' },
+  ];
+
   constructor(private formBuilder: FormBuilder, private router: Router, private titleService: Title) { }
 
   ngOnInit(): void {
@@ -114,8 +158,8 @@ export class GrupoDetalleComponent implements OnInit {
     this.cargarActividades();
   }
 
-  agregarMiembro() {
-    alert("Falta implementar")
+  agregarMiembroSeleccionado(usuario: any) {
+    alert(`Usuario ${usuario.userName} invitado al grupo.`);
   }
 
   agregarGasto() {

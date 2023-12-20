@@ -277,3 +277,9 @@ h2 {
     font-weight: bold;
     flex-grow: 1;
 }
+
+.scroll-list {
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}

@@ -18,7 +18,8 @@
 
         <!-- Botones dentro de grupo-section -->
         <div class="buttons-section">
-            <button (click)="agregarMiembro()">Agregar Miembro</button>
+            <button data-bs-toggle="modal" data-bs-target="#modalAgregarMiembro">Agregar
+                Miembro</button>
             <button (click)="agregarGasto()">Agregar Gasto</button>
         </div>
     </div>
@@ -70,5 +71,52 @@
                 </li>
             </ul>
         </div>
+
     </div>
+    <div class="modal fade" id="modalAgregarMiembro" tabindex="-1" aria-labelledby="modalAgregarMiembroLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAgregarMiembroLabel">Agregar Miembro al Grupo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control mb-3" placeholder="Buscar usuarios..."
+                        [(ngModel)]="filtroUsuarios">
+
+                    <h6>Amigos</h6>
+                    <ul class="scroll-list list-group">
+                        <li *ngFor="let amigo of amigos"
+                            class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ amigo.userName }}</span>
+                            <button (click)="agregarMiembroSeleccionado(amigo)" class="btn btn-success">Enviar
+                                invitación</button>
+                        </li>
+                        <li *ngIf="amigos && amigos.length === 0" class="list-group-item">No hay amigos disponibles para
+                            mostrar.</li>
+                    </ul>
+                    <ng-template #noAmigos>
+                        <p>No hay amigos disponibles para mostrar.</p>
+                    </ng-template>
+
+                    <h6>Usuarios</h6>
+                    <ul class="scroll-list list-group">
+                        <li *ngFor="let usuario of usuarios"
+                            class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ usuario.userName }}</span>
+                            <button (click)="agregarMiembroSeleccionado(usuario)" class="btn btn-primary">Enviar
+                                invitación</button>
+                        </li>
+                        <li *ngIf="usuarios && usuarios.length === 0" class="list-group-item">No hay usuarios
+                            disponibles para mostrar.</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
