@@ -5,9 +5,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.grupo7.cuentasclaras2.modelos.DeudaUsuario;
 import com.grupo7.cuentasclaras2.modelos.Gasto;
+import com.grupo7.cuentasclaras2.modelos.GastoAutor;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Pago;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
@@ -19,9 +21,9 @@ public class GrupoDTO {
     private Date fechaCreacion;
     private CategoriaDTO categoria;
     private List<MiembrosGrupoDTO> miembros;
-    private List<GastoDTO> gastos;
-    private List<PagoDTO> pagos;
-    private List<DeudaUsuarioDTO> deudasUsuarios;
+    private List<DeudaUsuarioPreviewDTO> deudasUsuarios;
+    private double balance;
+    private List<ActividadDTO> actividades;
 
     public GrupoDTO() {
     }
@@ -35,9 +37,8 @@ public class GrupoDTO {
         if (grupo.getCategoria() != null) {
             this.categoria = new CategoriaDTO(grupo.getCategoria());
         }
-        this.gastos = convertirGastosADTOs(grupo.getGastos());
-        this.pagos = convertirPagosADTOs(grupo.getPagos());
-        this.deudasUsuarios = convertirDeudasUsuariosADTOs(grupo.getDeudas());
+        this.deudasUsuarios = convertirDeudasUsuariosADTOs(grupo.getDeudas(), usuarioAutenticado);
+        this.actividades = convertirActividades(grupo, usuarioAutenticado);
     }
 
     public long getId() {
@@ -88,27 +89,11 @@ public class GrupoDTO {
         this.categoria = categoria;
     }
 
-    public List<GastoDTO> getGastos() {
-        return gastos;
-    }
-
-    public void setGastos(List<GastoDTO> gastos) {
-        this.gastos = gastos;
-    }
-
-    public List<PagoDTO> getPagos() {
-        return pagos;
-    }
-
-    public void setPagos(List<PagoDTO> pagos) {
-        this.pagos = pagos;
-    }
-
-    public List<DeudaUsuarioDTO> getDeudasUsuarios() {
+    public List<DeudaUsuarioPreviewDTO> getDeudasUsuarios() {
         return deudasUsuarios;
     }
 
-    public void setDeudasUsuarios(List<DeudaUsuarioDTO> deudasUsuarios) {
+    public void setDeudasUsuarios(List<DeudaUsuarioPreviewDTO> deudasUsuarios) {
         this.deudasUsuarios = deudasUsuarios;
     }
 
@@ -116,11 +101,14 @@ public class GrupoDTO {
         List<MiembrosGrupoDTO> miembrosDTO = new ArrayList<>();
         List<DeudaUsuario> deudas = grupo.getDeudas();
         Map<Usuario, Double> saldos = new HashMap<>();
+        balance = 0;
 
         for (DeudaUsuario deuda : deudas) {
             if (deuda.getDeudor().equals(usuarioAutenticado)) {
+                balance -= deuda.getMonto();
                 saldos.put(deuda.getAcreedor(), -deuda.getMonto());
             } else if (deuda.getAcreedor().equals(usuarioAutenticado)) {
+                balance += deuda.getMonto();
                 saldos.put(deuda.getDeudor(), deuda.getMonto());
             }
         }
@@ -138,36 +126,141 @@ public class GrupoDTO {
         return miembrosDTO;
     }
 
-    private List<GastoDTO> convertirGastosADTOs(List<Gasto> gastos) {
-        List<GastoDTO> gastosDTO = new ArrayList<>();
-        if (gastos != null) {
-            for (Gasto gasto : gastos) {
-                GastoDTO gastoDTO = new GastoDTO(gasto);
-                gastosDTO.add(gastoDTO);
-            }
-        }
-        return gastosDTO;
+    public double getBalance() {
+        return balance;
     }
 
-    private List<PagoDTO> convertirPagosADTOs(List<Pago> pagos) {
-        List<PagoDTO> pagoDTOs = new ArrayList<>();
-        if (pagos != null) {
-            for (Pago pago : pagos) {
-                PagoDTO pagoDTO = new PagoDTO(pago);
-                pagoDTOs.add(pagoDTO);
-            }
-        }
-        return pagoDTOs;
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 
-    private List<DeudaUsuarioDTO> convertirDeudasUsuariosADTOs(List<DeudaUsuario> deudaUsuarios) {
-        List<DeudaUsuarioDTO> deudaUsuarioDTOs = new ArrayList<>();
-        if (deudaUsuarios != null) {
-            for (DeudaUsuario deudaUsuario : deudaUsuarios) {
-                DeudaUsuarioDTO deudaUsuarioDTO = new DeudaUsuarioDTO(deudaUsuario);
-                deudaUsuarioDTOs.add(deudaUsuarioDTO);
-            }
-        }
-        return deudaUsuarioDTOs;
+    public List<ActividadDTO> getActividades() {
+        return actividades;
     }
+
+    public void setActividades(List<ActividadDTO> actividades) {
+        this.actividades = actividades;
+    }
+
+    private List<ActividadDTO> convertirActividades(Grupo grupo, Usuario usuarioAutenticado) {
+        List<ActividadDTO> actividades = new ArrayList<>();
+
+        for (Gasto gasto : grupo.getGastos()) {
+            ActividadDTO actividad = new ActividadDTO();
+            actividad.setId(gasto.getId());
+            actividad.setType("gasto");
+            actividad.setFecha(gasto.getFecha());
+
+            String data = generarTextoGasto(gasto, usuarioAutenticado);
+            actividad.setData(data);
+
+            actividades.add(actividad);
+        }
+
+        for (Pago pago : grupo.getPagos()) {
+            ActividadDTO actividad = new ActividadDTO();
+            actividad.setId(pago.getId());
+            actividad.setType("pago");
+            actividad.setFecha(pago.getFechaCreacion());
+
+            String data = generarTextoPago(pago, usuarioAutenticado);
+            actividad.setData(data);
+
+            actividades.add(actividad);
+        }
+
+        return actividades;
+    }
+
+    private String generarTextoGasto(Gasto gasto, Usuario usuarioAutenticado) {
+        StringBuilder texto = new StringBuilder();
+        List<GastoAutor> gastoAutores = gasto.getGastoAutor();
+        double totalMonto = gasto.getMontoTotal();
+
+        // Obtener la lista de nombres de los autores del gasto
+        List<String> nombresAutores = gastoAutores.stream()
+                .map(ga -> ga.getIntegrante().getUsername())
+                .collect(Collectors.toList());
+
+        if (nombresAutores.size() == 1 && !gastoAutores.get(0).getIntegrante().equals(usuarioAutenticado)) {
+            // Caso: Solo un autor y no es el usuario autenticado
+            texto.append(nombresAutores.get(0))
+                    .append(" gastó $")
+                    .append(totalMonto)
+                    .append(" en ")
+                    .append(gasto.getNombre());
+
+        } else if (nombresAutores.size() == 1 && gastoAutores.get(0).getIntegrante().equals(usuarioAutenticado)) {
+            // Caso: Solo un autor y es el usuario autenticado
+            texto.append("Gastaste $")
+                    .append(totalMonto)
+                    .append(" en ")
+                    .append(gasto.getNombre());
+
+        } else if (nombresAutores.size() > 1 && !nombresAutores.contains(usuarioAutenticado.getUsername())) {
+            // Caso: Más de un autor y ninguno es el usuario autenticado
+            texto.append(String.join(", ", nombresAutores))
+                    .append(" gastaron ")
+                    .append(totalMonto)
+                    .append(" en ")
+                    .append(gasto.getNombre());
+
+        } else if (nombresAutores.contains(usuarioAutenticado.getUsername())) {
+            nombresAutores.remove(usuarioAutenticado.getUsername());
+            // Caso: El usuario autenticado está entre los autores
+            texto.append(String.join(", ", nombresAutores))
+                    .append(" y vos gastaste ")
+                    .append(totalMonto)
+                    .append(" en ")
+                    .append(gasto.getNombre());
+
+        }
+
+        return texto.toString();
+    }
+
+    private String generarTextoPago(Pago pago, Usuario usuarioAutenticado) {
+        if (pago.getAutor().equals(usuarioAutenticado)) {
+            return "Pagaste $" + pago.getMonto() + " a " + pago.getDestinatario().getUsername();
+        } else if (pago.getDestinatario().equals(usuarioAutenticado)) {
+            return pago.getAutor().getUsername() + " te pagó $" + pago.getMonto();
+        } else {
+            return pago.getAutor().getUsername() + " pagó $" + pago.getMonto() + " a "
+                    + pago.getDestinatario().getUsername();
+        }
+    }
+
+    private List<DeudaUsuarioPreviewDTO> convertirDeudasUsuariosADTOs(List<DeudaUsuario> deudaUsuarios,
+            Usuario usuarioAutenticado) {
+        List<DeudaUsuarioPreviewDTO> deudasDTO = new ArrayList<>();
+
+        for (DeudaUsuario deuda : deudaUsuarios) {
+            DeudaUsuarioPreviewDTO deudaDTO = new DeudaUsuarioPreviewDTO();
+            deudaDTO.setId(deuda.getId());
+            deudaDTO.setMonto(deuda.getMonto());
+            deudaDTO.setData(generarTextoDeuda(deuda, usuarioAutenticado));
+
+            if (deuda.getDeudor().equals(usuarioAutenticado)) {
+                deudaDTO.setUsuarioDebe(true);
+            } else {
+                deudaDTO.setUsuarioDebe(false);
+            }
+
+            deudasDTO.add(deudaDTO);
+        }
+
+        return deudasDTO;
+    }
+
+    private String generarTextoDeuda(DeudaUsuario deuda, Usuario usuarioAutenticado) {
+        if (deuda.getDeudor().equals(usuarioAutenticado)) {
+            return "Le debes $" + deuda.getMonto() + " a " + deuda.getAcreedor().getUsername();
+        } else if (deuda.getAcreedor().equals(usuarioAutenticado)) {
+            return deuda.getDeudor().getUsername() + " te debe $" + deuda.getMonto();
+        } else {
+            return deuda.getDeudor().getUsername() + " debe $" + deuda.getMonto() + " a "
+                    + deuda.getAcreedor().getUsername();
+        }
+    }
+
 }
