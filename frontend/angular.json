@@ -28,7 +28,9 @@
               "src/styles.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
-            "scripts": ["node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"],
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+            ],
             "server": "src/main.server.ts",
             "prerender": false
           },
@@ -88,9 +90,12 @@
             ],
             "styles": [
               "src/styles.css",
+              "node_modules/font-awesome/css/font-awesome.css",
               "frontend/node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
-            "scripts": ["frontend/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"]
+            "scripts": [
+              "frontend/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+            ]
           }
         }
       }

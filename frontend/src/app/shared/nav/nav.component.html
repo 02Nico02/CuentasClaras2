@@ -7,18 +7,21 @@
     <ul class="nav-links">
         <li><a routerLink="/grupos">Grupos</a></li>
         <li><a routerLink="/amigos">Amigos</a></li>
-        <li><a routerLink="/amigos">{{pagActual}}</a></li>
     </ul>
 
     <div class="user-info">
-        <span>Nombre del Usuario</span>
+        <div class="notification-icon" (click)="toggleDropdown()">
+            <img src="../../../assets/icons/notifications-active_118870.png" alt="Icono de notificaciones">
+            <div *ngIf="isDropdownOpen" class="dropdown-content" [ngClass]="{'oculto': !isDropdownOpen,}">
+                <app-notification></app-notification>
+            </div>
+        </div>
+        <span>UserName</span>
 
-        <!-- Icono de notificaciones -->
-        <a href="#" class="notification-icon">
-            <i class="fas fa-bell"></i>
-        </a>
+        <span class="user-balance">
+            Saldo: {{ formatBalance() }}
+        </span>
 
-        <!-- Botón de cerrar sesión -->
-        <button class="logout-button">Cerrar Sesión</button>
+        <button class="logout-button" (click)="logout()">Cerrar Sesión</button>
     </div>
 </nav>
