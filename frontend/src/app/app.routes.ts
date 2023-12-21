@@ -5,10 +5,10 @@ import { HomeComponent } from './pages/home/home.component';
 import { GrupoDetalleComponent } from './pages/grupo-detalle/grupo-detalle.component';
 
 export const routes: Routes = [
-    { path: "", component: HomeComponent },
+    { path: "home", component: HomeComponent },
     { path: "login", component: LoginComponent },
     { path: "register", component: RegisterComponent },
     { path: "group-detalle", component: GrupoDetalleComponent },
-    // {path:"**",redirectTo:"login", pathMatch:"full"},
+    {path:"**",redirectTo:"login", pathMatch:"full"},
 
 ];

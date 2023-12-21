@@ -18,20 +18,20 @@ export class HomeComponent {
   user?: User;
   userLoginOn: boolean = false
 
-  constructor(private userService: UserService, private loginService: LoginService, private router: Router) {
-    // this.userService.getUser(environment.userId).subscribe({
-    //   next:(userData)=>{
-    //     this.user=userData
-    //   },
-    //   error:(errorData)=>{
-    //     this.errorMessage=errorData
-    //   },
-    //   complete:()=>{
-    //     console.info("User Data ok")
-    //   }
-
-    // }) 
-  }
+  constructor(private userService:UserService, private loginService:LoginService, private router:Router){
+    this.userService.getUserByUsername(environment.userId).subscribe({
+      next:(userData)=>{
+        this.user=userData
+      },
+      error:(errorData)=>{
+        this.errorMessage=errorData
+      },
+      complete:()=>{
+          console.info("User Data ok")
+        }
+      
+      }) 
+    }
 
   ngOnInit(): void {
     this.loginService.currentUserLoginOn.subscribe(
@@ -43,17 +43,9 @@ export class HomeComponent {
     )
   }
 
-  logout() {
-    this.loginService.logout().subscribe(
-      () => {
-        console.log("cerrada");
-        // cualquier otra acción después del logout
-      },
-      error => {
-        console.error("Error al cerrar sesión:", error);
-      }
-    );
-    this.router.navigate(['/'])
+    logout() {
+    this.loginService.logout()
+    this.router.navigate(['/login'])
 
   }
 }
