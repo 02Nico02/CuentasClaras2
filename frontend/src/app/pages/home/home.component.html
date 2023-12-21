@@ -1,4 +1,4 @@
-<p>Sesión iniciada</p>
+<!-- <p>Sesión iniciada</p>
 <a routerLink="register">Registrate</a><br />
 <a routerLink="login">Iniciar sesion</a> <br />
 <a (click)="logout()" routerLink="/inicio">Cerrar Sesión</a>
@@ -6,4 +6,13 @@
   <li *ngFor="let each of userGroups">
     {{ each.nombre }}
   </li>
-</ul>
+</ul> -->
+<app-nav></app-nav>
+<div class="container mt-5 gap-5 page-container">
+  @for(each of userGroups; track each){
+
+  <app-group-card class="card-container" [groupData]="each"></app-group-card>
+  } @empty {
+  <div>Aún no tenés ningún grupo</div>
+  }
+</div>

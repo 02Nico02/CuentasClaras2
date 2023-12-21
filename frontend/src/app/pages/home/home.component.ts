@@ -6,11 +6,13 @@ import { LoginService } from '../../services/auth/login.service';
 import { GrupoPreviewDTO } from '../../services/group/grupoPreview';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { NavComponent } from '../../shared/nav/nav.component';
+import { GroupCardComponent } from '../../components/group-card/group-card.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterModule,FormsModule,CommonModule],
+  imports: [RouterModule,FormsModule,CommonModule,NavComponent,GroupCardComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })

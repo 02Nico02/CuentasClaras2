@@ -1,0 +1,32 @@
+.card-right {
+  width: 70%;
+  display: flex;
+  background: rgba(220, 216, 241, 0.75);
+  border-radius: 0 25px 25px 0;
+}
+.card-left {
+  width: 30%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  border-radius: 25px 0px 0px 25px;
+  background: rgba(220, 216, 241, 1);
+}
+
+.foto {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 1px solid green;
+}
+.category-container {
+  display: flex;
+}
+
+.category-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid black;
+}
