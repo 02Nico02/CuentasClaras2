@@ -9,10 +9,9 @@ export const routes: Routes = [
     { path: "home", component: HomeComponent },
     { path: "login", component: LoginComponent },
     { path: "register", component: RegisterComponent },
-    { path: "group-detalle", component: GrupoDetalleComponent },
-    {path:"**",redirectTo:"login", pathMatch:"full"},
     { path: "grupo/:id/detalle", component: GrupoDetalleComponent },
     { path: "crear-grupo", component: CrearGrupoComponent },
+    { path: "**", redirectTo: "login", pathMatch: "full" },
     // {path:"**",redirectTo:"login", pathMatch:"full"},
 
 ];
