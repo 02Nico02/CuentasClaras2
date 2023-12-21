@@ -2,3 +2,8 @@
 <a routerLink="register">Registrate</a><br />
 <a routerLink="login">Iniciar sesion</a> <br />
 <a (click)="logout()" routerLink="/inicio">Cerrar Sesión</a>
+<ul>
+  <li *ngFor="let each of userGroups">
+    {{ each.nombre }}
+  </li>
+</ul>
