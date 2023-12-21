@@ -4,14 +4,14 @@ import java.util.Date;
 
 public class NotificationDTO {
     private long id;
-    private String type; // Puedes usar un enum para distinguir entre invitación de amigo y de grupo
+    private String type;
     private Date fechaCreacion;
 
-    // Campos específicos de InvitacionAmistadDTO
+    // InvitacionAmistadDTO
     private long idRemitenteAmistad;
     private String usernameRemitenteAmistad;
 
-    // Campos específicos de InvitacionGrupoDTO
+    // InvitacionGrupoDTO
     private long idGrupo;
     private String nombreGrupo;
     private long idRemitenteGrupo;

@@ -1,0 +1,8 @@
+<div *ngFor="let notification of notifications" class="notification-item">
+    <p>{{ formatTheNotification(notification) }}</p>
+    <small>Hace: {{ calculateTimePassed(notification.fechaCreacion) }}</small>
+    <div class="notification-buttons">
+        <button class="accept" (click)="acceptInvitation(notification)">Aceptar</button>
+        <button class="decline" (click)="declineInvitation(notification)">Rechazar</button>
+    </div>
+</div>
