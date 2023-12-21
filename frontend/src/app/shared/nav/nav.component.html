@@ -1,0 +1,24 @@
+<nav>
+    <div class="branding">
+        <img src="../../assets/logo.png" alt="Logo de Cuentas Claras" class="logo">
+        <span>Cuentas Claras</span>
+    </div>
+
+    <ul class="nav-links">
+        <li><a routerLink="/grupos">Grupos</a></li>
+        <li><a routerLink="/amigos">Amigos</a></li>
+        <li><a routerLink="/amigos">{{pagActual}}</a></li>
+    </ul>
+
+    <div class="user-info">
+        <span>Nombre del Usuario</span>
+
+        <!-- Icono de notificaciones -->
+        <a href="#" class="notification-icon">
+            <i class="fas fa-bell"></i>
+        </a>
+
+        <!-- Botón de cerrar sesión -->
+        <button class="logout-button">Cerrar Sesión</button>
+    </div>
+</nav>
