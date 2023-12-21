@@ -12,7 +12,7 @@ import { GroupCardComponent } from '../../components/group-card/group-card.compo
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterModule,FormsModule,CommonModule,NavComponent,GroupCardComponent],
+  imports: [RouterModule, FormsModule, CommonModule, NavComponent, GroupCardComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -23,30 +23,30 @@ export class HomeComponent {
   userLoginOn: boolean = false
   userGroups?: GrupoPreviewDTO[]
 
-  constructor(private userService:UserService, private loginService:LoginService, private router:Router){
+  constructor(private userService: UserService, private loginService: LoginService, private router: Router) {
 
-    }
+  }
 
-    ngOnInit(): void {
+  ngOnInit(): void {
     this.llamarAPI()
-    }
+  }
 
-  llamarAPI(){
+  llamarAPI() {
     this.userService.getUserByUsername().subscribe({
-      next:(userData)=>{
+      next: (userData) => {
         // console.log(userData)
-        this.userGroups=userData
+        this.userGroups = userData
         console.log(this.userGroups[0])
         // typeof(userData)
       },
-      error:(errorData)=>{
-        this.errorMessage=errorData
+      error: (errorData) => {
+        this.errorMessage = errorData
       },
-      complete:()=>{
-          console.info("User Data ok")
-        }
-      
-      }) 
+      complete: () => {
+        console.info("User Data ok")
+      }
+
+    })
   }
 
   // constructor(private userService:UserService, private loginService:LoginService, private router:Router){
@@ -60,7 +60,7 @@ export class HomeComponent {
   //     complete:()=>{
   //         console.info("User Data ok")
   //       }
-      
+
   //     }) 
   //   }
 
@@ -74,9 +74,7 @@ export class HomeComponent {
   //   )
   // }
 
-    logout() {
-    this.loginService.logout()
-    this.router.navigate(['/login'])
-
+  createGroup() {
+    this.router.navigate(['/crear-grupo'])
   }
 }
