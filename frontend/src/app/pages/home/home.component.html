@@ -1,9 +1,14 @@
 <app-nav></app-nav>
+<div class="section-header">
+  <h2>Tus Grupos</h2>
+  <button class="create-group-button" (click)="createGroup()">Crear Nuevo Grupo</button>
+</div>
 <div class="container mt-5 gap-5 page-container">
-  @for(each of userGroups; track each){
 
+  @for(each of userGroups; track each){
   <app-group-card class="card-container container" [groupData]="each"></app-group-card>
-  } @empty {
+  }
+  @empty {
   <div class="no-groups-title">Ordena tus gastos grupales</div>
   <div class="no-groups-message">
     ¿Te vas de viaje con amigos? ¿Te juntas a comer un asado? ¿Convivís con alguien?
