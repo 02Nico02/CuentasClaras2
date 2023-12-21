@@ -4,11 +4,12 @@ import { GroupService } from '../../services/group/group.service';
 import { Title } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { NavComponent } from '../../shared/nav/nav.component';
 
 @Component({
   selector: 'app-crear-grupo',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, CommonModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, NavComponent],
   templateUrl: './crear-grupo.component.html',
   styleUrl: './crear-grupo.component.css'
 })
