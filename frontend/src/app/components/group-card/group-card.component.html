@@ -1,0 +1,12 @@
+<div class="card-left">
+  <div class="foto"></div>
+  <div class="category-container">
+    <div class="category-logo"></div>
+    {{ groupData?.categoria?.nombre }}
+  </div>
+</div>
+<div class="card-right">
+  <div>{{ groupData?.nombre }}</div>
+  @for(each of groupData?.miembros; track each){ {{ each.userName }} }
+  <!-- {{ groupData?.categoria?.nombre }} -->
+</div>

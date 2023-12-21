@@ -15,15 +15,16 @@ export class LoginService {
   currentUserData: BehaviorSubject<String> = new BehaviorSubject<String>("")
 
   constructor(private http: HttpClient) {
-    this.currentUserLoginOn = new BehaviorSubject<boolean>(sessionStorage.getItem("token") != null)
-    this.currentUserData = new BehaviorSubject<String>(sessionStorage.getItem("token") || "")
+    this.currentUserLoginOn = new BehaviorSubject<boolean>(localStorage.getItem("token") != null)
+    this.currentUserData = new BehaviorSubject<String>(localStorage.getItem("token") || "")
   }
 
   login(credentials: LoginRequest): Observable<any> {
     return this.http.post<any>(environment.urlApi + "users/auth", credentials).pipe(
       tap((userData) => {
-        sessionStorage.setItem("token", userData.token)
+        localStorage.setItem("token", userData.token)
         this.currentUserData.next(userData)
+        console.log(userData)
         this.currentUserLoginOn.next(true)
       }),
       map((userData) => userData.token),
@@ -35,7 +36,7 @@ export class LoginService {
     console.log("por cerrar sesion")
     return this.http.post<any>(environment.urlApi + "users/logout", {}).pipe(
       tap(() => {
-        sessionStorage.removeItem("token");
+        localStorage.removeItem("token");
         this.currentUserLoginOn.next(false);
       }),
       catchError(this.handleError)

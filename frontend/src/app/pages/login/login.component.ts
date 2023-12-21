@@ -19,8 +19,8 @@ export class LoginComponent implements OnInit {
 
   constructor(private formBuilder: FormBuilder, private router: Router, private loginService: LoginService, private titleService: Title) {
     this.loginForm = this.formBuilder.group({
-      userName: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]]
+      userName: ['usuario1@ejemplo.com', [Validators.required, Validators.email]],
+      password: ['1234User', [Validators.required]]
     });
   }
 
@@ -38,12 +38,11 @@ export class LoginComponent implements OnInit {
           console.error(errorData);
           this.loginError = errorData;
         },
-        complete: () => {
-          console.info("Login completo");
-          this.router.navigateByUrl("/");
-          this.loginForm.reset();
-        }
-      });
+        complete:()=>{
+          console.info("Login completo")
+          this.router.navigateByUrl("/home")
+          this.loginForm.reset()
+      }})
     } else {
       console.log("Formulario inválido");
       this.loginForm.markAllAsTouched();

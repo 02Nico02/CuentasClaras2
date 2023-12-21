@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { GroupService } from '../../services/group/group.service';
 import { GrupoDTO } from '../../services/group/grupo.dto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
