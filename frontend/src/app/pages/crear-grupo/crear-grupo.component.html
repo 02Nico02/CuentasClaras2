@@ -1,0 +1,40 @@
+<div class="container mt-5">
+    <h2>Crear Grupo</h2>
+
+    <form [formGroup]="grupoForm" (ngSubmit)="crearGrupo()">
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre del grupo</label>
+            <input type="text" class="form-control" id="nombre" formControlName="nombre" required>
+            @if(nombre.invalid && (nombre.dirty || nombre.touched)){
+            <div class="text-danger">
+                @if(nombre.errors?.['required']){
+                <div>El nombre del grupo es requerido.</div>
+                } @if(nombre.errors?.['maxlength']){
+                <div>El nombre del grupo no debe superar los 50 caracteres.</div>
+                }@if(nombre.errors?.['minlength']){
+                <div>El nombre del grupo debe tener al menos 3 caracteres.</div>
+                }
+            </div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label for="categoria" class="form-label">Categoría</label>
+            <select class="form-control" id="categoria" formControlName="categoria" required>
+                <option *ngFor="let categoria of categorias" [value]="categoria.id">
+                    <i [class]="categoria.icon"></i> {{ categoria.nombre }}
+                </option>
+            </select>
+            @if(categoria.invalid && (categoria.dirty || categoria.touched)){
+            <div class="text-danger">
+                @if(categoria.errors?.['required']){
+                <div>Por favor, selecciona una categoría.</div>
+                }
+            </div>
+            }
+        </div>
+
+
+        <button type="submit" class="btn btn-primary">Crear Grupo</button>
+    </form>
+</div>
