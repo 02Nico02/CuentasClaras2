@@ -389,7 +389,7 @@ public class UsuarioController {
      * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
      */
     @PostMapping("/sendGroupInvitation")
-    public ResponseEntity<String> sendGroupInvitation(
+    public ResponseEntity<Map<String, String>> sendGroupInvitation(
             @RequestParam Long receiverId,
             @RequestParam Long groupId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -397,13 +397,16 @@ public class UsuarioController {
 
         Optional<Usuario> userOptional = usuarioService.getByUsername((String) principal);
 
+        Map<String, String> response = new HashMap<>();
+
         if (userOptional.isPresent()) {
             Usuario usuario = userOptional.get();
 
             invitacionService.enviarInvitacion(usuario, receiverId, groupId);
-            return new ResponseEntity<>("Solicitud de grupo enviada con éxito.", HttpStatus.OK);
+            response.put("msg", "Solicitud de grupo enviada con éxito.");
+            return ResponseEntity.ok(response);
         }
-        return new ResponseEntity<>("Usuario no encontrado.", HttpStatus.NOT_FOUND);
+        return ResponseEntity.notFound().build();
 
     }
 

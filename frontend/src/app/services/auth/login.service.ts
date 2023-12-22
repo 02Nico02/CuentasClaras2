@@ -38,7 +38,7 @@ export class LoginService {
         localStorage.removeItem("token");
         this.currentUserLoginOn.next(false);
       }),
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -58,6 +58,9 @@ export class LoginService {
         } else {
           errorMessage = "Usuario o contraseña incorrecta";
         }
+      } else if (error.status === 403) {
+        localStorage.removeItem("token");
+        this.currentUserLoginOn.next(false);
       }
 
       console.error(`El backend retornó el código de estado ${error.status}, con el mensaje: ${errorMessage}`);

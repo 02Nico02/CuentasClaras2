@@ -1,188 +1,149 @@
 <app-nav></app-nav>
 
 <div *ngIf="grupo" class="container mt-5">
-  <div class="grupo-section">
-    <h2 class="grupo-name">{{ grupo2?.nombre }}</h2>
-    <div class="grupo-category">
-      <div class="category-icon">
-        <img
-          [src]="grupo2?.categoria?.icon"
-          alt="{{ grupo2?.categoria?.nombre }}"
-        />
-      </div>
-      <span>{{ grupo2?.categoria?.nombre }}</span>
-    </div>
-    <p class="grupo-balance">
-      Saldo:
-      <span
-        [ngClass]="{
-          'saldo-positivo': grupo.balance >= 0,
-          'saldo-negativo': grupo.balance < 0
-        }"
-      >
-        {{ formatBalanceString(grupo2?.balance || 0) }}
-      </span>
-    </p>
+    <div class="grupo-section">
+        <h2 class="grupo-name">{{ grupo2?.nombre }}</h2>
+        <div class="grupo-category">
+            <div class="category-icon">
+                <img src="../../../assets/icons/{{grupo2?.categoria?.icon}}"
+                    alt="icono de la categoria {{ grupo2?.categoria?.nombre }}">
+            </div>
+            <span>{{ grupo2?.categoria?.nombre }}</span>
+        </div>
+        <p class="grupo-balance">
+            Saldo:
+            <span [ngClass]="getClassBalance(grupo2!.balance)">
+                {{ formatBalanceString(grupo2?.balance || 0) }}
+            </span>
+        </p>
 
-    <div class="buttons-section">
-      <button data-bs-toggle="modal" data-bs-target="#modalAgregarMiembro">
-        Agregar Miembro
-      </button>
-      <button (click)="agregarGasto()">Agregar Gasto</button>
+        <div class="buttons-section">
+            <button data-bs-toggle="modal" data-bs-target="#modalAgregarMiembro">
+                Agregar Miembro
+            </button>
+            <button (click)="agregarGasto()">Agregar Gasto</button>
+        </div>
     </div>
-  </div>
 
-  <div class="sections">
-    <!-- Integrantes del grupo -->
-    <div class="section-box">
-      <h3>Integrantes del Grupo</h3>
-      <ul class="members-grid">
-        <li *ngFor="let miembro of grupo2?.miembros">
-          <span class="userName">{{ miembro.userName }}</span>
-          <span
-            *ngIf="miembro.balance != 0"
-            [ngClass]="{
+    <div class="sections">
+        <!-- Integrantes del grupo -->
+        <div class="section-box">
+            <h3>Integrantes del Grupo</h3>
+            <ul class="members-grid">
+                <li *ngFor="let miembro of grupo2?.miembros">
+                    <span class="userName">{{ miembro.userName }}</span>
+                    <span *ngIf="miembro.balance != 0" [ngClass]="{
               'saldo-positivo': miembro.balance > 0,
               'saldo-negativo': miembro.balance < 0
-            }"
-          >
-            {{
-              miembro.balance > 0
-                ? "+$" + miembro.balance.toFixed(2)
-                : "-$" + (-miembro.balance).toFixed(2)
-            }}
-          </span>
-        </li>
-      </ul>
-    </div>
+            }">
+                        {{
+                        miembro.balance > 0
+                        ? "+$" + miembro.balance.toFixed(2)
+                        : "-$" + (-miembro.balance).toFixed(2)
+                        }}
+                    </span>
+                </li>
+            </ul>
+            <div *ngIf="!grupo2?.miembros || grupo2?.miembros?.length === 0" class="message">
+                Eres el único miembro del grupo. ¡Invita a más personas!
+            </div>
+        </div>
 
-    <!-- Actividades -->
-    <div class="section-box">
-      <h3>Actividades Recientes</h3>
-      <ul class="activities-list">
-        <li
-          *ngFor="let actividad of visibleActividades"
-          class="activity-item"
-          [ngClass]="{ click: actividad.type === 'gasto' }"
-          (click)="
+        <!-- Actividades -->
+        <div class="section-box">
+            <h3>Actividades Recientes</h3>
+            <ul class="activities-list">
+                <li *ngFor="let actividad of visibleActividades" class="activity-item"
+                    [ngClass]="{ click: actividad.type === 'gasto' }" (click)="
             actividad.type === 'gasto'
               ? mostrarDetallesActividad(actividad)
               : null
-          "
-        >
-          <div class="activity-content">
-            <div class="activity-date">
-              {{ actividad.fecha | date : "medium" }}
+          ">
+                    <div class="activity-content">
+                        <div class="activity-date">
+                            {{ actividad.fecha | date : "medium" }}
+                        </div>
+                        <div class="activity-data">{{ actividad.data }}</div>
+                    </div>
+                </li>
+            </ul>
+            <div class="activity-buttons">
+                <button *ngIf="visibleActividades.length < (grupo2?.actividades?.length || 0)"
+                    (click)="mostrarMasActividades()">
+                    Ver más
+                </button>
+                <button *ngIf="visibleActividades.length > 5" (click)="mostrarMenosActividades()">
+                    Ver menos
+                </button>
             </div>
-            <div class="activity-data">{{ actividad.data }}</div>
-          </div>
-        </li>
-      </ul>
-      <div class="activity-buttons">
-        <button
-          *ngIf="visibleActividades.length < (grupo2?.actividades?.length || 0)"
-          (click)="mostrarMasActividades()"
-        >
-          Ver más
-        </button>
-        <button
-          *ngIf="visibleActividades.length > 5"
-          (click)="mostrarMenosActividades()"
-        >
-          Ver menos
-        </button>
-      </div>
-    </div>
-
-    <!-- Deudas -->
-    <div class="section-box">
-      <h3>Deudas</h3>
-      <ul class="deudas-grid">
-        <li *ngFor="let deuda of grupo2?.deudasUsuarios" class="deuda-item">
-          <div class="deuda-data">{{ deuda.data }}</div>
-          <button
-            *ngIf="deuda.usuarioDebe"
-            (click)="pagarDeuda(deuda)"
-            class="button pagar"
-          >
-            Pagar
-          </button>
-        </li>
-      </ul>
-    </div>
-  </div>
-  <div
-    class="modal fade"
-    id="modalAgregarMiembro"
-    tabindex="-1"
-    aria-labelledby="modalAgregarMiembroLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalAgregarMiembroLabel">
-            Agregar Miembro al Grupo
-          </h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
+            <div *ngIf="!grupo2?.actividades || grupo2?.actividades?.length === 0" class="message">
+                Aún no hay actividades registradas. ¡Agrega un gasto!
+            </div>
         </div>
-        <div class="modal-body">
-          <input
-            type="text"
-            class="form-control mb-3"
-            placeholder="Buscar usuarios..."
-            [(ngModel)]="filtroUsuarios"
-          />
+
+        <!-- Deudas -->
+        <div class="section-box">
+            <h3>Deudas</h3>
+            <ul class="deudas-grid">
+                <li *ngFor="let deuda of grupo2?.deudasUsuarios" class="deuda-item">
+                    <div class="deuda-data">{{ deuda.data }}</div>
+                    <button *ngIf="deuda.usuarioDebe" (click)="pagarDeuda(deuda.id)" class="button pagar">
+                        Pagar
+                    </button>
+                </li>
+            </ul>
+            <div *ngIf="!grupo2?.deudasUsuarios || grupo2?.deudasUsuarios?.length === 0" class="message">
+                Aún no hay deudas registradas.
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalAgregarMiembro" tabindex="-1" aria-labelledby="modalAgregarMiembroLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAgregarMiembroLabel">
+                        Agregar Miembro al Grupo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control mb-3" placeholder="Buscar usuarios..."
+                        [(ngModel)]="filtroUsuarios" (keyup)="buscarUsuarios()" />
 
                     <h6>Amigos</h6>
                     <ul class="scroll-list list-group">
                         <li *ngFor="let amigo of amigos"
                             class="list-group-item d-flex justify-content-between align-items-center">
                             <span>{{ amigo.userName }}</span>
-                            <button (click)="agregarMiembroSeleccionado(amigo)" class="btn btn-success">Enviar
-                                invitación</button>
+                            <button [disabled]="amigo.solicitudEnviada" (click)="agregarMiembroSeleccionado(amigo)"
+                                class="btn btn-success">{{
+                                amigo.solicitudEnviada ? 'Enviada' : 'Enviar invitación' }}</button>
                         </li>
                         <li *ngIf="amigos && amigos.length === 0" class="list-group-item">No hay amigos disponibles para
                             mostrar.</li>
                     </ul>
 
-          <h6>Usuarios</h6>
-          <ul class="scroll-list list-group">
-            <li
-              *ngFor="let usuario of usuarios"
-              class="list-group-item d-flex justify-content-between align-items-center"
-            >
-              <span>{{ usuario.userName }}</span>
-              <button
-                (click)="agregarMiembroSeleccionado(usuario)"
-                class="btn btn-primary"
-              >
-                Enviar invitación
-              </button>
-            </li>
-            <li
-              *ngIf="usuarios && usuarios.length === 0"
-              class="list-group-item"
-            >
-              No hay usuarios disponibles para mostrar.
-            </li>
-          </ul>
+                    <h6>Usuarios</h6>
+                    <ul class="scroll-list list-group">
+                        <li *ngFor="let usuario of usuarios"
+                            class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ usuario.userName }}</span>
+                            <button (click)="agregarMiembroSeleccionado(usuario)" class="btn btn-primary">
+                                Enviar invitación
+                            </button>
+                        </li>
+                        <li *ngIf="usuarios && usuarios.length === 0" class="list-group-item">
+                            No hay usuarios disponibles para mostrar.
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
     </div>
-  </div>
 </div>

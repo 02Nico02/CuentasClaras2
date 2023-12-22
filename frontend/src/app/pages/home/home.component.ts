@@ -51,31 +51,6 @@ export class HomeComponent {
     })
   }
 
-  // constructor(private userService:UserService, private loginService:LoginService, private router:Router){
-  //   this.userService.getUserByUsername().subscribe({
-  //     next:(userData)=>{
-  //       this.userGroups=userData
-  //     },
-  //     error:(errorData)=>{
-  //       this.errorMessage=errorData
-  //     },
-  //     complete:()=>{
-  //         console.info("User Data ok")
-  //       }
-
-  //     }) 
-  //   }
-
-  // ngOnInit(): void {
-  //   this.loginService.currentUserLoginOn.subscribe(
-  //     {
-  //       next: (userLoginOn) => {
-  //         this.userLoginOn = userLoginOn;
-  //       }
-  //     }
-  //   )
-  // }
-
   createGroup() {
     this.router.navigate(['/crear-grupo'])
   }
