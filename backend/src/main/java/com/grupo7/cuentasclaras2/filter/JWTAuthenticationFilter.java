@@ -58,6 +58,7 @@ public class JWTAuthenticationFilter implements Filter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(request, response);
         } catch (UnauthorizedException e) {
+            System.out.println(e);
             res.setStatus(HttpStatus.FORBIDDEN.value());
             res.getWriter().write("Error de autorización: " + e.getMessage());
         }
