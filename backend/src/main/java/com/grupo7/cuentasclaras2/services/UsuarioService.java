@@ -15,6 +15,7 @@ import com.grupo7.cuentasclaras2.exception.UserException;
 import com.grupo7.cuentasclaras2.modelos.DeudaUsuario;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
+import com.grupo7.cuentasclaras2.repositories.DeudaUsuarioRepository;
 import com.grupo7.cuentasclaras2.repositories.UsuarioRepository;
 
 @Service
@@ -22,6 +23,9 @@ import com.grupo7.cuentasclaras2.repositories.UsuarioRepository;
 public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private DeudaUsuarioRepository deudaUsuarioRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -224,4 +228,19 @@ public class UsuarioService {
         return usuarioRepository.findUsersByUsernameNotFriends(usernameQuery, usuario.getId());
     }
 
+    public double calcularBalance(Usuario usuario) {
+        List<DeudaUsuario> deudaUsuarios = deudaUsuarioRepository.findByAcreedorORDeudor(usuario);
+
+        double balanceFinal = 0.0;
+
+        for (DeudaUsuario deuda : deudaUsuarios) {
+            if (usuario.equals(deuda.getAcreedor())) {
+                balanceFinal += deuda.getMonto();
+            } else if (usuario.equals(deuda.getDeudor())) {
+                balanceFinal -= deuda.getMonto();
+            }
+        }
+
+        return balanceFinal;
+    }
 }

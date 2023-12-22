@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.grupo7.cuentasclaras2.modelos.DeudaUsuario;
@@ -36,5 +38,8 @@ public interface DeudaUsuarioRepository extends JpaRepository<DeudaUsuario, Long
     List<DeudaUsuario> findByAcreedorAndGrupo(Usuario deudor, Grupo grupo);
 
     List<DeudaUsuario> findByDeudorAndAcreedorAndMonto(Usuario deudor, Usuario acreedor, double monto);
+
+    @Query("SELECT du FROM DeudaUsuario du WHERE du.acreedor = :usuario OR du.deudor = :usuario")
+    List<DeudaUsuario> findByAcreedorORDeudor(@Param("usuario") Usuario usuario);
 
 }

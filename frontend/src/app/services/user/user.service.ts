@@ -1,10 +1,11 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { GrupoPreviewDTO } from '../group/grupoPreview';
 import { AmigoDTO } from './amigo.dto';
 import { User } from '../auth/user';
+import { userPreview } from '../auth/userPreview';
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +33,25 @@ export class UserService {
 
   sendFriendRequestById(receiverId: number): Observable<any> {
     return this.http.post<any>(`${environment.urlApi}users/sendFriendRequestById?receiverId=${receiverId}`, {});
+  }
+
+  getUserInfo(): Observable<userPreview> {
+    return this.http.get<userPreview>(`${environment.urlApi}users/userInfo`);
+  }
+
+  acceptFriendRequest(invitationId: number): Observable<any> {
+    return this.http.post<any>(`${environment.urlApi}users/acceptFriendRequest?invitationId=${invitationId}`, {});
+  }
+
+  declineFriendRequest(invitationId: number): Observable<any> {
+    return this.http.post<any>(`${environment.urlApi}users/rejectFriendRequest?invitationId=${invitationId}`, {});
+  }
+
+  acceptGroupInvitation(invitationId: number): Observable<any> {
+    return this.http.post<any>(`${environment.urlApi}groups/acceptGroupInvitation?invitationId=${invitationId}`, {});
+  }
+  declineGroupInvitation(invitationId: number): Observable<any> {
+    return this.http.post<any>(`${environment.urlApi}users/rejectGroupInvitation?invitationId=${invitationId}`, {});
   }
 
 
