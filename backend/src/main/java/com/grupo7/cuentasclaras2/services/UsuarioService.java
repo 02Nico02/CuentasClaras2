@@ -220,4 +220,8 @@ public class UsuarioService {
         return usuariosFueraDelGrupo;
     }
 
+    public List<Usuario> findUsersByUsernameNotFriends(String usernameQuery, Usuario usuario) {
+        return usuarioRepository.findUsersByUsernameNotFriends(usernameQuery, usuario.getId());
+    }
+
 }

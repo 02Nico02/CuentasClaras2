@@ -1,7 +1,8 @@
-export interface User{
-    id:number;
-    userName:string,
-    email?:string,
-    nombres?:string,
-    apellido?:string,
+export interface User {
+    id: number;
+    userName: string,
+    email?: string,
+    nombres?: string,
+    apellido?: string,
+    solicitudEnviada?: boolean;
 }

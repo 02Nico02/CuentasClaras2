@@ -36,4 +36,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     List<Usuario> findUsersNotInGroupByQuery(@Param("idGrupo") Long idGrupo,
             @Param("usernameQuery") String usernameQuery);
 
+    @Query("SELECT u FROM Usuario u " +
+            "WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :usernameQuery, '%')) " +
+            "AND u.id <> :id " +
+            "AND u NOT IN (SELECT a FROM Usuario usuario JOIN usuario.amigos a WHERE usuario.id = :id) " +
+            "AND u NOT IN (SELECT ir.receptor FROM InvitacionAmistad ir WHERE ir.remitente.id = :id) " +
+            "AND u NOT IN (SELECT ie.remitente FROM InvitacionAmistad ie WHERE ie.receptor.id = :id)")
+    List<Usuario> findUsersByUsernameNotFriends(@Param("usernameQuery") String usernameQuery, @Param("id") long id);
+
 }

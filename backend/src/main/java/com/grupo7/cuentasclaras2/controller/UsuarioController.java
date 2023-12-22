@@ -11,8 +11,10 @@ import com.grupo7.cuentasclaras2.DTO.AmigoDTO;
 import com.grupo7.cuentasclaras2.DTO.Credentials;
 import com.grupo7.cuentasclaras2.DTO.DeudaUsuarioDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoPreviewDTO;
+import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionAmistadDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionGrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.MsgResponseDTO;
 import com.grupo7.cuentasclaras2.DTO.NotificationDTO;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
 import com.grupo7.cuentasclaras2.DTO.UsernameAndPassword;
@@ -222,6 +224,27 @@ public class UsuarioController {
         }
     }
 
+    @GetMapping("/usersNotFriends")
+    public ResponseEntity<List<IdEmailUsuarioDTO>> getUsersNotFriends(@RequestParam String usernameQuery) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        String usernameAutenticado = (String) principal;
+
+        Optional<Usuario> usuarioAutenticadoOptional = usuarioService.getByUsername(usernameAutenticado);
+        if (usuarioAutenticadoOptional.isPresent()) {
+            Usuario usuarioAutenticado = usuarioAutenticadoOptional.get();
+            List<Usuario> usuariosNotFriends = usuarioService.findUsersByUsernameNotFriends(usernameQuery,
+                    usuarioAutenticado);
+
+            List<IdEmailUsuarioDTO> usuariosNotFriendsDTO = usuariosNotFriends.stream()
+                    .map(IdEmailUsuarioDTO::new)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(usuariosNotFriendsDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     /**
      * Envía una solicitud de amistad desde el usuario actual al usuario
      * destinatario.
@@ -255,6 +278,42 @@ public class UsuarioController {
                     HttpStatus.NOT_FOUND);
         }
 
+    }
+
+    /**
+     * Envía una solicitud de amistad desde el usuario actual al usuario
+     * destinatario.
+     *
+     * @param receiverId ID del usuario destinatario.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
+    @PostMapping("/sendFriendRequestById")
+    public ResponseEntity<MsgResponseDTO> sendFriendRequestById(
+            @RequestParam Long receiverId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+
+        Optional<Usuario> senderOptional = usuarioService.getByUsername((String) principal);
+
+        if (senderOptional.isPresent()) {
+            Usuario sender = senderOptional.get();
+            Optional<Usuario> receiverOptional = usuarioService.getById(receiverId);
+
+            if (receiverOptional.isPresent()) {
+                Usuario receiver = receiverOptional.get();
+                invitacionAmistadService.sendFriendRequest(sender, receiver);
+                return new ResponseEntity<>(
+                        new MsgResponseDTO("Solicitud de amistad enviada con éxito.", HttpStatus.OK),
+                        HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(
+                        new MsgResponseDTO("Usuario destinatario no encontrado.", HttpStatus.NOT_FOUND),
+                        HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(new MsgResponseDTO("Usuario remitente no encontrado.", HttpStatus.NOT_FOUND),
+                    HttpStatus.NOT_FOUND);
+        }
     }
 
     /**
