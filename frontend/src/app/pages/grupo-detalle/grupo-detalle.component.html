@@ -1,19 +1,19 @@
 <app-nav></app-nav>
 
-<div *ngIf="grupo" class="container mt-5">
+<div *ngIf="grupo2" class="container mt-5">
     <div class="grupo-section">
-        <h2 class="grupo-name">{{ grupo2?.nombre }}</h2>
+        <h2 class="grupo-name">{{ grupo2.nombre }}</h2>
         <div class="grupo-category">
             <div class="category-icon">
-                <img src="../../../assets/icons/{{grupo2?.categoria?.icon}}"
-                    alt="icono de la categoria {{ grupo2?.categoria?.nombre }}">
+                <img src="../../../assets/icons/{{grupo2.categoria.icon}}"
+                    alt="icono de la categoria {{ grupo2.categoria.nombre }}">
             </div>
-            <span>{{ grupo2?.categoria?.nombre }}</span>
+            <span>{{ grupo2.categoria.nombre }}</span>
         </div>
         <p class="grupo-balance">
             Saldo:
-            <span [ngClass]="getClassBalance(grupo2!.balance)">
-                {{ formatBalanceString(grupo2?.balance || 0) }}
+            <span [ngClass]="getClassBalance(grupo2.balance)">
+                {{ formatBalanceString(grupo2.balance || 0) }}
             </span>
         </p>
 
@@ -30,7 +30,7 @@
         <div class="section-box">
             <h3>Integrantes del Grupo</h3>
             <ul class="members-grid">
-                <li *ngFor="let miembro of grupo2?.miembros">
+                <li *ngFor="let miembro of grupo2.miembros">
                     <span class="userName">{{ miembro.userName }}</span>
                     <span *ngIf="miembro.balance != 0" [ngClass]="{
               'saldo-positivo': miembro.balance > 0,
@@ -44,7 +44,7 @@
                     </span>
                 </li>
             </ul>
-            <div *ngIf="!grupo2?.miembros || grupo2?.miembros?.length === 0" class="message">
+            <div *ngIf="!grupo2.miembros || grupo2.miembros.length === 0" class="message">
                 Eres el único miembro del grupo. ¡Invita a más personas!
             </div>
         </div>
@@ -68,7 +68,7 @@
                 </li>
             </ul>
             <div class="activity-buttons">
-                <button *ngIf="visibleActividades.length < (grupo2?.actividades?.length || 0)"
+                <button *ngIf="visibleActividades.length < (grupo2.actividades.length || 0)"
                     (click)="mostrarMasActividades()">
                     Ver más
                 </button>

@@ -29,6 +29,7 @@ export class NotificationComponent implements OnInit {
       this.userService.acceptFriendRequest(notification.id).subscribe(
         response => {
           this.notifications = this.notifications.filter(notif => notif.id !== notification.id);
+          location.reload();
         },
         error => {
           alert("Error al aceptar la invitación");

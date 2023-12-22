@@ -18,10 +18,10 @@ export class GroupService {
 
   obtenerPosiblesMiembros(groupId: string, usernameQuery: string): Observable<PosiblesMiembrosDTO> {
     return this.http.get<PosiblesMiembrosDTO>(`${environment.urlApi}group/${groupId}/searchUsers?usernameQuery=${usernameQuery}`);
-}
-  pagarDeuda(deuda: any, idGrupo:number): Observable<any>{
+  }
+  pagarDeuda(deuda: any, idGrupo: number): Observable<any> {
 
-    let aux={
+    let aux = {
       "monto": deuda.monto,
       "destinatarioId": deuda.idAcreedor,
       "grupoId": idGrupo
@@ -30,7 +30,7 @@ export class GroupService {
     return this.http.post<any>(`${environment.urlApi}pay/new`, aux)
   }
 
-  crearGrupo(grupo: any): Observable<any>{
+  crearGrupo(grupo: any): Observable<any> {
     console.log(grupo)
     return this.http.post<any>(environment.urlApi + "group/newGroup", grupo)
   }
