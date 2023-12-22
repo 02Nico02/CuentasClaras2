@@ -55,6 +55,7 @@ nav {
 
 .notification-icon img {
     height: 24px;
+    cursor: pointer;
 }
 
 .logout-button {

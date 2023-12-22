@@ -11,10 +11,13 @@ import com.grupo7.cuentasclaras2.DTO.AmigoDTO;
 import com.grupo7.cuentasclaras2.DTO.Credentials;
 import com.grupo7.cuentasclaras2.DTO.DeudaUsuarioDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoPreviewDTO;
+import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionAmistadDTO;
 import com.grupo7.cuentasclaras2.DTO.InvitacionGrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.MsgResponseDTO;
 import com.grupo7.cuentasclaras2.DTO.NotificationDTO;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
+import com.grupo7.cuentasclaras2.DTO.UserInfoDTO;
 import com.grupo7.cuentasclaras2.DTO.UsernameAndPassword;
 import com.grupo7.cuentasclaras2.DTO.UsuarioDTO;
 import com.grupo7.cuentasclaras2.exception.UnauthorizedException;
@@ -30,7 +33,9 @@ import com.grupo7.cuentasclaras2.services.UsuarioService;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -182,7 +187,6 @@ public class UsuarioController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok().build();
-
     }
 
     /**
@@ -217,6 +221,27 @@ public class UsuarioController {
                     .collect(Collectors.toList());
 
             return new ResponseEntity<>(friendsDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/usersNotFriends")
+    public ResponseEntity<List<IdEmailUsuarioDTO>> getUsersNotFriends(@RequestParam String usernameQuery) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        String usernameAutenticado = (String) principal;
+
+        Optional<Usuario> usuarioAutenticadoOptional = usuarioService.getByUsername(usernameAutenticado);
+        if (usuarioAutenticadoOptional.isPresent()) {
+            Usuario usuarioAutenticado = usuarioAutenticadoOptional.get();
+            List<Usuario> usuariosNotFriends = usuarioService.findUsersByUsernameNotFriends(usernameQuery,
+                    usuarioAutenticado);
+
+            List<IdEmailUsuarioDTO> usuariosNotFriendsDTO = usuariosNotFriends.stream()
+                    .map(IdEmailUsuarioDTO::new)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(usuariosNotFriendsDTO, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -258,29 +283,70 @@ public class UsuarioController {
     }
 
     /**
+     * Envía una solicitud de amistad desde el usuario actual al usuario
+     * destinatario.
+     *
+     * @param receiverId ID del usuario destinatario.
+     * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
+     */
+    @PostMapping("/sendFriendRequestById")
+    public ResponseEntity<MsgResponseDTO> sendFriendRequestById(
+            @RequestParam Long receiverId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+
+        Optional<Usuario> senderOptional = usuarioService.getByUsername((String) principal);
+
+        if (senderOptional.isPresent()) {
+            Usuario sender = senderOptional.get();
+            Optional<Usuario> receiverOptional = usuarioService.getById(receiverId);
+
+            if (receiverOptional.isPresent()) {
+                Usuario receiver = receiverOptional.get();
+                invitacionAmistadService.sendFriendRequest(sender, receiver);
+                return new ResponseEntity<>(
+                        new MsgResponseDTO("Solicitud de amistad enviada con éxito.", HttpStatus.OK),
+                        HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(
+                        new MsgResponseDTO("Usuario destinatario no encontrado.", HttpStatus.NOT_FOUND),
+                        HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(new MsgResponseDTO("Usuario remitente no encontrado.", HttpStatus.NOT_FOUND),
+                    HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
      * Acepta una solicitud de amistad pendiente.
      *
      * @param invitationId Identificador de la invitación de amistad a aceptar.
      * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
      */
     @PostMapping("/acceptFriendRequest")
-    public ResponseEntity<String> acceptFriendRequest(
+    public ResponseEntity<Map<String, String>> acceptFriendRequest(
             @RequestParam Long invitationId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
         Optional<Usuario> userOptional = usuarioService.getByUsername((String) principal);
 
+        Map<String, String> response = new HashMap<>();
+
         if (userOptional.isPresent()) {
             Usuario usuario = userOptional.get();
             boolean operacionExitosa = invitacionAmistadService.aceptarSolicitudAmistad(usuario, invitationId);
             if (operacionExitosa) {
-                return new ResponseEntity<>("Solicitud de amistad aceptada con éxito.", HttpStatus.OK);
+                response.put("msg", "Solicitud de amistad aceptada con éxito.");
+                return ResponseEntity.ok(response);
             } else {
-                return new ResponseEntity<>("La operación no pudo ser completada.", HttpStatus.BAD_REQUEST);
+                response.put("error", "La operación no pudo ser completada.");
+                return ResponseEntity.badRequest().body(response);
             }
         } else {
-            return new ResponseEntity<>("Usuario no encontrado.", HttpStatus.NOT_FOUND);
+            response.put("error", "Usuario no encontrado.");
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -291,23 +357,27 @@ public class UsuarioController {
      * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
      */
     @PostMapping("/rejectFriendRequest")
-    public ResponseEntity<String> rejectFriendRequest(
+    public ResponseEntity<Map<String, String>> rejectFriendRequest(
             @RequestParam Long invitationId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
         Optional<Usuario> userOptional = usuarioService.getByUsername((String) principal);
 
+        Map<String, String> response = new HashMap<>();
+
         if (userOptional.isPresent()) {
             Usuario usuario = userOptional.get();
             boolean operacionExitosa = invitacionAmistadService.rechazarSolicitudAmistad(usuario, invitationId);
             if (operacionExitosa) {
-                return new ResponseEntity<>("Solicitud de amistad rechazada con éxito.", HttpStatus.OK);
+                response.put("msg", "Solicitud de amistad rechazada con éxito.");
+                return ResponseEntity.ok(response);
             } else {
-                return new ResponseEntity<>("La operación no pudo ser completada.", HttpStatus.BAD_REQUEST);
+                response.put("error", "La operación no pudo ser completada.");
+                return ResponseEntity.badRequest().body(response);
             }
         } else {
-            return new ResponseEntity<>("Usuario no encontrado.", HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -344,19 +414,22 @@ public class UsuarioController {
      * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
      */
     @PostMapping("/acceptGroupInvitation")
-    public ResponseEntity<String> acceptGroupInvitation(
+    public ResponseEntity<Map<String, String>> acceptGroupInvitation(
             @RequestParam Long invitationId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
         Optional<Usuario> userOptional = usuarioService.getByUsername((String) principal);
 
+        Map<String, String> response = new HashMap<>();
+
         if (userOptional.isPresent()) {
             Usuario usuario = userOptional.get();
             invitacionService.aceptarInvitacion(usuario, invitationId);
-            return new ResponseEntity<>("Invitación de grupo aceptada con éxito.", HttpStatus.OK);
+            response.put("msg", "Invitación de grupo aceptada con éxito.");
+            return ResponseEntity.ok(response);
         } else {
-            return new ResponseEntity<>("Usuario no encontrado.", HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -367,19 +440,23 @@ public class UsuarioController {
      * @return ResponseEntity con un mensaje de estado y HttpStatus correspondiente.
      */
     @PostMapping("/rejectGroupInvitation")
-    public ResponseEntity<String> rejectGroupInvitation(
+    public ResponseEntity<Map<String, String>> rejectGroupInvitation(
             @RequestParam Long invitationId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
         Optional<Usuario> userOptional = usuarioService.getByUsername((String) principal);
 
+        Map<String, String> response = new HashMap<>();
+
         if (userOptional.isPresent()) {
             Usuario usuario = userOptional.get();
             invitacionService.rechazarInvitacion(usuario, invitationId);
-            return new ResponseEntity<>("Invitación de grupo rechazada con éxito.", HttpStatus.OK);
+            response.put("msg", "Invitación de grupo rechazada con éxito.");
+            return ResponseEntity.ok(response);
+
         } else {
-            return new ResponseEntity<>("Usuario no encontrado.", HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -419,6 +496,40 @@ public class UsuarioController {
                     .collect(Collectors.toList());
 
             return new ResponseEntity<>(notificationsDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/userInfo")
+    public ResponseEntity<UserInfoDTO> getUserInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+
+        Optional<Usuario> user = usuarioService.getByUsername((String) principal);
+
+        if (user.isPresent()) {
+            Usuario usuario = user.get();
+
+            List<NotificationDTO> notificationsDTO = Stream
+                    .concat(
+                            usuario.getInvitacionesAmigosRecibidas().stream()
+                                    .map(InvitacionAmistadDTO::new)
+                                    .map(NotificationDTO::new),
+                            usuario.getInvitacionesGrupo().stream()
+                                    .map(InvitacionGrupoDTO::new)
+                                    .map(NotificationDTO::new))
+                    .sorted(Comparator.comparing(NotificationDTO::getFechaCreacion).reversed())
+                    .collect(Collectors.toList());
+
+            double balance = usuarioService.calcularBalance(usuario);
+
+            UserInfoDTO userInfoDTO = new UserInfoDTO();
+            userInfoDTO.setUsername(usuario.getUsername());
+            userInfoDTO.setNotifications(notificationsDTO);
+            userInfoDTO.setBalance(balance);
+
+            return new ResponseEntity<>(userInfoDTO, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

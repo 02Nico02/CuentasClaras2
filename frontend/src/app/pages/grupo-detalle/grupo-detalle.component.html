@@ -139,27 +139,17 @@
             [(ngModel)]="filtroUsuarios"
           />
 
-          <h6>Amigos</h6>
-          <ul class="scroll-list list-group">
-            <li
-              *ngFor="let amigo of amigos"
-              class="list-group-item d-flex justify-content-between align-items-center"
-            >
-              <span>{{ amigo.userName }}</span>
-              <button
-                (click)="agregarMiembroSeleccionado(amigo)"
-                class="btn btn-success"
-              >
-                Enviar invitación
-              </button>
-            </li>
-            <li *ngIf="amigos && amigos.length === 0" class="list-group-item">
-              No hay amigos disponibles para mostrar.
-            </li>
-          </ul>
-          <ng-template #noAmigos>
-            <p>No hay amigos disponibles para mostrar.</p>
-          </ng-template>
+                    <h6>Amigos</h6>
+                    <ul class="scroll-list list-group">
+                        <li *ngFor="let amigo of amigos"
+                            class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ amigo.userName }}</span>
+                            <button (click)="agregarMiembroSeleccionado(amigo)" class="btn btn-success">Enviar
+                                invitación</button>
+                        </li>
+                        <li *ngIf="amigos && amigos.length === 0" class="list-group-item">No hay amigos disponibles para
+                            mostrar.</li>
+                    </ul>
 
           <h6>Usuarios</h6>
           <ul class="scroll-list list-group">

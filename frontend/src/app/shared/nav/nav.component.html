@@ -10,13 +10,14 @@
     </ul>
 
     <div class="user-info">
-        <div class="notification-icon" (click)="toggleDropdown()">
+        <div *ngIf="userInfo && userInfo.notifications && userInfo.notifications.length > 0" class="notification-icon"
+            (click)="toggleDropdown()">
             <img src="../../../assets/icons/notifications-active_118870.png" alt="Icono de notificaciones">
             <div *ngIf="isDropdownOpen" class="dropdown-content" [ngClass]="{'oculto': !isDropdownOpen,}">
-                <app-notification></app-notification>
+                <app-notification [notifications]="userInfo ? userInfo.notifications : []"></app-notification>
             </div>
         </div>
-        <span>UserName</span>
+        <span>{{userInfo?.username}}</span>
 
         <span class="user-balance">
             Saldo: {{ formatBalance() }}

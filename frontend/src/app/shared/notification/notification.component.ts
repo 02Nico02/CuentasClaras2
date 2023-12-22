@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Notification } from './Notification';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { UserService } from '../../services/user/user.service';
 
 @Component({
   selector: 'app-notification',
@@ -13,44 +15,65 @@ export class NotificationComponent implements OnInit {
   @Input() notifications: Notification[] = [];
   @Output() openModal = new EventEmitter<boolean>();
 
-  ngOnInit(): void {
-    this.notifications = [
-      {
-        id: 1,
-        type: 'Amistad',
-        fechaCreacion: new Date(),
-        idRemitenteAmistad: 101,
-        usernameRemitenteAmistad: 'user1'
-      },
-      {
-        id: 2,
-        type: 'Grupo',
-        fechaCreacion: new Date(),
-        idGrupo: 201,
-        nombreGrupo: 'Grupo de Viajes',
-        idRemitenteGrupo: 102,
-        usernameRemitenteGrupo: 'user2'
-      },
-      {
-        id: 3,
-        type: 'Amistad',
-        fechaCreacion: new Date(),
-        idRemitenteAmistad: 103,
-        usernameRemitenteAmistad: 'user3'
-      },
-    ];
-  }
+  constructor(private router: Router, private userService: UserService) { }
+
+  ngOnInit(): void { }
 
   onNotificationClick() {
     this.openModal.emit(true);
   }
 
   acceptInvitation(notification: Notification): void {
-    alert("Implementar aceptar")
+
+    if (notification.type === "Amistad") {
+      this.userService.acceptFriendRequest(notification.id).subscribe(
+        response => {
+          this.notifications = this.notifications.filter(notif => notif.id !== notification.id);
+        },
+        error => {
+          alert("Error al aceptar la invitación");
+          console.error("Error:", error);
+        }
+      );
+    } else if (notification.type === "Grupo") {
+      this.userService.acceptGroupInvitation(notification.id).subscribe(
+        response => {
+          this.router.navigate([`/grupo/${notification.idGrupo}/detalle`]);
+        },
+        error => {
+          alert("Error al aceptar la invitación al grupo");
+          console.error("Error:", error);
+        }
+      );
+    } else {
+      alert("Tipo de notificación no reconocido");
+    }
   }
 
   declineInvitation(notification: Notification): void {
-    alert("Implementar rechazar")
+    if (notification.type === "Amistad") {
+      this.userService.declineFriendRequest(notification.id).subscribe(
+        response => {
+          this.notifications = this.notifications.filter(notif => notif.id !== notification.id);
+        },
+        error => {
+          alert("Error al rechazar la invitación");
+          console.error("Error:", error);
+        }
+      );
+    } else if (notification.type === "Grupo") {
+      this.userService.declineGroupInvitation(notification.id).subscribe(
+        response => {
+          this.notifications = this.notifications.filter(notif => notif.id !== notification.id);
+        },
+        error => {
+          alert("Error al rechazar la invitación al grupo");
+          console.error("Error:", error);
+        }
+      );
+    } else {
+      alert("Tipo de notificación no reconocido");
+    }
   }
 
   formatTheNotification(notification: Notification): string {
@@ -64,8 +87,9 @@ export class NotificationComponent implements OnInit {
   }
 
   calculateTimePassed(date: Date): string {
+    const fecha = new Date(date);
     const now = new Date();
-    const diff = Math.abs(now.getTime() - date.getTime());
+    const diff = Math.abs(now.getTime() - fecha.getTime());
     const minutes = Math.floor(diff / (1000 * 60));
     if (minutes < 60) {
       return `${minutes} min`;

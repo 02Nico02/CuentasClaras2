@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { LoginService } from '../../services/auth/login.service';
 import { Router } from '@angular/router';
 import { NotificationComponent } from '../notification/notification.component';
+import { UserService } from '../../services/user/user.service';
+import { userPreview } from '../../services/auth/userPreview';
 
 @Component({
   selector: 'app-nav',
@@ -11,21 +13,28 @@ import { NotificationComponent } from '../notification/notification.component';
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.css'
 })
-export class NavComponent {
-  @Input() pagActual: string | undefined;
+export class NavComponent implements OnInit {
 
-  saldoUsuario: number = 0.0;
   isDropdownOpen: boolean = false;
+  userInfo: userPreview | null = null;
 
-  constructor(private loginService: LoginService, private router: Router) { }
+  constructor(private loginService: LoginService, private router: Router, private userService: UserService) { }
+
+  ngOnInit(): void {
+    this.fetchUserInfo();
+  }
 
   formatBalance(): string {
-    if (this.saldoUsuario > 0) {
-      return `+$${this.saldoUsuario.toFixed(2)}`;
-    } else if (this.saldoUsuario < 0) {
-      return `-$${Math.abs(this.saldoUsuario).toFixed(2)}`;
+    if (this.userInfo && typeof this.userInfo.balance !== 'undefined') {
+      if (this.userInfo.balance > 0) {
+        return `+$${this.userInfo.balance.toFixed(2)}`;
+      } else if (this.userInfo.balance < 0) {
+        return `-$${Math.abs(this.userInfo.balance).toFixed(2)}`;
+      } else {
+        return '$0';
+      }
     } else {
-      return '$0';
+      return 'Balance no disponible';
     }
   }
 
@@ -45,5 +54,17 @@ export class NavComponent {
 
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  fetchUserInfo(): void {
+    this.userService.getUserInfo().subscribe(
+      response => {
+        this.userInfo = response;
+        console.log(response)
+      },
+      error => {
+        console.error('Error al obtener información del usuario:', error);
+      }
+    );
   }
 }
