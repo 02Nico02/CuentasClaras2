@@ -1,32 +1,174 @@
-.card-right {
-  width: 70%;
+.group-card {
+  max-height: 520px;
   display: flex;
-  background: rgba(220, 216, 241, 0.75);
-  border-radius: 0 25px 25px 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0px 5px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+  width: 100%;
 }
+
+.group-card:hover {
+  box-shadow: 0px 7px 12px rgba(0, 0, 0, 0.15);
+}
+
 .card-left {
-  width: 30%;
+  flex: 0.3;
+  padding: 1.5rem;
+  background: rgba(220, 216, 241, 0.85);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.card-right {
+  flex: 1;
+  padding: 1.5rem;
+  background: #f7f7f7;
+  display: flex;
   flex-direction: column;
-  border-radius: 25px 0px 0px 25px;
-  background: rgba(220, 216, 241, 1);
+}
+
+.card-right h3 {
+  color: #482883;
 }
 
 .foto {
-  width: 150px;
-  height: 150px;
+  height: 130px;
+  width: 130px;
+  background-color: #A841CB;
   border-radius: 50%;
-  border: 1px solid green;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  color: #fff;
 }
+
+.foto img {
+  height: 100%;
+  width: 100%;
+}
+
 .category-container {
   display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  background: linear-gradient(45deg, #8B2BAE, #6A1E89);
+  border-radius: 20px;
+  padding: 5px 6px;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 0.7rem;
 }
 
 .category-logo {
-  width: 20px;
-  height: 20px;
+  background-color: #f4f4f4;
   border-radius: 50%;
-  border: 1px solid black;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.category-logo img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: block;
+}
+
+.category-name {
+  margin-left: 8px;
+  margin-right: 8px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.members-list {
+  margin-top: 1.3rem;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.member-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.member-chip {
+  background-color: #f4f4f4;
+  color: #333;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  font-weight: bold;
+}
+
+.member-chip:last-child {
+  margin-right: 0;
+}
+
+.bottom-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.balance-info {
+  margin-top: 1.3rem;
+  font-size: 1.1rem;
+  color: #777;
+}
+
+.balance-info span {
+  margin-left: 5px;
+}
+
+.balance-chip {
+  background-color: #f4f4f4;
+  color: #333;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-right: 10px;
+}
+
+.button {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.5rem;
+  background-color: #A841CB;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.button:hover {
+  background-color: #8B2BAE;
+}
+
+.negative-balance {
+  color: red;
+}
+
+.positive-balance {
+  color: green;
+}
+
+.zero-balance {
+  color: blue;
 }
