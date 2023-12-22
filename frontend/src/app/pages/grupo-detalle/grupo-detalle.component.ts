@@ -5,16 +5,22 @@ import { Title } from '@angular/platform-browser';
 import { GrupoDTO } from '../../services/group/grupo.dto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { GroupService } from '../../services/group/group.service';
+import { NavComponent } from '../../shared/nav/nav.component';
 
 
 @Component({
   selector: 'app-grupo-detalle',
   standalone: true,
-  imports: [RouterModule, ReactiveFormsModule, CommonModule, FormsModule],
+  imports: [RouterModule, ReactiveFormsModule, CommonModule, FormsModule,NavComponent],
   templateUrl: './grupo-detalle.component.html',
   styleUrl: './grupo-detalle.component.css'
 })
 export class GrupoDetalleComponent implements OnInit {
+
+
+  grupo2?: GrupoDTO
+
 
   grupo: GrupoDTO = {
     id: 1,
@@ -136,12 +142,24 @@ export class GrupoDetalleComponent implements OnInit {
     { id: 9, userName: 'usuario9' },
   ];
 
-  constructor(private route: ActivatedRoute, private router: Router, private titleService: Title) { }
+  constructor(private route: ActivatedRoute, private router: Router, private titleService: Title, private groupService:GroupService) { }
 
   ngOnInit(): void {
-    const grupoId = this.route.snapshot.paramMap.get('id');
     this.titleService.setTitle('Cuentas Claras - Detalle grupo');
-    this.cargarActividades();
+    console.log(this.visibleActividades.length)
+    // this.cargarActividades();
+    this.llamarAPI()
+  }
+
+  llamarAPI(){
+    const grupoId = this.route.snapshot.paramMap.get('id') || "1";
+    this.groupService.obtenerDetalleGrupo(grupoId).subscribe({
+      next:(res)=>{
+        this.grupo2=res
+        console.log(this.grupo2)
+      }
+    })
+
   }
 
   cargarActividades() {

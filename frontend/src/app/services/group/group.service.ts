@@ -11,7 +11,7 @@ export class GroupService {
 
   constructor(private http: HttpClient) { }
 
-  obtenerDetalleGrupo(idGrupo: number): Observable<GrupoDTO> {
+  obtenerDetalleGrupo(idGrupo: string): Observable<GrupoDTO> {
     return this.http.get<GrupoDTO>(`${environment.urlApi}group/${idGrupo}`);
   }
 }

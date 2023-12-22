@@ -14,6 +14,6 @@ export const routes: Routes = [
     { path: "crear-grupo", component: CrearGrupoComponent },
     { path: "amigos", component: FriendsListComponent },
     { path: "**", redirectTo: "login", pathMatch: "full" },
-    // {path:"**",redirectTo:"login", pathMatch:"full"},
+    {path:"**",redirectTo:"login", pathMatch:"full"},
 
 ];

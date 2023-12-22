@@ -16,6 +16,7 @@ import com.grupo7.cuentasclaras2.services.PagoService;
 import com.grupo7.cuentasclaras2.services.UsuarioService;
 
 @RestController
+@CrossOrigin(origins = { "http://localhost:4200" })
 @RequestMapping("/api/pay")
 public class PagoController {
 

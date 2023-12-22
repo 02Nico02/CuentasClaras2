@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
 import com.grupo7.cuentasclaras2.DTO.GastoDTO;
 import com.grupo7.cuentasclaras2.modelos.Gasto;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
@@ -25,6 +25,7 @@ import com.grupo7.cuentasclaras2.services.GrupoService;
 import com.grupo7.cuentasclaras2.services.UsuarioService;
 
 @RestController
+@CrossOrigin(origins = { "http://localhost:4200" })
 @RequestMapping("/api/spent")
 public class GastoController {
 	@Autowired
