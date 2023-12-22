@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
 import com.grupo7.cuentasclaras2.modelos.Pago;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
@@ -53,14 +53,16 @@ public class PagoController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		Object principal = authentication.getPrincipal();
 
+		// Obtiene un optional del usuario a partir del username que extrajo del token
 		Optional<Usuario> user = usuarioService.getByUsername((String) principal);
 
+		// Si no encuentra el usuario devuelve not found
 		if (!user.isPresent())
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+		// Si lo encuentra lo extrae del optional
 		Usuario usuario = user.get();
-		if (pagoDTO.getAutorId() != usuario.getId())
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		pagoDTO.setAutorId(usuario.getId());
 
 		Pago pagoGuardado = pagoService.guardarPagoDesdeDTO(pagoDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new PagoDTO(pagoGuardado));

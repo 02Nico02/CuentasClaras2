@@ -61,7 +61,7 @@
       <h3>Actividades Recientes</h3>
       <ul class="activities-list">
         <li
-          *ngFor="let actividad of grupo2?.actividades"
+          *ngFor="let actividad of visibleActividades"
           class="activity-item"
           [ngClass]="{ click: actividad.type === 'gasto' }"
           (click)="
@@ -102,7 +102,7 @@
           <div class="deuda-data">{{ deuda.data }}</div>
           <button
             *ngIf="deuda.usuarioDebe"
-            (click)="pagarDeuda(deuda.id)"
+            (click)="pagarDeuda(deuda)"
             class="button pagar"
           >
             Pagar
