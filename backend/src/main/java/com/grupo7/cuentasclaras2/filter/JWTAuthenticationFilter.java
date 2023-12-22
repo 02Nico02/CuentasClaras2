@@ -33,6 +33,7 @@ public class JWTAuthenticationFilter implements Filter {
         if ("/api/users/register".equals(req.getRequestURI()) || "/api/users/auth".equals(req.getRequestURI())
                 || "OPTIONS".equals(req.getMethod())) {
             System.out.println("dentro");
+            System.out.println(req.getRequestURI());
             chain.doFilter(request, response);
             return;
         }

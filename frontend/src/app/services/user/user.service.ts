@@ -48,11 +48,17 @@ export class UserService {
   }
 
   acceptGroupInvitation(invitationId: number): Observable<any> {
-    return this.http.post<any>(`${environment.urlApi}groups/acceptGroupInvitation?invitationId=${invitationId}`, {});
+    return this.http.post<any>(`${environment.urlApi}users/acceptGroupInvitation?invitationId=${invitationId}`, {});
   }
   declineGroupInvitation(invitationId: number): Observable<any> {
     return this.http.post<any>(`${environment.urlApi}users/rejectGroupInvitation?invitationId=${invitationId}`, {});
   }
+
+  sendGroupInvitation(receiverId: number, groupId: number): Observable<any> {
+    console.log("Antes de enviar receiver: " + receiverId + " grupo:" + groupId)
+    return this.http.post<any>(`${environment.urlApi}users/sendGroupInvitation?receiverId=${receiverId}&groupId=${groupId}`, {});
+  }
+
 
 
 

@@ -40,16 +40,14 @@ export class NavComponent implements OnInit {
 
   logout() {
     this.loginService.logout().subscribe({
-      next:() => {
+      next: () => {
         console.log("cerrada");
       },
-      error:(errorData) => {
+      error: (errorData) => {
         console.error("Error al cerrar sesión:", errorData);
-      },
-      complete:()=>{
-        this.router.navigate(['/login'])
       }
     });
+    this.router.navigate(['/login'])
   }
 
   toggleDropdown(): void {
