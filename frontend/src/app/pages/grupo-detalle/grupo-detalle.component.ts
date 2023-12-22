@@ -6,12 +6,13 @@ import { GrupoDTO } from '../../services/group/grupo.dto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GroupService } from '../../services/group/group.service';
+import { NavComponent } from '../../shared/nav/nav.component';
 
 
 @Component({
   selector: 'app-grupo-detalle',
   standalone: true,
-  imports: [RouterModule, ReactiveFormsModule, CommonModule, FormsModule],
+  imports: [RouterModule, ReactiveFormsModule, CommonModule, FormsModule,NavComponent],
   templateUrl: './grupo-detalle.component.html',
   styleUrl: './grupo-detalle.component.css'
 })

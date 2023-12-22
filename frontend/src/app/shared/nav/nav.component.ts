@@ -30,15 +30,17 @@ export class NavComponent {
   }
 
   logout() {
-    this.loginService.logout().subscribe(
-      () => {
+    this.loginService.logout().subscribe({
+      next:() => {
         console.log("cerrada");
       },
-      error => {
-        console.error("Error al cerrar sesión:", error);
+      error:(errorData) => {
+        console.error("Error al cerrar sesión:", errorData);
+      },
+      complete:()=>{
+        this.router.navigate(['/login'])
       }
-    );
-    this.router.navigate(['/login'])
+    });
   }
 
   toggleDropdown(): void {

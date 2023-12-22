@@ -33,7 +33,6 @@ export class LoginService {
   }
 
   logout(): Observable<any> {
-    console.log("por cerrar sesion")
     return this.http.post<any>(environment.urlApi + "users/logout", {}).pipe(
       tap(() => {
         localStorage.removeItem("token");

@@ -181,7 +181,7 @@ public class UsuarioController {
      */
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
-        return ResponseEntity.ok().body("Sesión cerrada");
+        return ResponseEntity.ok().build();
 
     }
 
