@@ -32,4 +32,5 @@ export interface DeudaUsuarioDTO {
     usuarioDebe: boolean;
     data: string;
     monto: number;
+    idAcreedor:number
 }

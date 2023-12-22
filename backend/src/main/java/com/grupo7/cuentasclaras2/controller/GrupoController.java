@@ -92,6 +92,7 @@ public class GrupoController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		Object principal = authentication.getPrincipal();
 
+		System.out.println(grupoDTO);
 		Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
 
 		if (!usuarioOptional.isPresent()) {
@@ -103,7 +104,6 @@ public class GrupoController {
 		List<MiembrosGrupoDTO> miembrosDTO = new ArrayList<>();
 		miembrosDTO.add(new MiembrosGrupoDTO(usuarioAutenticado));
 		grupoDTO.setMiembros(miembrosDTO);
-
 		return grupoService.newGroupByDTO(grupoDTO)
 				.map(grupoGuardado -> new ResponseEntity<>(new GrupoDTO(grupoGuardado, usuarioAutenticado),
 						HttpStatus.CREATED))

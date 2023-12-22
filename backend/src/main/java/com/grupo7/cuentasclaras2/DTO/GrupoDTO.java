@@ -239,6 +239,7 @@ public class GrupoDTO {
             deudaDTO.setId(deuda.getId());
             deudaDTO.setMonto(deuda.getMonto());
             deudaDTO.setData(generarTextoDeuda(deuda, usuarioAutenticado));
+            deudaDTO.setIdAcreedor(deuda.getAcreedor().getId());
 
             if (deuda.getDeudor().equals(usuarioAutenticado)) {
                 deudaDTO.setUsuarioDebe(true);

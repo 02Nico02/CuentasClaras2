@@ -53,7 +53,7 @@
         <div class="section-box">
             <h3>Actividades Recientes</h3>
             <ul class="activities-list">
-                <li *ngFor="let actividad of grupo2?.actividades" class="activity-item"
+                <li *ngFor="let actividad of visibleActividades" class="activity-item"
                     [ngClass]="{ click: actividad.type === 'gasto' }" (click)="
             actividad.type === 'gasto'
               ? mostrarDetallesActividad(actividad)

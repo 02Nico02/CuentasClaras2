@@ -53,7 +53,6 @@ public class TokenServices {
         String prefix = "Bearer";
         try {
             if (token.startsWith(prefix)) {
-                System.out.println("Entré en la linea 55");
                 token = token.substring(prefix.length()).trim();
             }
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();

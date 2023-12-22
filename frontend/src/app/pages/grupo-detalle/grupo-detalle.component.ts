@@ -105,30 +105,30 @@ export class GrupoDetalleComponent implements OnInit {
       }
     ],
     deudasUsuarios: [
-      {
-        id: 1,
-        usuarioDebe: true,
-        data: 'Le debes al usuario2 $',
-        monto: 300
-      },
-      {
-        id: 2,
-        usuarioDebe: false,
-        data: 'El usuario3 te debe $',
-        monto: 300
-      },
-      {
-        id: 3,
-        usuarioDebe: false,
-        data: 'El usuario3 le debe al usuario4 $',
-        monto: 400
-      },
-      {
-        id: 4,
-        usuarioDebe: false,
-        data: 'El usuario2 le debe al usuario4 $',
-        monto: 200
-      }
+      // {
+      //   id: 1,
+      //   usuarioDebe: true,
+      //   data: 'Le debes al usuario2 $',
+      //   monto: 300
+      // },
+      // {
+      //   id: 2,
+      //   usuarioDebe: false,
+      //   data: 'El usuario3 te debe $',
+      //   monto: 300
+      // },
+      // {
+      //   id: 3,
+      //   usuarioDebe: false,
+      //   data: 'El usuario3 le debe al usuario4 $',
+      //   monto: 400
+      // },
+      // {
+      //   id: 4,
+      //   usuarioDebe: false,
+      //   data: 'El usuario2 le debe al usuario4 $',
+      //   monto: 200
+      // }
     ]
   };
 
@@ -146,8 +146,8 @@ export class GrupoDetalleComponent implements OnInit {
   ngOnInit(): void {
     this.titleService.setTitle('Cuentas Claras - Detalle grupo');
     console.log(this.visibleActividades.length)
-    // this.cargarActividades();
     this.llamarAPI()
+    this.cargarActividades();
   }
 
   llamarAPI() {
@@ -163,6 +163,8 @@ export class GrupoDetalleComponent implements OnInit {
 
   cargarActividades() {
     this.visibleActividades = this.grupo.actividades.slice(0, this.limiteActividades);
+    console.log(this.visibleActividades)
+    console.log(this.visibleActividades.length)
   }
 
   mostrarMasActividades() {
@@ -198,8 +200,23 @@ export class GrupoDetalleComponent implements OnInit {
     alert("Falta implementar")
   }
 
-  pagarDeuda(idDeuda: number) {
-    alert("Falta implementar")
+  pagarDeuda(deuda: any) {
+    console.log(deuda)
+    this.groupService.pagarDeuda(deuda,(this.grupo2?.id||0)).subscribe({
+      next:(res)=>{
+        console.log("La deuda se debería haber creado")
+        console.log(res.status)
+      },
+      error:(error)=>{
+        console.log(error.status)
+        console.log("Murió la deuda")
+      },
+      complete:()=>{
+        console.log("Deuda Completadisima")
+        location.reload();
+      }
+    })
+    // llamar al servicio enviandole el idGrupo
   }
 
   formatBalanceString(balance: number): string {
