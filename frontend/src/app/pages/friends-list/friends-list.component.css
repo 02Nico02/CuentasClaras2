@@ -1,0 +1,110 @@
+.section-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    color: #333;
+}
+
+.add-friend-button {
+    background-color: #A841CB;
+    color: #fff;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-friend-button:hover {
+    background-color: #8B2BAE;
+}
+
+.friends-section {
+    padding: 4rem 0;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: #333;
+}
+
+.friend-cards {
+    display: grid;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.friend-card {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    text-align: center;
+    transition: transform 0.3s ease;
+    margin-bottom: 2rem;
+}
+
+.friend-card:hover {
+    transform: translateY(-5px);
+}
+
+.friend-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.friend-foto {
+    height: 60px;
+    width: 60px;
+    background-color: #A841CB;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    color: #fff;
+    margin-right: 1rem;
+}
+
+.friend-foto img {
+    max-width: 100%;
+    border-radius: 50%;
+}
+
+.friend-name {
+    font-size: 1.5rem;
+    color: #555;
+}
+
+.friend-balance {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 0;
+}
+
+.negative-balance {
+    color: red;
+}
+
+.positive-balance {
+    color: green;
+}
+
+.zero-balance {
+    color: blue;
+}
+
+.no-friends-message {
+    font-size: 1.2rem;
+    color: #777;
+    text-align: center;
+    margin-top: 20px;
+}

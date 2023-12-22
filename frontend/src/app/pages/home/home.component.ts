@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NavComponent } from '../../shared/nav/nav.component';
 import { GroupCardComponent } from '../../components/group-card/group-card.component';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-home',
@@ -23,11 +24,12 @@ export class HomeComponent {
   userLoginOn: boolean = false
   userGroups?: GrupoPreviewDTO[]
 
-  constructor(private userService: UserService, private loginService: LoginService, private router: Router) {
+  constructor(private userService: UserService, private loginService: LoginService, private router: Router, private titleService: Title) {
 
   }
 
   ngOnInit(): void {
+    this.titleService.setTitle('Cuentas Claras - Grupos');
     this.llamarAPI()
   }
 
