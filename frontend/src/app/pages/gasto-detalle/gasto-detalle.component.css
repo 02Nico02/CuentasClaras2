@@ -173,8 +173,39 @@ img {
     transition: transform 0.3s ease-in-out;
 }
 
-.zoomed {
-    transform: scale(1.5);
+.img-fluid:hover {
+    transform: scale(1.1);
     transition: transform 0.3s ease;
-    cursor: zoom-out;
+}
+
+.modal-background {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    max-width: 90%;
+    margin: 50px auto;
+    position: relative;
+}
+
+.modal-header {
+    padding: 15px 0;
+    text-align: center;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.modal-footer {
+    padding: 15px 0;
+    text-align: center;
+    border-top: 1px solid #eaeaea;
 }

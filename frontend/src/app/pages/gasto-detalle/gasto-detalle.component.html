@@ -84,16 +84,15 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalImagenComprobanteLabel">
-                    Comprobante del Gasto
-                </h5>
+                <h5 class="modal-title" id="modalImagenComprobanteLabel">Comprobante del Gasto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <img *ngIf="gasto.imagen != 'imagen'" [src]="gasto.imagen" alt="Imagen o comprobante del gasto"
-                    class="img-fluid" (click)="hacerZoom($event)">
-                <img *ngIf="gasto.imagen == 'imagen'" src="https://www.afip.gob.ar/visitaComercios/images/FacturaV4.jpg"
-                    alt="Imagen o comprobante del gasto" class="img-fluid" (click)="hacerZoom($event)">
+                <img *ngIf="gasto.imagen !== 'imagen'" [src]="gasto.imagen" alt="Comprobante del gasto"
+                    class="img-fluid">
+                <img *ngIf="gasto.imagen === 'imagen'"
+                    src="https://www.afip.gob.ar/visitaComercios/images/FacturaV4.jpg" alt="Imagen por defecto"
+                    class="img-fluid">
             </div>
         </div>
     </div>
