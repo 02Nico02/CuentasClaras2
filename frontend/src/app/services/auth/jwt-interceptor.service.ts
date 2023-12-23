@@ -6,43 +6,18 @@ import { LoginService } from './login.service';
 // @Injectable({
 //   providedIn: 'root'
 // })
-export function JwtInterceptorService (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>>{
+export function JwtInterceptorService(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
 
-  // constructor(private loginService: LoginService) {   
-    console.log("Interceptor: Entrando en el interceptor");
-    // let token: String = this.loginService.userToken
-    let token: String = localStorage?.["token"];
-    console.log("Token:", token);
-    if (token != "") {
-      req = req.clone({
-        setHeaders: {
-          "Content-Type": "application/json;charset=utf-8",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
-      })
-    }
-    return next(req)
+  let token: String = localStorage?.["token"];
+  if (token != "") {
+    req = req.clone({
+      setHeaders: {
+        "Content-Type": "application/json;charset=utf-8",
+        "Accept": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    })
   }
-// export class JwtInterceptorService implements HttpInterceptor {
-
-//   constructor(private loginService: LoginService) { }
-
-
-//   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-//     console.log("Interceptor: Entrando en el interceptor");
-//     // let token: String = this.loginService.userToken
-//     let token: String = localStorage?.["token"];
-//     console.log("Token:", token);
-//     if (token != "") {
-//       req = req.clone({
-//         setHeaders: {
-//           "Content-Type": "application/json;charset=utf-8",
-//           "Accept": "application/json",
-//           "Authorization": `Bearer ${token}`
-//         }
-//       })
-//     }
-//     return next.handle(req)
-//   }
+  return next(req)
+}
 

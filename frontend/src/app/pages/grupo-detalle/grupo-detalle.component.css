@@ -41,7 +41,7 @@ h2 {
     margin-bottom: 10px;
     background: linear-gradient(45deg, #8B2BAE, #6A1E89);
     border-radius: 15px;
-    padding: 8px 12px;
+    padding: 8px 13px 8px 8px;
     color: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }

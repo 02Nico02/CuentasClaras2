@@ -40,4 +40,12 @@ export class GastoDetalleComponent implements OnInit {
   getstringdistribution(formaDividir: string): string {
     return formaDividir === "PORCENTAJE" ? "Distribución por Porcentaje" : "Distribución por Monto"
   }
+  hacerZoom(event: Event) {
+    const imgElement = event.target as HTMLElement;
+    if (imgElement.classList.contains('zoomed')) {
+      imgElement.classList.remove('zoomed');
+    } else {
+      imgElement.classList.add('zoomed');
+    }
+  }
 }

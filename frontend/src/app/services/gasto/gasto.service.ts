@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { GastoDTO } from './gasto.dto';
-import { Observable } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -10,10 +11,23 @@ import { environment } from '../../../environments/environment';
 export class GastoService {
 
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
   getGastoById(idGasto: string): Observable<GastoDTO> {
-    return this.http.get<GastoDTO>(`${environment.urlApi}spent/${idGasto}`);
+    return this.http.get<GastoDTO>(`${environment.urlApi}spent/${idGasto}`).pipe(
+      catchError(error => {
+        if (error.status === 0) {
+          if (error.error && error.error.error) {
+            const errorMessage = error.error.error;
+            console.error('Error del servidor:', errorMessage);
+            this.router.navigate(['/login']);
+          } else {
+            this.router.navigate(['/login']);
+          }
+        }
+        throw error;
+      })
+    );
   }
 
 

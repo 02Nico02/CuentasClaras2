@@ -1,13 +1,17 @@
 package com.grupo7.cuentasclaras2.filter;
 
 import java.io.IOException;
+import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grupo7.cuentasclaras2.exception.UnauthorizedException;
 import com.grupo7.cuentasclaras2.services.TokenBlacklist;
 import com.grupo7.cuentasclaras2.services.TokenServices;
@@ -22,33 +26,34 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class JWTAuthenticationFilter implements Filter {
+
+    private static final String REGISTER_ENDPOINT = "/api/users/register";
+    private static final String AUTH_ENDPOINT = "/api/users/auth";
+    private static final String LOGOUT_ENDPOINT = "/api/users/logout";
+    private static final String OPTIONS_METHOD = "OPTIONS";
+
+    private static final Logger logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        // El login y register del usuarios son públicos
-        System.out.println("error");
-        if ("/api/users/register".equals(req.getRequestURI()) || "/api/users/auth".equals(req.getRequestURI())
-                || "OPTIONS".equals(req.getMethod())) {
-            System.out.println("dentro");
-            System.out.println(req.getRequestURI());
+        if (isPublicEndpoint(req.getRequestURI()) || OPTIONS_METHOD.equals(req.getMethod())) {
             chain.doFilter(request, response);
             return;
         }
-        System.out.println("error 2");
 
         String token = req.getHeader(HttpHeaders.AUTHORIZATION);
-        System.out.println(token);
 
         try {
             if (token == null || TokenBlacklist.isTokenBlacklisted(token) || !TokenServices.validateToken(token)) {
                 throw new UnauthorizedException("Token inválido o expirado");
             }
 
-            // Si es el logout, poner el token en la blacklist
-            if ("/api/users/logout".equals(req.getRequestURI()) || "OPTIONS".equals(req.getMethod())) {
+            if (LOGOUT_ENDPOINT.equals(req.getRequestURI())) {
                 TokenBlacklist.blacklistToken(token);
                 chain.doFilter(request, response);
                 return;
@@ -59,10 +64,19 @@ public class JWTAuthenticationFilter implements Filter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(request, response);
         } catch (UnauthorizedException e) {
-            System.out.println(e);
+            logger.error("Error de autorización: {}", e.getMessage());
             res.setStatus(HttpStatus.FORBIDDEN.value());
-            res.getWriter().write("Error de autorización: " + e.getMessage());
+
+            res.setContentType("application/json");
+
+            objectMapper.writeValue(res.getWriter(), Map.of("error", "Acceso denegado: " + e.getMessage()));
+
+            return;
         }
+    }
+
+    private boolean isPublicEndpoint(String uri) {
+        return REGISTER_ENDPOINT.equals(uri) || AUTH_ENDPOINT.equals(uri) || LOGOUT_ENDPOINT.equals(uri);
     }
 
     @Override
