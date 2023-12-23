@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { GrupoDTO } from '../../services/group/grupo.dto';
+import { DeudaUsuarioDTO, GrupoDTO } from '../../services/group/grupo.dto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GroupService } from '../../services/group/group.service';
@@ -89,7 +89,7 @@ export class GrupoDetalleComponent implements OnInit {
     alert("Falta implementar")
   }
 
-  pagarDeuda(deuda: any) {
+  pagarDeuda(deuda: DeudaUsuarioDTO) {
     this.groupService.pagarDeuda(deuda, (this.grupo2?.id || 0)).subscribe({
       next: (res) => {
       },
@@ -97,9 +97,8 @@ export class GrupoDetalleComponent implements OnInit {
       },
       complete: () => {
         location.reload();
-      }
+      },
     })
-    // llamar al servicio enviandole el idGrupo
   }
 
   formatBalanceString(balance: number): string {

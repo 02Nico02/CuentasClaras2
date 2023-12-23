@@ -5,10 +5,10 @@
   </div>
   <h2 class="text-center mb-4">Registrarse</h2>
 
-  <form [formGroup]="registerForm" class="form" autocomplete="off">
+  <form [formGroup]="registerForm" class="form">
     <div class="mb-3 mt-3">
       <label for="inputUserName" class="form-label">Nombre de usuario</label>
-      <input formControlName="username" type="text" name="username" autocomplete="off" class="form-control"
+      <input formControlName="username" type="text" name="username" autocomplete="username" class="form-control"
         id="inputUserName" aria-describedby="userNameHelp" placeholder="ej. nombreusuario123" />
       @if(username.invalid && (username.dirty || username.touched)){
       <div class="text-danger mt-2">
@@ -28,7 +28,7 @@
 
     <div class="mb-3 mt-3">
       <label for="inputNames" class="form-label">Nombres</label>
-      <input formControlName="nombres" type="text" name="nombres" autocomplete="off" class="form-control"
+      <input formControlName="nombres" type="text" name="nombres" autocomplete="name" class="form-control"
         id="inputNames" aria-describedby="nameHelp" placeholder="Nombres" />
       @if(nombres.invalid && (nombres.dirty || nombres.touched)){
       <div class="text-danger mt-2">
@@ -44,8 +44,8 @@
 
     <div class="mb-3 mt-3">
       <label for="surname" class="form-label">Apellidos</label>
-      <input formControlName="apellido" type="text" name="apellido" autocomplete="off" class="form-control" id="surname"
-        aria-describedby="surnameHelp" placeholder="Apellidos" />
+      <input formControlName="apellido" type="text" name="apellido" autocomplete="name" class="form-control"
+        id="surname" aria-describedby="surnameHelp" placeholder="Apellidos" />
       @if(apellido.invalid && (apellido.dirty || apellido.touched)){
       <div class="text-danger mt-2">
         @if(apellido.errors?.['required']){
@@ -60,7 +60,7 @@
 
     <div class="mb-3 mt-3">
       <label for="email1" class="form-label">Email</label>
-      <input formControlName="email" type="email" name="email" autocomplete="off" class="form-control" id="email1"
+      <input formControlName="email" type="email" name="email" autocomplete="email" class="form-control" id="email1"
         aria-describedby="emailHelp" placeholder="usuario@ejemplo.com" />
       @if(email.invalid && (email.dirty || email.touched)){
       <div class="text-danger mt-2">
@@ -76,7 +76,7 @@
 
     <div class="mb-3">
       <label for="exampleInputPassword1" class="form-label">Contraseña</label>
-      <input formControlName="password" type="password" name="password" autocomplete="off" class="form-control"
+      <input formControlName="password" type="password" name="password" autocomplete="new-password" class="form-control"
         id="exampleInputPassword1" placeholder="**********" />
       @if(password.invalid && (password.dirty || password.touched)){
       <div class="text-danger mt-2">

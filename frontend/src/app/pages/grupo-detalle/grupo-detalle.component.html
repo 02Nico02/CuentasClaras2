@@ -87,7 +87,7 @@
             <ul class="deudas-grid">
                 <li *ngFor="let deuda of grupo2?.deudasUsuarios" class="deuda-item">
                     <div class="deuda-data">{{ deuda.data }}</div>
-                    <button *ngIf="deuda.usuarioDebe" (click)="pagarDeuda(deuda.id)" class="button pagar">
+                    <button *ngIf="deuda.usuarioDebe" (click)="pagarDeuda(deuda)" class="button pagar">
                         Pagar
                     </button>
                 </li>
@@ -117,8 +117,8 @@
                             class="list-group-item d-flex justify-content-between align-items-center">
                             <span>{{ amigo.userName }}</span>
                             <button [disabled]="amigo.solicitudEnviada" (click)="agregarMiembroSeleccionado(amigo)"
-                                class="btn btn-success">{{
-                                amigo.solicitudEnviada ? 'Enviada' : 'Enviar invitación' }}</button>
+                                class="btn btn-success"> {{ amigo.solicitudEnviada ? 'Enviada' : 'Enviar invitación' }}
+                            </button>
                         </li>
                         <li *ngIf="amigos && amigos.length === 0" class="list-group-item">No hay amigos disponibles para
                             mostrar.</li>
@@ -129,8 +129,9 @@
                         <li *ngFor="let usuario of usuarios"
                             class="list-group-item d-flex justify-content-between align-items-center">
                             <span>{{ usuario.userName }}</span>
-                            <button (click)="agregarMiembroSeleccionado(usuario)" class="btn btn-primary">
-                                Enviar invitación
+                            <button [disabled]="usuario.solicitudEnviada" (click)="agregarMiembroSeleccionado(usuario)"
+                                class="btn btn-primary">
+                                {{ usuario.solicitudEnviada ? 'Enviada' : 'Enviar invitación' }}
                             </button>
                         </li>
                         <li *ngIf="usuarios && usuarios.length === 0" class="list-group-item">
