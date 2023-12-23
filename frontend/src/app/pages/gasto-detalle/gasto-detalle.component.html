@@ -1,0 +1,71 @@
+<app-nav></app-nav>
+
+<div class="detalle-gasto-container">
+    <div class="detalle-gasto" *ngIf="gasto else noGasto">
+        <div class="detalle-header">
+            <h2>Detalle del Gasto</h2>
+        </div>
+
+        <div class="detalle-section">
+            <div class="detalle-item" *ngIf="gasto.nombre">
+                <h3 class="detalle-title">Nombre del Gasto</h3>
+                <p class="detalle-content">{{ gasto.nombre }}</p>
+            </div>
+
+            <div class="detalle-item-date" *ngIf="gasto.fecha">
+                <h3 class="detalle-title">Fecha</h3>
+                <p class="detalle-content">{{ gasto.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+
+            <div *ngIf="gasto.imagen" class="detalle-item">
+                <h3 class="detalle-title">Comprobante del Gasto</h3>
+                <img [src]="gasto.imagen" alt="Imagen o comprobante del gasto">
+            </div>
+            <div *ngIf="gasto.gastoAutor?.length" class="detalle-item">
+                <h3>Contribuyentes del Gasto</h3>
+                <ul class="members-grid">
+                    <li *ngFor="let autor of gasto.gastoAutor">
+                        <span class="userName">{{ autor.userName }}</span>
+                        <span>
+                            {{"$" + autor.monto.toFixed(2)}}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+
+            <div *ngIf="gasto.categoria" class="detalle-item">
+                <h3>Categoría</h3>
+                <div class="grupo-category">
+                    <div class="category-icon">
+                        <img *ngIf="gasto.categoria.icon" src="../../../assets/icons/icono_familia.png"
+                            alt="icono de la categoria {{ gasto.categoria.nombre }}">
+                        <!-- <img *ngIf="gasto.categoria.icon" src="../../../assets/icons/{{gasto.categoria.icon}}"
+                            alt="icono de la categoria {{ gasto.categoria.nombre }}"> -->
+                    </div>
+                    <p>{{ gasto.categoria.nombre }}</p>
+                </div>
+            </div>
+
+            <div *ngIf="gasto.formaDividir" class="detalle-item">
+                <h3> {{getstringdistribution(gasto.formaDividir.formaDividir)}} </h3>
+                <ul class="members-grid">
+                    <li *ngFor="let division of gasto.formaDividir.divisionIndividual">
+                        <span class="userName">{{ division.userName }}</span>
+                        <span>
+                            {{ gasto.formaDividir.formaDividir == 'MONTO' ? '$'+ division.monto.toFixed(2) : +
+                            division.monto.toFixed(2)+'%' }}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="buttons-section">
+                <button *ngIf="gasto.editable" (click)="editarGasto(gasto.id)" class="btn-primary">Editar Gasto</button>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #noGasto>
+        <p class="message">El gasto no existe o no se encontró información.</p>
+    </ng-template>
+</div>

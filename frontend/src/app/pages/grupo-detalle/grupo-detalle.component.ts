@@ -122,7 +122,7 @@ export class GrupoDetalleComponent implements OnInit {
   }
 
   mostrarDetallesActividad(actividad: any) {
-    alert("Detalle del gasto con id= " + actividad.id)
+    this.router.navigateByUrl("/gasto/" + actividad.id + "/detalle")
   }
 
   buscarUsuarios(): void {

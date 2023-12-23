@@ -19,7 +19,6 @@ h2 {
     color: #2c3e50;
     margin-bottom: 20px;
     text-align: center;
-    /* Centrar el texto */
 }
 
 .grupo-section {
@@ -28,9 +27,7 @@ h2 {
     margin-bottom: 30px;
     display: flex;
     flex-direction: column;
-    /* Alinear elementos en columna */
     align-items: center;
-    /* Centrar elementos */
 }
 
 .grupo-name {
@@ -41,33 +38,34 @@ h2 {
 .grupo-category {
     display: flex;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     background: linear-gradient(45deg, #8B2BAE, #6A1E89);
-    border-radius: 20px;
-    padding: 5px 6px;
+    border-radius: 15px;
+    padding: 8px 12px;
     color: white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .category-icon {
-    background-color: #f4f4f4;
+    background-color: #ffffff;
     border-radius: 50%;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 4px;
+    margin-right: 10px;
 }
 
 .category-icon img {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     display: block;
 }
 
 .grupo-category span {
-    margin-left: 8px;
-    margin-right: 8px;
-    font-weight: bold;
+    font-weight: 600;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
+
 
 .grupo-balance {
     font-size: 18px;
@@ -81,7 +79,6 @@ h2 {
     padding: 5px;
     margin-right: 5px;
     color: white;
-    /* font-weight: bold; */
     cursor: pointer;
     transition: all 0.3s ease-in-out;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -168,23 +165,27 @@ h2 {
     flex-wrap: wrap;
     list-style-type: none;
     padding: 0;
-    flex-basis: 50%;
+    justify-content: center;
 }
 
 .members-grid li {
-    flex: 1 1 calc(50% - 20px);
+    flex: 0 1 calc(50% - 20px);
     padding: 15px;
     margin: 10px;
-    background-color: #f9f9f9;
+    background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
     font-size: 16px;
     line-height: 1.5;
+    max-width: 300px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
 }
 
 .members-grid li .userName {
-    font-weight: bold;
+    font-weight: 500;
 }
 
 .section-box {
