@@ -1,3 +1,5 @@
+import { CategoriaDTO } from "../group/grupo.dto";
+
 export interface GastoDTO {
     id: number;
     gastoAutor: GastoAutor[];
@@ -6,7 +8,7 @@ export interface GastoDTO {
     imagen: string;
     grupoId: number;
     formaDividir: FormaDividir;
-    categoria: Categoria;
+    categoria: CategoriaDTO;
     editable: boolean;
 }
 
@@ -28,10 +30,4 @@ export interface DivisionIndividual {
     userId: number;
     userName: string;
     monto: number;
-}
-
-export interface Categoria {
-    id: number;
-    nombre: string;
-    icon: string;
 }

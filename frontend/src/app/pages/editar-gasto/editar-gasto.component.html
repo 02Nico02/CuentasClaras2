@@ -1,0 +1,128 @@
+<app-nav></app-nav>
+
+<div class="detalle-gasto-container">
+
+    <div *ngIf="gasto" class="detalle-gasto">
+
+        <div class="detalle-header">
+            <h2>Editar Gasto</h2>
+        </div>
+
+        <div class="detalle-section">
+
+            <div class="detalle-item">
+                <div class="detalle-item-content">
+                    <label class="detalle-title" for="name">Nombre del Gasto</label>
+                    <input id="name" type="text" [(ngModel)]="gasto.nombre" (ngModelChange)="validarName()"
+                        class="form-control">
+                </div>
+                <div *ngIf="!formValid.nombre" class="alert alert-danger">
+                    El nombre es requerido.
+                </div>
+            </div>
+            <div class="detalle-item">
+                <div class="detalle-item-content">
+                    <label class="detalle-title" for="fecha">Fecha del Gasto:</label>
+                    <input id="fecha" type="date" [(ngModel)]="gasto.fecha" (ngModelChange)="validarFecha()"
+                        class="form-control">
+                </div>
+                <div *ngIf="!formValid.fecha" class="alert alert-danger">
+                    La fecha ingresada no puede ser posterior a la fecha actual.
+                </div>
+            </div>
+
+            <div class="detalle-item">
+                <div *ngIf="gastoEdit" class="detalle-item-content">
+                    <label class="detalle-title" for="categoria">Categoría:</label>
+                    <select id="categoria" class="form-select" [(ngModel)]="gasto.categoria.id">
+                        <option *ngFor="let categoria of categorias" [value]="categoria.id"
+                            [selected]="categoria.id === gasto.categoria.id">
+                            {{ categoria.nombre }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="detalle-item mt-4" *ngIf="gasto && gasto.gastoAutor && gasto.gastoAutor.length">
+                <div class="detalle-item-content row align-items-center mb-3">
+                    <div class="col-md-12 d-flex align-items-center">
+                        <h5 class="detalle-title mb-0 col-md-3">Total Gastado:</h5>
+                        <span class="input-group-text font-weight-normal">{{ totalMontos | currency }}</span>
+                    </div>
+                </div>
+                <div *ngFor="let autor of gasto.gastoAutor; let i = index">
+                    <div class="detalle-item-content row g-2">
+                        <div class="col-md-2">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Usuario:</span>
+                            <span class="input-group-text" id="inputGroup-sizing-default">{{autor.userName}}</span>
+                            <span class="input-group-text">$</span>
+                            <input [(ngModel)]="autor.monto" (ngModelChange)="validarMontosYActualizarTotal()"
+                                type="number" class="form-control" aria-label="Sizing example input"
+                                aria-describedby="inputGroup-sizing-default">
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="!formValid.montoGasto" class="alert alert-danger">
+                    Los montos no pueden ser negativos.
+                </div>
+            </div>
+
+            <div class="detalle-item">
+                <div *ngIf="gastoEdit" class="detalle-item-content">
+                    <label class="detalle-title" for="formaDividir">Forma de Dividir:</label>
+                    <select id="formaDividir" class="form-select" [(ngModel)]="gasto.formaDividir.formaDividir"
+                        (ngModelChange)="cambiarFormaDividir()">
+                        <option value="MONTO" [selected]="gasto.formaDividir.formaDividir === 'MONTO'">Monto</option>
+                        <option value="PORCENTAJE" [selected]="gasto.formaDividir.formaDividir === 'PORCENTAJE'">
+                            Porcentaje</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="detalle-item mt-4">
+                <div class="detalle-item-content">
+                    <div class="col-md-12 d-flex align-items-center justify-content-between">
+                        <label class="detalle-title">Dividido Entre:</label>
+                        <button class="btn btn-primary" (click)="dividirEnPartesIguales()"
+                            style="margin-left: 10px;">Partes iguales</button>
+                    </div>
+
+
+                    <div *ngFor="let division of gasto.formaDividir.divisionIndividual; let i = index" class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">Usuario:</span>
+                            <span class="input-group-text">{{ division.userName }}</span>
+                            <span class="input-group-text">{{ gasto.formaDividir.formaDividir === 'MONTO' ? '$' : '%'
+                                }}</span>
+                            <input [(ngModel)]="division.monto" type="number" class="form-control"
+                                aria-label="Sizing example input" (ngModelChange)="validarMontosDivision()">
+
+                        </div>
+                    </div>
+                    <div *ngIf="!formValid.formaDivisionMonto" class="alert alert-danger">
+                        {{ mensajeErrorMontos }}
+                    </div>
+
+                    <div *ngIf="!formValid.formaDivisionPorcentaje" class="alert alert-danger">
+                        {{ mensajeErrorPorcentaje }}
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="detalle-item">
+                <label class="detalle-title">Comprobante del Gasto</label>
+                <input type="file" (change)="onFileChange($event)" class="form-control">
+                <img *ngIf="gasto?.imagen" [src]="gasto.imagen" alt="Comprobante del gasto" class="preview-img">
+            </div>
+
+            <div class="buttons-section">
+                <button (click)="guardarCambios()" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

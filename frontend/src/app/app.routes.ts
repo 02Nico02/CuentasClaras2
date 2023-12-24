@@ -6,6 +6,7 @@ import { GrupoDetalleComponent } from './pages/grupo-detalle/grupo-detalle.compo
 import { CrearGrupoComponent } from './pages/crear-grupo/crear-grupo.component';
 import { FriendsListComponent } from './pages/friends-list/friends-list.component';
 import { GastoDetalleComponent } from './pages/gasto-detalle/gasto-detalle.component';
+import { EditarGastoComponent } from './pages/editar-gasto/editar-gasto.component';
 
 export const routes: Routes = [
     { path: "home", component: HomeComponent },
@@ -15,6 +16,7 @@ export const routes: Routes = [
     { path: "gasto/:id/detalle", component: GastoDetalleComponent },
     { path: "crear-grupo", component: CrearGrupoComponent },
     { path: "amigos", component: FriendsListComponent },
+    { path: 'editar-gasto', component: EditarGastoComponent },
     { path: "**", redirectTo: "login", pathMatch: "full" },
 
 ];
