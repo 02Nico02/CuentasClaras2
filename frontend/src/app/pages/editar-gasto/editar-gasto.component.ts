@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { GastoService } from '../../services/gasto/gasto.service';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { GastoDTO } from '../../services/gasto/gasto.dto';
+import { GastoAutor, GastoDTO } from '../../services/gasto/gasto.dto';
 import { NavComponent } from '../../shared/nav/nav.component';
 import { Title } from '@angular/platform-browser';
 import { CategoriaDTO } from '../../services/group/grupo.dto';
@@ -68,6 +68,8 @@ export class EditarGastoComponent {
 
   mensajeErrorMontos: string = '';
   mensajeErrorPorcentaje: string = '';
+  mensajeErrorMontoGasto: string = '';
+  usuariosDisponibles: GastoAutor[] = [];
 
   constructor(private route: ActivatedRoute,
     private gastoService: GastoService,
@@ -84,38 +86,89 @@ export class EditarGastoComponent {
       this.gastoService.getAllExpenseCategories().subscribe(data => {
         this.categorias = data;
       });
+      this.agregarUsuariosDisponibles()
     } else {
       this.router.navigate(['/home']);
     }
 
   }
 
-  onImagenSeleccionada(event: any): void {
-    // const file = event.target.files[0];
-    // if (file) {
-    //   const reader = new FileReader();
-    //   reader.readAsDataURL(file);
-    //   reader.onload = (e) => {
-    //     this.imagenSeleccionada = e.target?.result;
-    //   };
-    // }
+  agregarUsuariosDisponibles(): void {
+    for (const usuario of this.gasto.formaDividir.divisionIndividual) {
+      if (!this.gasto.gastoAutor.some(autor => autor.userId === usuario.userId)) {
+        this.gasto.gastoAutor.push({
+          id: -1,
+          userId: usuario.userId,
+          userName: usuario.userName,
+          monto: 0
+        });
+      }
+    }
   }
 
   guardarCambios(): void {
-    // if (this.gastoForm.valid) {
-    //   this.gastoService.editarGasto(this.gasto).subscribe(
-    //     response => {
-    //       // Manejar la respuesta
-    //     },
-    //     error => {
-    //       console.error('Error al guardar el gasto', error);
-    //       // Mostrar un mensaje de error al usuario
-    //     }
-    //   );
-    //   console.log("Todo bien")
-    // }
+    if (this.validarGastoCompleto()) {
+      const gastoDTO: GastoDTO = {
+        id: this.gasto.id,
+        gastoAutor: this.gasto.gastoAutor
+          .filter(gastoAutor => gastoAutor.monto !== 0)
+          .map(gastoAutor => ({
+            id: gastoAutor.id,
+            userId: gastoAutor.userId,
+            monto: gastoAutor.monto
+          })),
+        nombre: this.gasto.nombre,
+        fecha: new Date(this.gasto.fecha).toISOString(),
+        imagen: this.gasto.imagen,
+        grupoId: this.gasto.grupoId,
+        formaDividir: {
+          id: this.gasto.formaDividir.id,
+          formaDividir: this.gasto.formaDividir.formaDividir,
+          divisionIndividual: this.gasto.formaDividir.divisionIndividual.map(division => ({
+            id: division.id,
+            userId: division.userId,
+            monto: division.monto
+          }))
+        },
+        categoria: {
+          id: this.gasto.categoria.id
+        },
+      };
+      this.gastoService.editarGasto(gastoDTO, this.gasto.id).subscribe(
+        response => {
+          console.log("todo ok, pero debe no existir la ruta")
+          console.log(response.id)
+          this.gasto = response;
+          this.router.navigate([`/gasto/${response.id}/detalle`]);
+        },
+        error => {
+          console.error('Error al guardar el gasto', error);
+          if (error.status === 401) {
+            this.router.navigate(['/login']);
+          } else if (error.status === 403) {
+            console.log("error 403")
+          } else if (error.status === 404) {
+            console.log("error 404")
+          } else {
+            console.log("Error general")
+          }
+        }
+      );
+    } else {
+      alert("no esta bien")
+    }
   }
-  onFileChange($event: Event) {
+
+  validarGastoCompleto(): boolean {
+    this.validarName();
+    this.validarFecha();
+    this.validarMontosYActualizarTotal();
+    this.validarMontosDivision();
+    if (this.formValid.nombre && this.formValid.fecha && this.formValid.montoGasto && this.formValid.formaDivisionPorcentaje && this.formValid.formaDivisionMonto) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 
@@ -129,7 +182,6 @@ export class EditarGastoComponent {
 
   validarFecha() {
     if (!this.gasto.fecha) {
-      console.log("false en 1")
       this.formValid.fecha = false;
       return;
     }
@@ -138,10 +190,8 @@ export class EditarGastoComponent {
     const fechaActual = new Date();
 
     if (fechaIngresada > fechaActual) {
-      console.log("false en 2")
       this.formValid.fecha = false;
     } else {
-      console.log("True")
       this.formValid.fecha = true;
     }
   }
@@ -161,18 +211,24 @@ export class EditarGastoComponent {
   }
 
 
-  validarMontosYActualizarTotal() {
+  validarMontosYActualizarTotal(): void {
     let total = 0;
     for (const autor of this.gasto.gastoAutor) {
-      if (autor.monto < 0) {
+      if (autor.monto < 0 || !this.esNumeroValido(autor.monto)) {
+        this.mensajeErrorMontoGasto = "Error: El monto ingresado no puede ser negativo y debe tener máximo dos decimales.";
         this.formValid.montoGasto = false;
-        return
+        return;
       }
       total += autor.monto;
     }
     this.totalMontos = total;
     this.formValid.montoGasto = true;
-    this.validarMontosDivision()
+    this.validarMontosDivision();
+  }
+
+  esNumeroValido(numero: number): boolean {
+    const decimales = (numero.toString().split('.')[1] || '').length;
+    return decimales <= 2;
   }
 
   cambiarFormaDividir() {
@@ -268,7 +324,7 @@ export class EditarGastoComponent {
         division.monto = parseFloat(porcentajePorUsuario.toFixed(2));
       });
 
-      const porcentajeTotalAsignado = porcentajePorUsuario * cantidadUsuarios;
+      const porcentajeTotalAsignado = this.sumatoriaDivisionIndividual();
       if (porcentajeTotalAsignado !== 100) {
         const ajustePorcentaje = 100 - porcentajeTotalAsignado;
         const indiceAleatorio = Math.floor(Math.random() * cantidadUsuarios);
@@ -295,36 +351,84 @@ export class EditarGastoComponent {
     }
   }
   sumatoriaDivisionIndividual(): number {
-    let suma = 0;
-    for (let division of this.gasto.formaDividir.divisionIndividual) {
-      suma += division.monto;
-    }
-
-    return suma;
+    return this.gasto.formaDividir.divisionIndividual.reduce((total, division) => total + division.monto, 0);
   }
+
   validarSumaMontos(): boolean {
     this.formValid.formaDivisionPorcentaje = true;
     const suma = this.sumatoriaDivisionIndividual();
+
+    if (!this.esNumeroValido(suma)) {
+      this.formValid.formaDivisionMonto = false;
+      this.mensajeErrorMontos = `La suma de los montos individuales tiene más de dos decimales.`;
+      return false;
+    }
+
     if (suma === this.totalMontos) {
       this.formValid.formaDivisionMonto = true;
       this.mensajeErrorMontos = '';
       return true;
     }
+
     this.formValid.formaDivisionMonto = false;
-    this.mensajeErrorMontos = `La suma de los montos individuales difiere de $${this.totalMontos}. Diferencia: ${this.totalMontos - suma}`;
+    const diff = this.totalMontos - suma;
+    this.mensajeErrorMontos = `La suma de los montos individuales difiere de $${this.totalMontos}. Diferencia: ${parseFloat(diff.toFixed(2))}`;
     return false;
   }
 
   validarPorcentaje(): boolean {
     this.formValid.formaDivisionMonto = true;
     const suma = this.sumatoriaDivisionIndividual();
+
+    if (!this.esNumeroValido(suma)) {
+      this.formValid.formaDivisionPorcentaje = false;
+      this.mensajeErrorPorcentaje = `La suma de los porcentajes tiene más de dos decimales.`;
+      return false;
+    }
+
     if (suma === 100) {
       this.formValid.formaDivisionPorcentaje = true;
       this.mensajeErrorPorcentaje = '';
       return true;
     }
+
     this.formValid.formaDivisionPorcentaje = false;
-    this.mensajeErrorPorcentaje = `La suma de los porcentajes difiere de 100%. Diferencia: ${100 - suma}`;
+    const diff = 100 - suma;
+    this.mensajeErrorPorcentaje = `La suma de los porcentajes difiere de 100%. Diferencia: ${parseFloat(diff.toFixed(2))}`;
     return false;
+  }
+
+  onFileChange(event: any): void {
+    const file = event.target.files[0];
+
+    // Validar tamaño máximo (5MB en este ejemplo)
+    const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+
+    if (file && file.size > maxSize) {
+      alert('El archivo supera el tamaño máximo permitido de 5MB.');
+      return;
+    }
+
+    // Validar tipo de archivo
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+
+    if (file && !allowedTypes.includes(file.type)) {
+      alert('El tipo de archivo no es válido. Solo se permiten imágenes (JPG, JPEG, PNG) y PDF.');
+      return;
+    }
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        this.gasto.imagen = reader.result as string;
+      };
+
+      reader.onerror = (error) => {
+        console.error('Error al leer el archivo:', error);
+      };
+    }
   }
 }

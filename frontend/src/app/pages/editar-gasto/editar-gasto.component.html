@@ -42,20 +42,21 @@
                     </select>
                 </div>
             </div>
+
             <div class="detalle-item mt-4" *ngIf="gasto && gasto.gastoAutor && gasto.gastoAutor.length">
-                <div class="detalle-item-content row align-items-center mb-3">
-                    <div class="col-md-12 d-flex align-items-center">
-                        <h5 class="detalle-title mb-0 col-md-3">Total Gastado:</h5>
-                        <span class="input-group-text font-weight-normal">{{ totalMontos | currency }}</span>
+                <div class="detalle-item-content row align-items-center">
+                    <div class="col-md-12 d-flex justify-content-between align-items-center">
+                        <label class="detalle-title mb-0">Total Gastado:</label>
+                        <span class="total-amount">{{ totalMontos | currency }}</span>
                     </div>
                 </div>
+
                 <div *ngFor="let autor of gasto.gastoAutor; let i = index">
                     <div class="detalle-item-content row g-2">
-                        <div class="col-md-2">
-                        </div>
                         <div class="input-group mb-3">
-                            <span class="input-group-text">Usuario:</span>
-                            <span class="input-group-text" id="inputGroup-sizing-default">{{autor.userName}}</span>
+                            <span class="input-group-text" id="inputGroup-sizing-default">{{autor.userName}}
+                                gastó:</span>
+
                             <span class="input-group-text">$</span>
                             <input [(ngModel)]="autor.monto" (ngModelChange)="validarMontosYActualizarTotal()"
                                 type="number" class="form-control" aria-label="Sizing example input"
@@ -64,7 +65,7 @@
                     </div>
                 </div>
                 <div *ngIf="!formValid.montoGasto" class="alert alert-danger">
-                    Los montos no pueden ser negativos.
+                    {{mensajeErrorMontoGasto}}
                 </div>
             </div>
 
@@ -91,8 +92,8 @@
 
                     <div *ngFor="let division of gasto.formaDividir.divisionIndividual; let i = index" class="mb-3">
                         <div class="input-group">
-                            <span class="input-group-text">Usuario:</span>
-                            <span class="input-group-text">{{ division.userName }}</span>
+                            <span class="input-group-text">{{ gasto.formaDividir.formaDividir === 'MONTO' ? 'Monto' :
+                                'Porcentaje' }} a pagar por {{ division.userName }}:</span>
                             <span class="input-group-text">{{ gasto.formaDividir.formaDividir === 'MONTO' ? '$' : '%'
                                 }}</span>
                             <input [(ngModel)]="division.monto" type="number" class="form-control"
@@ -112,14 +113,27 @@
 
 
             <div class="detalle-item">
-                <label class="detalle-title">Comprobante del Gasto</label>
-                <input type="file" (change)="onFileChange($event)" class="form-control">
-                <img *ngIf="gasto?.imagen" [src]="gasto.imagen" alt="Comprobante del gasto" class="preview-img">
+                <label class="detalle-title" for="comprobanteGasto">Comprobante del Gasto:</label>
+                <div class="comprobante-upload">
+                    <input id="comprobanteGasto" type="file" (change)="onFileChange($event)"
+                        class="form-control comprobante-input" accept=".jpg, .jpeg, .png, .pdf">
+                </div>
+                <small class="form-text text-muted">Formatos admitidos: JPG, JPEG, PNG, PDF. Tamaño máximo: 5MB.</small>
+                <div *ngIf="!formValid.imagen" class="alert alert-danger">
+                    El archivo seleccionado no es válido o supera el tamaño permitido.
+                </div>
+                <div *ngIf="gasto?.imagen" class="comprobante-preview">
+                    <img src="https://www.afip.gob.ar/visitaComercios/images/FacturaV4.jpg" alt="Comprobante del gasto"
+                        class="preview-img">
+                    <span class="preview-label">Vista previa</span>
+                </div>
             </div>
 
-            <div class="buttons-section">
-                <button (click)="guardarCambios()" class="btn btn-primary">Guardar Cambios</button>
+            <div class="buttons-section d-flex justify-content-between">
+                <button class="btn btn-secondary">Cancelar</button>
+                <button (click)="guardarCambios()" class="btn btn-primary mr-2">Guardar Cambios</button>
             </div>
+
 
         </div>
 

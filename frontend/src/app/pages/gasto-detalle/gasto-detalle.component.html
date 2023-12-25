@@ -16,11 +16,11 @@
                     <p class="detalle-content">{{ gasto.nombre }}</p>
                 </div>
                 <div *ngIf="gasto.fecha" class="detalle-item-date">
-                    <p class="detalle-content date-content">{{ gasto.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+                    <p class="detalle-content date-content">{{ mostrarFechaLocal(gasto.fecha) }}</p>
                 </div>
             </div>
 
-            <div *ngIf="gasto.categoria || gasto.imagen" class="row">
+            <div *ngIf="gasto.categoria || gasto.imagen" class="row detalle-item">
                 <div *ngIf="gasto.categoria" class="col-md-6">
                     <h3 class="detalle-title">Categoría</h3>
                     <div class="grupo-category">
@@ -47,7 +47,7 @@
                 <ul class="members-grid">
                     <li *ngFor="let autor of gasto.gastoAutor">
                         <span class="userName">{{ autor.userName }}</span>
-                        <span>{{ "$" + autor.monto.toFixed(2) }}</span>
+                        <span>{{ " $" + autor.monto.toFixed(2) }}</span>
                     </li>
                 </ul>
             </div>
@@ -66,7 +66,8 @@
             </div>
 
             <div class="buttons-section">
-                <button *ngIf="gasto.editable" (click)="editarGasto()" class="btn-primary">Editar Gasto</button>
+                <button [disabled]="!gasto.editable" *ngIf="gasto.editable" (click)="editarGasto()"
+                    class="btn-primary">Editar Gasto</button>
             </div>
 
         </div>

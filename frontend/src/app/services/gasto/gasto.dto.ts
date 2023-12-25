@@ -9,14 +9,14 @@ export interface GastoDTO {
     grupoId: number;
     formaDividir: FormaDividir;
     categoria: CategoriaDTO;
-    editable: boolean;
+    editable?: boolean;
 }
 
 export interface GastoAutor {
     id: number;
     monto: number;
     userId: number;
-    userName: string;
+    userName?: string;
 }
 
 export interface FormaDividir {
@@ -28,6 +28,6 @@ export interface FormaDividir {
 export interface DivisionIndividual {
     id: number;
     userId: number;
-    userName: string;
+    userName?: string;
     monto: number;
 }

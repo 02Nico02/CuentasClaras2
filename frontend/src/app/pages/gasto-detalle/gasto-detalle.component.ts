@@ -36,7 +36,9 @@ export class GastoDetalleComponent implements OnInit {
   }
 
   editarGasto(): void {
-    this.router.navigate(['/editar-gasto'], { state: { gasto: this.gasto } });
+    if (this.gasto?.editable) {
+      this.router.navigate(['/editar-gasto'], { state: { gasto: this.gasto } });
+    }
   }
   getstringdistribution(formaDividir: string): string {
     return formaDividir === "PORCENTAJE" ? "Distribución por Porcentaje" : "Distribución por Monto"
@@ -48,5 +50,19 @@ export class GastoDetalleComponent implements OnInit {
     } else {
       imgElement.classList.add('zoomed');
     }
+  }
+
+  convertirFechaAFormatoDeseado(fechaISO: string): string {
+    const fecha = new Date(fechaISO);
+    const dia = String(fecha.getUTCDate()).padStart(2, '0');
+    const mes = String(fecha.getUTCMonth() + 1).padStart(2, '0'); // +1 porque los meses en JavaScript son de 0 a 11
+    const anio = String(fecha.getUTCFullYear()).slice(-2); // Solo los últimos dos dígitos del año
+
+    return `${dia}/${mes}/${anio}`;
+  }
+
+
+  mostrarFechaLocal(fechaISO: string): string {
+    return this.convertirFechaAFormatoDeseado(fechaISO);
   }
 }

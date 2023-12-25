@@ -47,4 +47,24 @@ export class GastoService {
       })
     );
   }
+
+  editarGasto(gastoDTO: GastoDTO, id: number): Observable<GastoDTO> {
+    return this.http.put<GastoDTO>(`${environment.urlApi}spent/update/${id}`, gastoDTO).pipe(
+      catchError(error => {
+        console.log("Error")
+        console.log(error)
+        if (error.status === 0) {
+          console.log("Error 0")
+          if (error.error && error.error.error) {
+            const errorMessage = error.error.error;
+            console.error('Error del servidor:', errorMessage);
+            this.router.navigate(['/login']);
+          } else {
+            this.router.navigate(['/login']);
+          }
+        }
+        throw error;
+      })
+    );
+  }
 }
