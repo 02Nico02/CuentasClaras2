@@ -1,0 +1,141 @@
+<app-nav></app-nav>
+
+<div class="detalle-gasto-container">
+    <div class="detalle-gasto">
+        <div class="detalle-header">
+            <h2>Crear Gasto</h2>
+        </div>
+
+        <div class="detalle-section">
+
+            <div class="detalle-item">
+                <div class="detalle-item-content">
+                    <label class="detalle-title" for="name">Nombre del Gasto</label>
+                    <input [(ngModel)]="newGasto.nombre" id="name" name="nombre" type="text" required
+                        placeholder="ej. vacaciones con amigos" class="form-control" (input)="validarNombre()">
+                </div>
+                <div *ngIf="nameInvalid" class="alert alert-danger">
+                    El nombre es requerido.
+                </div>
+            </div>
+
+            <div class="detalle-item">
+                <div class="detalle-item-content">
+                    <label class="detalle-title" for="fecha">Fecha del Gasto:</label>
+                    <input [(ngModel)]="newGasto.fecha" id="fecha" name="fecha" type="date" required
+                        max="{{ today | date:'yyyy-MM-dd' }}" class="form-control" (input)="validarFecha()">
+                </div>
+                <div *ngIf="fechaInvalid" class="alert alert-danger">
+                    {{msgErrorFecha}}
+                </div>
+            </div>
+
+            <div class="detalle-item">
+                <div class="detalle-item-content">
+                    <label class="detalle-title" for="categoria">Categoría:</label>
+                    <select [(ngModel)]="newGasto.categoria.id" id="categoria" name="categoria" class="form-select"
+                        required>
+                        <option value="" disabled selected>Seleccione una categoría</option>
+                        <option *ngFor="let categoria of categorias" [value]="categoria.id">
+                            {{ categoria.nombre }}
+                        </option>
+                    </select>
+                </div>
+                <div *ngIf="!newGasto.categoria.id" class="alert alert-danger">
+                    La categoría es requerida.
+                </div>
+            </div>
+
+            <div class="detalle-item">
+                <div class="col-md-12 d-flex justify-content-between align-items-center">
+                    <label class="detalle-title">Autores:</label>
+                    <span *ngIf="totalMontos>0" class="total-amount">{{ totalMontos | currency }}</span>
+                </div>
+                <div class="autores-grid">
+                    <div class="detalle-item-content row g-2" *ngFor="let gastoAutor of newGasto.gastoAutor">
+                        <div class="input-group mb-3">
+                            <span class="member-chip">{{ gastoAutor.userName }} aporto: {{ gastoAutor.monto | currency
+                                }}</span>
+                            <button type="button" class="btn btn-danger btn-sm" (click)="eliminarAutor(gastoAutor)">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="newGasto.gastoAutor.length === 0" class="alert alert-danger">
+                    Debe haber al menos un autor.
+                </div>
+                <div class="agregar-autor-section mt-3" *ngIf="hayAutoresDisponibles">
+                    <label class="detalle-title">Agregar Autores:</label>
+                    <div class="input-group mb-3">
+                        <select #selectedAutor class="form-select">
+                            <option *ngFor="let autor of autoresDisponibles" [value]="autor.idUsuario">{{
+                                autor.userName }}</option>
+                        </select>
+                        <input #montoAutor type="number" class="form-control" id="inputMontoAutor" placeholder="Monto"
+                            aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"
+                            (input)="validarMonto(+montoAutor.value)"
+                            [ngClass]="{'is-invalid ng-invalid ng-touched': montoInvalid, 'is-valid ng-valid ng-touched': !montoInvalid && montoAutor.value !== ''}"
+                            min="0.01">
+                        <button (click)="agregarGastoAutor(+selectedAutor.value, +montoAutor.value)"
+                            class="btn btn-success" [disabled]="montoInvalid">Agregar</button>
+                    </div>
+                    <div *ngIf="userNameInvalid" class="alert alert-danger">
+                        El usuario es requerido.
+                    </div>
+                    <div *ngIf="montoInvalid" class="alert alert-danger">
+                        {{msgErrorMonto}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="detalle-item">
+                <div class="detalle-item-content">
+                    <label class="detalle-title" for="formaDividir">Forma de Dividir:</label>
+                    <select [(ngModel)]="newGasto.formaDividir.formaDividir" id="formaDividir" class="form-select"
+                        (ngModelChange)="cambiarFormaDividir()">
+                        <option value="" disabled selected>Seleccione una forma de dividir</option>
+                        <option value="MONTO" [selected]="newGasto.formaDividir.formaDividir === 'MONTO'">Monto</option>
+                        <option value="PORCENTAJE" [selected]="newGasto.formaDividir.formaDividir === 'PORCENTAJE'">
+                            Porcentaje</option>
+                    </select>
+                </div>
+            </div>
+
+            <div *ngIf="newGasto.formaDividir.formaDividir && totalMontos > 0" class="detalle-item mt-4">
+                <div class="detalle-item-content">
+                    <div class="col-md-12 d-flex align-items-center justify-content-between">
+                        <label class="detalle-title">Dividido Entre:</label>
+                        <button class="btn btn-primary" (click)="dividirEnPartesIguales()"
+                            style="margin-left: 10px;">Partes iguales</button>
+                    </div>
+
+
+                    <div *ngFor="let division of newGasto.formaDividir.divisionIndividual; let i = index" class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">{{ newGasto.formaDividir.formaDividir === 'MONTO' ? 'Monto' :
+                                'Porcentaje' }} a pagar por {{ division.userName }}:</span>
+                            <span class="input-group-text">{{ newGasto.formaDividir.formaDividir === 'MONTO' ? '$' : '%'
+                                }}</span>
+                            <input [(ngModel)]="division.monto" type="number" class="form-control"
+                                aria-label="Sizing example input" (ngModelChange)="validarMontosDivision()">
+
+                        </div>
+                    </div>
+                    <div *ngIf="formaDivisionMontoInvalid" class="alert alert-danger">
+                        {{ mensajeErrorMontos }}
+                    </div>
+
+                    <div *ngIf="formaDivisionPorcentajeInvalid" class="alert alert-danger">
+                        {{ mensajeErrorPorcentaje }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons-section d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary">Cancelar</button>
+                <button type="button" (click)="crearGasto()" class="btn btn-primary mr-2">Crear Gasto</button>
+            </div>
+        </div>
+    </div>
+</div>

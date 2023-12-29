@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { GrupoDTO } from './grupo.dto';
+import { GrupoDTO, MiembroDTO } from './grupo.dto';
 import { Observable } from 'rxjs';
 import { PosiblesMiembrosDTO } from './posiblesMiembros.dto copy';
 
@@ -19,6 +19,10 @@ export class GroupService {
   obtenerPosiblesMiembros(groupId: string, usernameQuery: string): Observable<PosiblesMiembrosDTO> {
     return this.http.get<PosiblesMiembrosDTO>(`${environment.urlApi}group/${groupId}/searchUsers?usernameQuery=${usernameQuery}`);
   }
+  obtenerMiembrosGrupo(groupId: string): Observable<MiembroDTO[]> {
+    return this.http.get<MiembroDTO[]>(`${environment.urlApi}group/${groupId}/members`);
+  }
+
   pagarDeuda(deuda: any, idGrupo: number): Observable<any> {
 
     let aux = {

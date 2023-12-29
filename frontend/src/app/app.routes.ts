@@ -7,6 +7,7 @@ import { CrearGrupoComponent } from './pages/crear-grupo/crear-grupo.component';
 import { FriendsListComponent } from './pages/friends-list/friends-list.component';
 import { GastoDetalleComponent } from './pages/gasto-detalle/gasto-detalle.component';
 import { EditarGastoComponent } from './pages/editar-gasto/editar-gasto.component';
+import { CrearGastoComponent } from './pages/crear-gasto/crear-gasto.component';
 
 export const routes: Routes = [
     { path: "home", component: HomeComponent },
@@ -17,6 +18,7 @@ export const routes: Routes = [
     { path: "crear-grupo", component: CrearGrupoComponent },
     { path: "amigos", component: FriendsListComponent },
     { path: 'editar-gasto', component: EditarGastoComponent },
+    { path: 'crear-gasto', component: CrearGastoComponent },
     { path: "**", redirectTo: "login", pathMatch: "full" },
 
 ];

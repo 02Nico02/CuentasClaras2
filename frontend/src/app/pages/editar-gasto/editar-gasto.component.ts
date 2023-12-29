@@ -306,33 +306,29 @@ export class EditarGastoComponent {
       let montoPorUsuario = this.totalMontos / cantidadUsuarios;
       montoPorUsuario = parseFloat(montoPorUsuario.toFixed(2));
 
-
-      this.gasto.formaDividir.divisionIndividual.forEach(division => {
-        division.monto = montoPorUsuario;
+      let montoTotalAsignado = 0;
+      this.gasto.formaDividir.divisionIndividual.forEach((division, index) => {
+        if (index < cantidadUsuarios - 1) {
+          division.monto = montoPorUsuario;
+          montoTotalAsignado += montoPorUsuario;
+        } else {
+          division.monto = parseFloat((this.totalMontos - montoTotalAsignado).toFixed(2));
+        }
       });
-      const montoTotalAsignado = montoPorUsuario * cantidadUsuarios;
-      if (montoTotalAsignado !== this.totalMontos) {
-        const indiceAleatorio = Math.floor(Math.random() * cantidadUsuarios);
-        const ajuste = this.totalMontos - montoTotalAsignado;
-
-        this.gasto.formaDividir.divisionIndividual[indiceAleatorio].monto += ajuste;
-      }
 
     } else if (this.gasto.formaDividir.formaDividir === 'PORCENTAJE') {
       const porcentajePorUsuario = 100 / cantidadUsuarios;
+      let porcentajeTotalAsignado = 0;
+
       this.gasto.formaDividir.divisionIndividual.forEach(division => {
         division.monto = parseFloat(porcentajePorUsuario.toFixed(2));
+        porcentajeTotalAsignado += division.monto;
       });
 
-      const porcentajeTotalAsignado = this.sumatoriaDivisionIndividual();
       if (porcentajeTotalAsignado !== 100) {
         const ajustePorcentaje = 100 - porcentajeTotalAsignado;
-        const indiceAleatorio = Math.floor(Math.random() * cantidadUsuarios);
-
-        this.gasto.formaDividir.divisionIndividual[indiceAleatorio].monto += ajustePorcentaje;
+        this.gasto.formaDividir.divisionIndividual[cantidadUsuarios - 1].monto += ajustePorcentaje;
       }
-
-
     }
     this.validarMontosDivision()
   }

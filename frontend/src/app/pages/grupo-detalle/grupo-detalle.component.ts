@@ -86,7 +86,7 @@ export class GrupoDetalleComponent implements OnInit {
   }
 
   agregarGasto() {
-    alert("Falta implementar")
+    this.router.navigate(['/crear-gasto'], { state: { groupId: this.grupo2?.id } });
   }
 
   pagarDeuda(deuda: DeudaUsuarioDTO) {
