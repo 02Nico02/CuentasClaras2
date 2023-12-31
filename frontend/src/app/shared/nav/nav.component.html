@@ -31,7 +31,7 @@
 
                 <div class="user-details">
                     <span class="username">{{userInfo?.username}}</span>
-                    <span class="user-balance">Saldo: {{ formatBalance() }}</span>
+                    <span *ngIf="userInfo" class="user-balance">Saldo: {{ formatMonto(userInfo.balance) }}</span>
                 </div>
 
                 <button class="btn btn-logout" (click)="logout()">Cerrar Sesión</button>

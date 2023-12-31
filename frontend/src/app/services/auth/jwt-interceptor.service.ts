@@ -1,4 +1,4 @@
-import { HttpEvent, HttpHandler, HttpHandlerFn, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { HttpEvent, HttpHandler, HttpHandlerFn, HttpHeaders, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LoginService } from './login.service';
@@ -8,15 +8,20 @@ import { LoginService } from './login.service';
 // })
 export function JwtInterceptorService(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
 
-  let token: String = localStorage?.["token"];
-  if (token != "") {
+  let token: string | null = localStorage.getItem("token");
+  if (token) {
     req = req.clone({
       setHeaders: {
-        "Content-Type": "application/json;charset=utf-8",
-        "Accept": "application/json",
         "Authorization": `Bearer ${token}`
       }
-    })
+    });
+  }
+
+  if (!(req.body instanceof FormData)) {
+    const headers = req.headers.set("Content-Type", "application/json;charset=utf-8")
+      .set("Accept", "application/json");
+
+    req = req.clone({ headers });
   }
   return next(req)
 }

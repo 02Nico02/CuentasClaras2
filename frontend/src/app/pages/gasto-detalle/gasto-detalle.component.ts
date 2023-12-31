@@ -5,6 +5,7 @@ import { GastoService } from '../../services/gasto/gasto.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavComponent } from '../../shared/nav/nav.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-gasto-detalle',
@@ -17,6 +18,7 @@ export class GastoDetalleComponent implements OnInit {
 
   gasto?: GastoDTO;
   gastoId: string = "1";
+  environment = environment;
 
   constructor(private route: ActivatedRoute, private titleService: Title, private gastoService: GastoService, private router: Router) { }
 
@@ -55,8 +57,8 @@ export class GastoDetalleComponent implements OnInit {
   convertirFechaAFormatoDeseado(fechaISO: string): string {
     const fecha = new Date(fechaISO);
     const dia = String(fecha.getUTCDate()).padStart(2, '0');
-    const mes = String(fecha.getUTCMonth() + 1).padStart(2, '0'); // +1 porque los meses en JavaScript son de 0 a 11
-    const anio = String(fecha.getUTCFullYear()).slice(-2); // Solo los últimos dos dígitos del año
+    const mes = String(fecha.getUTCMonth() + 1).padStart(2, '0');
+    const anio = String(fecha.getUTCFullYear()).slice(-2);
 
     return `${dia}/${mes}/${anio}`;
   }
@@ -64,5 +66,14 @@ export class GastoDetalleComponent implements OnInit {
 
   mostrarFechaLocal(fechaISO: string): string {
     return this.convertirFechaAFormatoDeseado(fechaISO);
+  }
+
+  formatMonto(monto: number): string {
+    const formattedMonto = monto.toLocaleString('es-AR', {
+      style: 'currency',
+      currency: 'ARS'
+    });
+
+    return formattedMonto;
   }
 }

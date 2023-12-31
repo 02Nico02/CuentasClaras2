@@ -112,13 +112,12 @@ export class GrupoDetalleComponent implements OnInit {
   }
 
   formatBalance(balance: number): string {
-    if (balance > 0) {
-      return `+$${balance.toFixed(2)}`;
-    } else if (balance < 0) {
-      return `-$${(-balance).toFixed(2)}`;
-    } else {
-      return '$0.00';
-    }
+    const formattedBalance = balance.toLocaleString('es-AR', {
+      style: 'currency',
+      currency: 'ARS'
+    });
+
+    return formattedBalance;
   }
 
   mostrarDetallesActividad(actividad: any) {
@@ -148,5 +147,14 @@ export class GrupoDetalleComponent implements OnInit {
     } else {
       return 'zero-balance';
     }
+  }
+
+  formattedDate(date: string): string {
+    const fecha = new Date(date);
+    const dia = String(fecha.getUTCDate()).padStart(2, '0');
+    const mes = String(fecha.getUTCMonth() + 1).padStart(2, '0');
+    const anio = String(fecha.getUTCFullYear()).slice(-2);
+
+    return `${dia}/${mes}/${anio}`;
   }
 }

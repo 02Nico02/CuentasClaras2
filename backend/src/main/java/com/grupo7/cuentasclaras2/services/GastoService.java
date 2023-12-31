@@ -3,8 +3,10 @@ package com.grupo7.cuentasclaras2.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.grupo7.cuentasclaras2.DTO.CategoriaDTO;
+import com.grupo7.cuentasclaras2.DTO.CrearGastoDTO;
 import com.grupo7.cuentasclaras2.DTO.DivisionIndividualDTO;
 import com.grupo7.cuentasclaras2.DTO.FormaDividirDTO;
 import com.grupo7.cuentasclaras2.DTO.GastoAutorDTO;
@@ -24,12 +26,21 @@ import com.grupo7.cuentasclaras2.repositories.CategoriaRepository;
 import com.grupo7.cuentasclaras2.repositories.GastoRepository;
 import com.grupo7.cuentasclaras2.repositories.GrupoRepository;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -105,48 +116,97 @@ public class GastoService {
 
 	/**
 	 * Crea un nuevo gasto en el sistema utilizando la información proporcionada en
-	 * un objeto GastoDTO.
+	 * un objeto CrearGastoDTO.
 	 *
-	 * @param gastoDTO El objeto GastoDTO que contiene la información para crear el
-	 *                 nuevo gasto.
+	 * @param crearGastoDTO El objeto CrearGastoDTO que contiene la información para
+	 *                      crear el
+	 *                      nuevo gasto.
 	 * @return El gasto recién creado y guardado en el sistema.
 	 * @throws GroupException Si la validación de los datos del gasto no es exitosa.
 	 */
 	@Transactional
-	public Gasto newSpendingByDTO(GastoDTO gastoDTO) {
-		validateNombreAndFecha(gastoDTO.getNombre(), gastoDTO.getFecha());
-		validateFormaDividir(gastoDTO.getFormaDividir(), gastoDTO.getGastoAutor());
+	public Gasto newSpendingByDTO(CrearGastoDTO crearGastoDTO) {
+		validateNombreAndFecha(crearGastoDTO.getNombre(), crearGastoDTO.getFecha());
+		validateFormaDividir(crearGastoDTO.getFormaDividir(), crearGastoDTO.getGastoAutor());
 
-		CategoriaDTO categoriaDTO = gastoDTO.getCategoria();
-		Categoria categoria = validateAndGetCategoria(categoriaDTO.getId());
+		Categoria categoria = validateAndGetCategoria(crearGastoDTO.getCategoriaId());
 		validateCategoria(categoria);
 
-		Grupo grupo = validateGroupExistente(gastoDTO.getGrupoId());
+		Grupo grupo = validateGroupExistente(crearGastoDTO.getGrupoId());
 		List<Usuario> miembros = grupo.getMiembros();
-		validateGroupMembers(gastoDTO.getGastoAutor(), gastoDTO.getFormaDividir().getDivisionIndividual(), miembros);
+		validateGroupMembers(crearGastoDTO.getGastoAutor(), crearGastoDTO.getFormaDividir().getDivisionIndividual(),
+				miembros);
 
 		Gasto gasto = new Gasto();
-		gasto.setNombre(gastoDTO.getNombre());
-		gasto.setFecha(gastoDTO.getFecha());
-		gasto.setImagen(gastoDTO.getImagen());
+		gasto.setNombre(crearGastoDTO.getNombre());
+		gasto.setFecha(crearGastoDTO.getFecha());
 		gasto.setEditable(true);
 		grupo.agregarGasto(gasto);
 
-		FormaDividir formaDividir = formaDividirService.createFormaDividirByDTO(gastoDTO.getFormaDividir(), gasto);
+		FormaDividir formaDividir = formaDividirService.createFormaDividirByDTO(crearGastoDTO.getFormaDividir(), gasto);
 		gasto.setFormaDividir(formaDividir);
 
 		categoria.agregarGasto(gasto);
 
-		for (GastoAutorDTO gastoAutorDTO : gastoDTO.getGastoAutor()) {
+		for (GastoAutorDTO gastoAutorDTO : crearGastoDTO.getGastoAutor()) {
 			gastoAutorService.createGastoAutorByDTO(gastoAutorDTO, gasto);
 		}
 
 		categoriaRepository.save(categoria);
 		Gasto gastoGuardado = gastoRepository.save(gasto);
 
-		crearDeudasUsuarios(gastoDTO.getFormaDividir(), gastoGuardado);
+		crearDeudasUsuarios(crearGastoDTO.getFormaDividir(), gastoGuardado);
 
 		return gastoGuardado;
+	}
+
+	public Gasto saveImagenComprobante(Gasto gasto, MultipartFile file) {
+		validateImagen(file);
+		File imageSave = saveFileToDisk(file);
+		gasto.setImagen(imageSave.getName());
+		gastoRepository.save(gasto);
+		return gasto;
+	}
+
+	/**
+	 * Guarda el archivo proporcionado en el sistema de archivos en una ubicación
+	 * específica.
+	 * El archivo se guarda con un nombre único generado utilizando UUID para evitar
+	 * colisiones.
+	 *
+	 * @param file MultipartFile que representa el archivo a guardar.
+	 * @return File que representa el archivo guardado en el sistema de archivos.
+	 * @throws GastoException Si ocurre un error durante la transferencia o guardado
+	 *                        del archivo.
+	 */
+	private File saveFileToDisk(MultipartFile file) {
+		String directoryPath = "src/main/resources/static/images/gasto/";
+		String originalFilename = file.getOriginalFilename();
+		String fileExtension = "";
+		if (originalFilename != null && originalFilename.contains(".")) {
+			fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+		} else {
+			throw new GastoException("No se pudo determinar la extensión del archivo o el nombre del archivo es nulo.");
+		}
+
+		String uniqueFileName = UUID.randomUUID().toString() + "." + fileExtension;
+
+		Path directory = Paths.get(directoryPath);
+		if (!Files.exists(directory)) {
+			try {
+				Files.createDirectories(directory);
+			} catch (IOException e) {
+				throw new GastoException("Error al crear el directorio: " + e.getMessage());
+			}
+		}
+
+		File storedFile = new File(directoryPath + uniqueFileName);
+		try (OutputStream os = new FileOutputStream(storedFile)) {
+			os.write(file.getBytes());
+		} catch (IOException e) {
+			throw new GastoException("Error al guardar el archivo: " + e.getMessage());
+		}
+		return storedFile;
 	}
 
 	/**
@@ -304,6 +364,37 @@ public class GastoService {
 	private void validateCategoria(Categoria categoria) {
 		if (categoria.isGrupo()) {
 			throw new GastoException("La categoria no pertenece a un gasto");
+		}
+	}
+
+	/**
+	 * Valida la imagen proporcionada para asegurarse de que cumpla con los
+	 * requisitos de tamaño y tipo especificados.
+	 *
+	 * @param imagen MultipartFile que representa la imagen a validar.
+	 * @throws GastoException Si la imagen supera el tamaño máximo permitido o si su
+	 *                        tipo no está entre los tipos permitidos.
+	 */
+	private void validateImagen(MultipartFile imagen) {
+		if (imagen == null || imagen.isEmpty()) {
+			return;
+		}
+
+		long maxSize = 5 * 1024 * 1024; // 5MB
+		String[] allowedTypes = { "image/jpeg", "image/png", "image/jpg", "application/pdf" };
+
+		try {
+			if (imagen.getSize() > maxSize) {
+				throw new GastoException("El tamaño de la imagen supera el límite permitido de 5MB.");
+			}
+
+			String contentType = imagen.getContentType();
+			if (contentType == null || !Arrays.asList(allowedTypes).contains(contentType)) {
+				throw new GastoException(
+						"El tipo de archivo no es válido. Solo se permiten imágenes (JPG, JPEG, PNG) y PDF.");
+			}
+		} catch (Exception e) {
+			throw new GastoException("Error al validar la imagen: " + e.getMessage());
 		}
 	}
 

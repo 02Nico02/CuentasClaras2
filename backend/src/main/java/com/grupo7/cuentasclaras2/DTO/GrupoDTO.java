@@ -1,9 +1,12 @@
 package com.grupo7.cuentasclaras2.DTO;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -104,22 +107,17 @@ public class GrupoDTO {
         balance = 0;
 
         for (DeudaUsuario deuda : deudas) {
-            if (deuda.getDeudor().equals(usuarioAutenticado)) {
-                balance -= deuda.getMonto();
-                saldos.put(deuda.getAcreedor(), -deuda.getMonto());
-            } else if (deuda.getAcreedor().equals(usuarioAutenticado)) {
-                balance += deuda.getMonto();
-                saldos.put(deuda.getDeudor(), deuda.getMonto());
-            }
+            saldos.put(deuda.getAcreedor(), saldos.getOrDefault(deuda.getAcreedor(), 0.0) + deuda.getMonto());
+
+            saldos.put(deuda.getDeudor(), saldos.getOrDefault(deuda.getDeudor(), 0.0) - deuda.getMonto());
         }
+
+        balance = saldos.getOrDefault(usuarioAutenticado, 0.0);
 
         if (grupo.getMiembros() != null) {
             for (Usuario usuario : grupo.getMiembros()) {
-                if (usuario.equals(usuarioAutenticado)) {
-                    continue;
-                }
-                double balance = saldos.getOrDefault(usuario, 0.0);
-                MiembrosGrupoDTO miembroDTO = new MiembrosGrupoDTO(usuario, balance);
+                double balanceUsuario = saldos.getOrDefault(usuario, 0.0);
+                MiembrosGrupoDTO miembroDTO = new MiembrosGrupoDTO(usuario, balanceUsuario);
                 miembrosDTO.add(miembroDTO);
             }
         }
@@ -177,6 +175,14 @@ public class GrupoDTO {
         List<GastoAutor> gastoAutores = gasto.getGastoAutor();
         double totalMonto = gasto.getMontoTotal();
 
+        // Configurar DecimalFormat para el formato argentino
+        DecimalFormatSymbols simbolos = new DecimalFormatSymbols(Locale.getDefault());
+        simbolos.setDecimalSeparator(',');
+        simbolos.setGroupingSeparator('.');
+
+        DecimalFormat df = new DecimalFormat("#,###,##0.00", simbolos);
+        String montoFormateado = df.format(totalMonto);
+
         // Obtener la lista de nombres de los autores del gasto
         List<String> nombresAutores = gastoAutores.stream()
                 .map(ga -> ga.getIntegrante().getUsername())
@@ -186,14 +192,14 @@ public class GrupoDTO {
             // Caso: Solo un autor y no es el usuario autenticado
             texto.append(nombresAutores.get(0))
                     .append(" gastó $")
-                    .append(totalMonto)
+                    .append(montoFormateado)
                     .append(" en ")
                     .append(gasto.getNombre());
 
         } else if (nombresAutores.size() == 1 && gastoAutores.get(0).getIntegrante().equals(usuarioAutenticado)) {
             // Caso: Solo un autor y es el usuario autenticado
             texto.append("Gastaste $")
-                    .append(totalMonto)
+                    .append(montoFormateado)
                     .append(" en ")
                     .append(gasto.getNombre());
 
@@ -201,7 +207,7 @@ public class GrupoDTO {
             // Caso: Más de un autor y ninguno es el usuario autenticado
             texto.append(String.join(", ", nombresAutores))
                     .append(" gastaron ")
-                    .append(totalMonto)
+                    .append(montoFormateado)
                     .append(" en ")
                     .append(gasto.getNombre());
 
@@ -210,7 +216,7 @@ public class GrupoDTO {
             // Caso: El usuario autenticado está entre los autores
             texto.append(String.join(", ", nombresAutores))
                     .append(" y vos gastaste ")
-                    .append(totalMonto)
+                    .append(montoFormateado)
                     .append(" en ")
                     .append(gasto.getNombre());
 
@@ -220,12 +226,19 @@ public class GrupoDTO {
     }
 
     private String generarTextoPago(Pago pago, Usuario usuarioAutenticado) {
+        DecimalFormatSymbols simbolos = new DecimalFormatSymbols(Locale.getDefault());
+        simbolos.setDecimalSeparator(',');
+        simbolos.setGroupingSeparator('.');
+
+        DecimalFormat df = new DecimalFormat("#,###,##0.00", simbolos);
+        String montoFormateado = df.format(pago.getMonto());
+
         if (pago.getAutor().equals(usuarioAutenticado)) {
-            return "Pagaste $" + pago.getMonto() + " a " + pago.getDestinatario().getUsername();
+            return "Pagaste $" + montoFormateado + " a " + pago.getDestinatario().getUsername();
         } else if (pago.getDestinatario().equals(usuarioAutenticado)) {
-            return pago.getAutor().getUsername() + " te pagó $" + pago.getMonto();
+            return pago.getAutor().getUsername() + " te pagó $" + montoFormateado;
         } else {
-            return pago.getAutor().getUsername() + " pagó $" + pago.getMonto() + " a "
+            return pago.getAutor().getUsername() + " pagó $" + montoFormateado + " a "
                     + pago.getDestinatario().getUsername();
         }
     }
@@ -254,12 +267,19 @@ public class GrupoDTO {
     }
 
     private String generarTextoDeuda(DeudaUsuario deuda, Usuario usuarioAutenticado) {
+        DecimalFormatSymbols simbolos = new DecimalFormatSymbols(Locale.getDefault());
+        simbolos.setDecimalSeparator(',');
+        simbolos.setGroupingSeparator('.');
+
+        DecimalFormat df = new DecimalFormat("#,###,##0.00", simbolos);
+        String montoFormateado = df.format(deuda.getMonto());
+
         if (deuda.getDeudor().equals(usuarioAutenticado)) {
-            return "Le debes $" + deuda.getMonto() + " a " + deuda.getAcreedor().getUsername();
+            return "Le debes $" + montoFormateado + " a " + deuda.getAcreedor().getUsername();
         } else if (deuda.getAcreedor().equals(usuarioAutenticado)) {
-            return deuda.getDeudor().getUsername() + " te debe $" + deuda.getMonto();
+            return deuda.getDeudor().getUsername() + " te debe $" + montoFormateado;
         } else {
-            return deuda.getDeudor().getUsername() + " debe $" + deuda.getMonto() + " a "
+            return deuda.getDeudor().getUsername() + " debe $" + montoFormateado + " a "
                     + deuda.getAcreedor().getUsername();
         }
     }

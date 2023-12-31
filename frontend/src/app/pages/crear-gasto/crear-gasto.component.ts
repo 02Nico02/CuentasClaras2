@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, AfterViewInit } from '@angular/core';
 import { NavComponent } from '../../shared/nav/nav.component';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,6 +8,7 @@ import { GastoService } from '../../services/gasto/gasto.service';
 import { CategoriaDTO, MiembroDTO } from '../../services/group/grupo.dto';
 import { GroupService } from '../../services/group/group.service';
 import { FormaDividir, GastoAutor, GastoDTO } from '../../services/gasto/gasto.dto';
+import { CrearGastoDTO, FormaDividirCrear, GastoAutorCrear } from '../../services/gasto/crearGastoDTO';
 
 @Component({
   selector: 'app-crear-gasto',
@@ -18,6 +19,10 @@ import { FormaDividir, GastoAutor, GastoDTO } from '../../services/gasto/gasto.d
 })
 export class CrearGastoComponent implements OnInit {
 
+  categorias: CategoriaDTO[] = [];
+  autoresDisponibles: MiembroDTO[] = [];
+  today = new Date();
+  groupId: string = "0";
   newGasto: GastoDTO = {
     id: 0,
     gastoAutor: [] as GastoAutor[],
@@ -28,29 +33,46 @@ export class CrearGastoComponent implements OnInit {
     formaDividir: {} as FormaDividir,
     categoria: {} as CategoriaDTO
   };
-  categorias: CategoriaDTO[] = [];
-  autoresDisponibles: MiembroDTO[] = [];
-  today = new Date();
-  userNameInvalid: boolean = false;
-  montoInvalid: boolean = false;
-  fechaInvalid: boolean = false;
-  nameInvalid: boolean = false;
-  formaDivisionPorcentajeInvalid: boolean = false;
-  formaDivisionMontoInvalid: boolean = false;
-  msgErrorMonto: String = '';
-  msgErrorFecha: String = '';
-  mensajeErrorMontos: string = '';
-  mensajeErrorPorcentaje: string = '';
+  errors = {
+    userName: false,
+    monto: false,
+    fecha: false,
+    name: false,
+    formaDivisionPorcentaje: false,
+    formaDivisionMonto: false,
+    categoria: false,
+    gastoAutor: false,
+    formaDividir: false,
+  };
+  messages = {
+    monto: '',
+    fecha: '',
+    name: '',
+    formaDivisionPorcentaje: '',
+    formaDivisionMonto: '',
+    imagen: '',
+  };
+  imagenInvalid: boolean = false;
   formaDividirAnterior: string = '';
   totalMontos: number = 0;
+  selectedFile: File | null = null;
+  imageURL: string | ArrayBuffer | null = null;
 
   constructor(private formBuilder: FormBuilder, private router: Router, private titleService: Title, private gastoService: GastoService, private groupService: GroupService) {
 
+    this.initializeData();
+  }
+
+  ngOnInit(): void {
+    this.titleService.setTitle('Cuentas Claras - Nuevo gasto');
+  }
+
+  private initializeData(): void {
+    this.groupId = history.state.groupId;
     this.gastoService.getAllExpenseCategories().subscribe(data => {
       this.categorias = data;
     });
-    let groupId = history.state.groupId;
-    this.groupService.obtenerMiembrosGrupo(groupId).subscribe(
+    this.groupService.obtenerMiembrosGrupo(this.groupId).subscribe(
       data => {
         this.autoresDisponibles = data;
         this.newGasto.formaDividir.divisionIndividual = data.map(miembro => ({
@@ -59,7 +81,6 @@ export class CrearGastoComponent implements OnInit {
           userName: miembro.userName,
           monto: 0
         }));
-        console.log(this.autoresDisponibles)
       },
       error => {
         console.error('Error al obtener los miembros del grupo:', error);
@@ -67,8 +88,9 @@ export class CrearGastoComponent implements OnInit {
     );
   }
 
-  ngOnInit(): void {
-    this.titleService.setTitle('Cuentas Claras - Nuevo gasto');
+  hasErrors(): boolean {
+    console.log("Entre al hasErrors")
+    return Object.values(this.errors).some(error => error);
   }
 
   fechaValida(control: FormControl) {
@@ -82,33 +104,35 @@ export class CrearGastoComponent implements OnInit {
   }
 
   onFileChange(event: any): void {
+    this.selectedFile = null;
+    this.imagenInvalid = false;
     const file = event.target.files[0];
 
-    // Validar tamaño máximo (5MB en este ejemplo)
-    const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+    const maxSize = 5 * 1024 * 1024;
 
     if (file && file.size > maxSize) {
-      alert('El archivo supera el tamaño máximo permitido de 5MB.');
+      this.imagenInvalid = true;
+      this.messages.imagen = 'El archivo supera el tamaño máximo permitido de 5MB.';
       return;
     }
 
-    // Validar tipo de archivo
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
 
     if (file && !allowedTypes.includes(file.type)) {
-      alert('El tipo de archivo no es válido. Solo se permiten imágenes (JPG, JPEG, PNG) y PDF.');
+      this.imagenInvalid = true;
+      this.messages.imagen = 'El tipo de archivo no es válido. Solo se permiten imágenes (JPG, JPEG, PNG) y PDF.';
       return;
     }
 
     if (file) {
+      this.selectedFile = file;
+
       const reader = new FileReader();
 
       reader.readAsDataURL(file);
-
-      // FALTA PONER LA FOTO EN EL GASTO
-      // reader.onload = () => {
-      //   this.gasto.imagen = reader.result as string;
-      // };
+      reader.onload = () => {
+        this.imageURL = reader.result;
+      };
 
       reader.onerror = (error) => {
         console.error('Error al leer el archivo:', error);
@@ -116,30 +140,7 @@ export class CrearGastoComponent implements OnInit {
     }
   }
 
-  imagenValida(control: AbstractControl): ValidationErrors | null {
-    const archivo = control.value;
-
-    if (archivo === null) {
-      return { 'sinImagen': true };
-    }
-
-    // Validar el tipo de archivo
-    const tipoPermitido = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-    if (!tipoPermitido.includes(archivo.type)) {
-      return { 'tipoInvalido': true }; // Devuelve un error si el tipo no es válido
-    }
-
-    // Validar el tamaño del archivo
-    const maxSize = 5 * 1024 * 1024; // 5MB en bytes
-    if (archivo.size > maxSize) {
-      return { 'tamanioExcedido': true }; // Devuelve un error si el tamaño excede el límite
-    }
-
-    return null; // o devuelve un error si es necesario
-  }
-
   agregarGastoAutor(idAutor: number, monto: number): void {
-    // Verifica si el autor ya ha sido agregado para evitar duplicados
     const autorExistente = this.newGasto.gastoAutor.find(gastoAutor => gastoAutor.userId === idAutor);
 
     if (autorExistente) {
@@ -147,19 +148,17 @@ export class CrearGastoComponent implements OnInit {
       return;
     }
 
-    // Busca el autor seleccionado en la lista de autores disponibles
     const autorSeleccionado = this.autoresDisponibles.find(autor => autor.idUsuario === idAutor);
 
     if (!autorSeleccionado) {
-      this.userNameInvalid = true
+      this.errors.userName = true
       console.error('Autor no encontrado.');
       return;
     }
 
     this.validarMonto(monto);
-    if (this.montoInvalid) return;
+    if (this.errors.monto) return;
 
-    // Crea un nuevo FormGroup para el autor y el monto
     const nuevoAutor: GastoAutor = {
       id: 0,
       userId: autorSeleccionado.idUsuario,
@@ -168,6 +167,7 @@ export class CrearGastoComponent implements OnInit {
     };
 
     this.newGasto.gastoAutor.push(nuevoAutor);
+    this.errors.gastoAutor = false;
     this.totalMontos += monto;
 
     const indexAutorSeleccionado = this.autoresDisponibles.findIndex(autor => autor.idUsuario === idAutor);
@@ -178,29 +178,28 @@ export class CrearGastoComponent implements OnInit {
     this.validarMontosDivision()
   }
   validarMonto(monto: number | null): void {
-    console.log("entre");
 
     if (!monto) {
-      this.montoInvalid = true;
-      this.msgErrorMonto = 'Por favor, ingrese un monto válido.';
+      this.errors.monto = true;
+      this.messages.monto = 'Por favor, ingrese un monto válido.';
       return;
     }
 
     if (monto < 0.01) {
-      this.montoInvalid = true;
-      this.msgErrorMonto = 'El monto debe ser mayor a 0.';
+      this.errors.monto = true;
+      this.messages.monto = 'El monto debe ser mayor a 0.';
       return;
     }
 
     const decimalPart = monto.toString().split('.')[1];
     if (decimalPart && decimalPart.length > 2) {
-      this.montoInvalid = true;
-      this.msgErrorMonto = 'El monto no puede tener más de dos decimales.';
+      this.errors.monto = true;
+      this.messages.monto = 'El monto no puede tener más de dos decimales.';
       return;
     }
 
-    this.montoInvalid = false; // Asegurarse de que el monto sea válido
-    this.msgErrorMonto = '';  // Limpiar el mensaje de error si no hay problemas
+    this.errors.monto = false;
+    this.messages.monto = '';
   }
 
   public get hayAutoresDisponibles(): boolean {
@@ -219,31 +218,43 @@ export class CrearGastoComponent implements OnInit {
       });
     }
 
+    if (this.newGasto.gastoAutor.length === 0) {
+      this.errors.gastoAutor = true
+    }
+
     this.validarMontosDivision()
   }
 
   validarNombre(): void {
-    console.log(this.nameInvalid)
-    console.log("nombre:")
-    console.log(this.newGasto.nombre)
     if (this.newGasto.nombre && this.newGasto.nombre.trim().length > 0) {
-      console.log("nombre existente")
-      this.nameInvalid = false
+      this.errors.name = false
       return
     }
-    this.nameInvalid = true
+    this.errors.name = true
   }
 
   validarFecha(): void {
     if (!this.newGasto.fecha) {
-      this.fechaInvalid = true;
-      this.msgErrorFecha = "La fecha es requerida"
+      this.errors.fecha = true;
+      this.messages.fecha = "La fecha es requerida"
       return
     }
     const inputDate = new Date(this.newGasto.fecha);
     const today = new Date();
-    this.fechaInvalid = inputDate > today;
-    this.msgErrorFecha = "La fecha ingresada no puede ser posterior a la fecha actual."
+    this.errors.fecha = inputDate > today;
+    this.messages.fecha = "La fecha ingresada no puede ser posterior a la fecha actual."
+  }
+
+  validarCategoria(): void {
+    this.errors.categoria = !this.newGasto.categoria.id;
+  }
+
+  validarGastoAutor(): void {
+    this.errors.gastoAutor = this.newGasto.gastoAutor.length === 0;
+  }
+
+  validarFormaDividir(): void {
+    this.errors.formaDividir = !this.newGasto.formaDividir.formaDividir;
   }
 
   dividirEnPartesIguales() {
@@ -291,55 +302,55 @@ export class CrearGastoComponent implements OnInit {
 
   validarMontosDivision() {
     if (this.newGasto.formaDividir.formaDividir === 'MONTO') {
-      this.formaDivisionPorcentajeInvalid = false;
+      this.errors.formaDivisionPorcentaje = false;
       this.validarSumaMontos()
     } else if (this.newGasto.formaDividir.formaDividir === 'PORCENTAJE') {
-      this.formaDivisionMontoInvalid = false;
+      this.errors.formaDivisionMonto = false;
       this.validarPorcentaje()
     }
   }
 
   validarSumaMontos(): boolean {
-    this.formaDivisionPorcentajeInvalid = false;
+    this.errors.formaDivisionPorcentaje = false;
     const suma = this.sumatoriaDivisionIndividual();
 
     if (!this.esNumeroValido(suma)) {
-      this.formaDivisionMontoInvalid = true;
-      this.mensajeErrorMontos = `La suma de los montos individuales tiene más de dos decimales.`;
+      this.errors.formaDivisionMonto = true;
+      this.messages.formaDivisionMonto = `La suma de los montos individuales tiene más de dos decimales.`;
       return false;
     }
 
     if (suma === this.totalMontos) {
-      this.formaDivisionMontoInvalid = false;
-      this.mensajeErrorMontos = '';
+      this.errors.formaDivisionMonto = false;
+      this.messages.formaDivisionMonto = '';
       return true;
     }
 
-    this.formaDivisionMontoInvalid = true;
+    this.errors.formaDivisionMonto = true;
     const diff = this.totalMontos - suma;
-    this.mensajeErrorMontos = `La suma de los montos individuales difiere de $${this.totalMontos}. Diferencia: ${parseFloat(diff.toFixed(2))}`;
+    this.messages.formaDivisionMonto = `La suma de los montos individuales difiere de $${this.totalMontos}. Diferencia: ${parseFloat(diff.toFixed(2))}`;
     return false;
   }
 
   validarPorcentaje(): boolean {
-    this.formaDivisionMontoInvalid = false;
+    this.errors.formaDivisionMonto = false;
     const suma = this.sumatoriaDivisionIndividual();
 
     if (!this.esNumeroValido(suma)) {
-      this.formaDivisionPorcentajeInvalid = true;
-      this.mensajeErrorPorcentaje = `La suma de los porcentajes tiene más de dos decimales.`;
+      this.errors.formaDivisionPorcentaje = true;
+      this.messages.formaDivisionPorcentaje = `La suma de los porcentajes tiene más de dos decimales.`;
       return false;
     }
 
     if (suma === 100) {
-      this.formaDivisionPorcentajeInvalid = false;
-      this.mensajeErrorPorcentaje = '';
+      this.errors.formaDivisionPorcentaje = false;
+      this.messages.formaDivisionPorcentaje = '';
       return true;
     }
 
-    this.formaDivisionPorcentajeInvalid = true;
+    this.errors.formaDivisionPorcentaje = true;
     const diff = 100 - suma;
-    this.mensajeErrorPorcentaje = `La suma de los porcentajes difiere de 100%. Diferencia: ${parseFloat(diff.toFixed(2))}`;
+    this.messages.formaDivisionPorcentaje = `La suma de los porcentajes difiere de 100%. Diferencia: ${parseFloat(diff.toFixed(2))}`;
     return false;
   }
 
@@ -409,8 +420,63 @@ export class CrearGastoComponent implements OnInit {
     this.formaDividirAnterior = 'PORCENTAJE';
   }
 
-  crearGasto() {
+  formValid(): boolean {
+    this.validarNombre();
+    this.validarFecha();
+    this.validarCategoria();
+    this.validarGastoAutor();
+    this.validarFormaDividir();
+    this.validarMontosDivision();
 
+    return Object.values(this.errors).every(error => !error);
+  }
+  crearGasto() {
+    if (this.formValid()) {
+      const formaDividirCrear: FormaDividirCrear = {
+        formaDividir: this.newGasto.formaDividir.formaDividir,
+        divisionIndividual: this.newGasto.formaDividir.divisionIndividual.map(division => ({
+          userId: division.userId,
+          monto: division.monto
+        }))
+      };
+      const gastoAutorCrear: GastoAutorCrear[] = this.newGasto.gastoAutor.map(autor => ({
+        userId: autor.userId,
+        monto: autor.monto
+      }));
+      const crearGastoData: CrearGastoDTO = {
+        nombre: this.newGasto.nombre,
+        fecha: this.newGasto.fecha,
+        grupoId: parseInt(this.groupId, 10),
+        formaDividir: formaDividirCrear,
+        categoriaId: this.newGasto.categoria.id,
+        gastoAutor: gastoAutorCrear
+      };
+      // formData.append('data', JSON.stringify(crearGastoData));
+      // if (this.selectedFile) {
+      //   formData.append('file', this.selectedFile, this.selectedFile.name);
+      // }
+      this.gastoService.crearGasto(crearGastoData).subscribe(
+        data => {
+          if (this.selectedFile) {
+            this.gastoService.subirImagen(data.id, this.selectedFile).subscribe(gasto => {
+              this.router.navigate([`/gasto/${data.id}/detalle`]);
+            });
+          } else {
+            this.router.navigate([`/gasto/${data.id}/detalle`]);
+
+          }
+        },
+        error => {
+          console.error(error);
+        }
+      );
+    } else {
+      console.log(this.errors);
+    }
+  }
+
+  cancelar() {
+    this.router.navigate([`/grupo/${this.groupId}/detalle`]);
   }
 
 }

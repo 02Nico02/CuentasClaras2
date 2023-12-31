@@ -123,8 +123,7 @@
                     El archivo seleccionado no es válido o supera el tamaño permitido.
                 </div>
                 <div *ngIf="gasto?.imagen" class="comprobante-preview">
-                    <img src="https://www.afip.gob.ar/visitaComercios/images/FacturaV4.jpg" alt="Comprobante del gasto"
-                        class="preview-img">
+                    <img [src]="gasto.imagen" alt="Comprobante del gasto" class="preview-img">
                     <span class="preview-label">Vista previa</span>
                 </div>
             </div>

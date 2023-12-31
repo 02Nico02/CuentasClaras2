@@ -290,3 +290,8 @@ h2 {
     color: #888;
     margin-top: 20px;
 }
+
+.activity-content {
+    text-decoration: none;
+    width: 100%;
+}

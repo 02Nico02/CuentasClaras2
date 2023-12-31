@@ -1,5 +1,6 @@
 package com.grupo7.cuentasclaras2;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -15,6 +16,9 @@ import com.grupo7.cuentasclaras2.interceptor.AccessLogInterceptor;
 @SpringBootApplication
 @ComponentScan(basePackages = "com.grupo7.cuentasclaras2")
 public class Cuentasclaras2Application implements WebMvcConfigurer {
+
+	@Value("${base.url}")
+	private String baseUrl;
 
 	public static void main(String[] args) {
 		SpringApplication.run(Cuentasclaras2Application.class, args);
@@ -50,6 +54,11 @@ public class Cuentasclaras2Application implements WebMvcConfigurer {
 						.allowCredentials(true);
 			}
 		};
+	}
+
+	@Bean
+	public String baseUrl() {
+		return baseUrl;
 	}
 
 }

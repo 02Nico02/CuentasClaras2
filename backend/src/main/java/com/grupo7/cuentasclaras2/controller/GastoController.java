@@ -15,8 +15,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.CrossOrigin;
+
+import com.grupo7.cuentasclaras2.DTO.CrearGastoDTO;
 import com.grupo7.cuentasclaras2.DTO.GastoDTO;
 import com.grupo7.cuentasclaras2.modelos.Gasto;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
@@ -36,6 +40,9 @@ public class GastoController {
 
 	@Autowired
 	private GrupoService grupoService;
+
+	@Autowired
+	private String baseUrl;
 
 	/**
 	 * Obtiene los detalles de un gasto específico por su identificador.
@@ -69,21 +76,29 @@ public class GastoController {
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
 
-		return new ResponseEntity<>(new GastoDTO(gasto), HttpStatus.OK);
+		GastoDTO gastoDTO = new GastoDTO(gasto);
+		if (gasto.getImagen() != null) {
+			String imageUrl = baseUrl + "/images/gasto/" + gasto.getImagen();
+			System.out.println(imageUrl);
+			gastoDTO.setImagen(imageUrl);
+		}
+
+		return new ResponseEntity<>(gastoDTO, HttpStatus.OK);
 	}
 
 	/**
 	 * Crea un nuevo gasto utilizando la información proporcionada en el objeto
-	 * GastoDTO.
+	 * CrearGastoDTO.
 	 *
-	 * @param gastoDTO Objeto que contiene los detalles del nuevo gasto.
+	 * @param crearGastoDTO Objeto que contiene los detalles del nuevo gasto.
 	 * @return ResponseEntity con el detalle del gasto recién creado en formato
 	 *         GastoDTO, o HttpStatus.UNAUTHORIZED si el usuario no está autenticado
 	 *         o no es miembro del grupo, o HttpStatus.FORBIDDEN si el usuario no es
 	 *         miembro del grupo especificado.
 	 */
 	@PostMapping("/create")
-	public ResponseEntity<GastoDTO> createGasto(@RequestBody GastoDTO gastoDTO) {
+	public ResponseEntity<GastoDTO> createGasto(@RequestBody CrearGastoDTO crearGastoDTO) {
+		System.out.println("ya en el metodo");
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		Object principal = authentication.getPrincipal();
 
@@ -93,15 +108,47 @@ public class GastoController {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 
-		boolean esMiembro = grupoService.usuarioPerteneceAlGrupo(usuarioOptional.get().getId(), gastoDTO.getGrupoId());
+		boolean esMiembro = grupoService.usuarioPerteneceAlGrupo(usuarioOptional.get().getId(),
+				crearGastoDTO.getGrupoId());
 
 		if (!esMiembro) {
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
 
-		Gasto gasto = gastoService.newSpendingByDTO(gastoDTO);
-
+		Gasto gasto = gastoService.newSpendingByDTO(crearGastoDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new GastoDTO(gasto));
+	}
+
+	@PostMapping("/create/image")
+	public ResponseEntity<String> uploadGastoImage(@RequestParam("file") MultipartFile file,
+			@RequestParam("gastoId") Long gastoId) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Object principal = authentication.getPrincipal();
+
+		Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
+
+		if (!usuarioOptional.isPresent()) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
+		Optional<Gasto> gastoOptional = gastoService.getGastoById(gastoId);
+		if (!gastoOptional.isPresent()) {
+			return new ResponseEntity<>("Gasto no encontrado", HttpStatus.NOT_FOUND);
+		}
+		Gasto gasto = gastoOptional.get();
+
+		boolean esMiembro = grupoService.usuarioPerteneceAlGrupo(usuarioOptional.get().getId(),
+				gasto.getGrupo().getId());
+		if (!esMiembro) {
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
+
+		try {
+			gastoService.saveImagenComprobante(gasto, file);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	/**
