@@ -1,9 +1,7 @@
 <app-nav></app-nav>
 
 <div class="detalle-gasto-container">
-
-    <div *ngIf="gasto" class="detalle-gasto">
-
+    <div class="detalle-gasto">
         <div class="detalle-header">
             <h2>Editar Gasto</h2>
         </div>
@@ -120,22 +118,22 @@
                 </div>
                 <small class="form-text text-muted">Formatos admitidos: JPG, JPEG, PNG, PDF. Tamaño máximo: 5MB.</small>
                 <div *ngIf="!formValid.imagen" class="alert alert-danger">
-                    El archivo seleccionado no es válido o supera el tamaño permitido.
+                    {{messageErrorimagen}}
                 </div>
-                <div *ngIf="gasto?.imagen" class="comprobante-preview">
-                    <img [src]="gasto.imagen" alt="Comprobante del gasto" class="preview-img">
+                <div *ngIf="gasto?.imagen && !imageURL" class="comprobante-preview">
+                    <img [src]="gasto.imagen" alt="Previsualización del comprobante" class="preview-img">
+                    <span class="preview-label">Vista previa</span>
+                </div>
+                <div *ngIf="imageURL" class="comprobante-preview">
+                    <img [src]="imageURL" alt="Previsualización del comprobante" class="preview-img">
                     <span class="preview-label">Vista previa</span>
                 </div>
             </div>
 
             <div class="buttons-section d-flex justify-content-between">
-                <button class="btn btn-secondary">Cancelar</button>
+                <a [href]="['/gasto/'+ gasto.id + '/detalle']" class="btn btn-secondary">Cancelar</a>
                 <button (click)="guardarCambios()" class="btn btn-primary mr-2">Guardar Cambios</button>
             </div>
-
-
         </div>
-
     </div>
-
 </div>

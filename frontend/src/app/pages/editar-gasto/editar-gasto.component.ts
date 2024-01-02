@@ -70,6 +70,9 @@ export class EditarGastoComponent {
   mensajeErrorPorcentaje: string = '';
   mensajeErrorMontoGasto: string = '';
   usuariosDisponibles: GastoAutor[] = [];
+  selectedFile: File | null = null;
+  imageURL: string | ArrayBuffer | null = null;
+  messageErrorimagen: string = '';
 
   constructor(private route: ActivatedRoute,
     private gastoService: GastoService,
@@ -83,6 +86,7 @@ export class EditarGastoComponent {
       this.gastoEdit = newGasto
       this.actualizarTotal()
       this.gasto.fecha = this.convertirFechaParaInput(this.gasto.fecha);
+      this.formaDividirAnterior = this.gasto.formaDividir.formaDividir;
       this.gastoService.getAllExpenseCategories().subscribe(data => {
         this.categorias = data;
       });
@@ -136,10 +140,15 @@ export class EditarGastoComponent {
       };
       this.gastoService.editarGasto(gastoDTO, this.gasto.id).subscribe(
         response => {
-          console.log("todo ok, pero debe no existir la ruta")
-          console.log(response.id)
           this.gasto = response;
           this.router.navigate([`/gasto/${response.id}/detalle`]);
+          if (this.selectedFile) {
+            this.gastoService.updateImagen(response.id, this.selectedFile).subscribe(gasto => {
+              this.router.navigate([`/gasto/${response.id}/detalle`]);
+            });
+          } else {
+            this.router.navigate([`/gasto/${response.id}/detalle`]);
+          }
         },
         error => {
           console.error('Error al guardar el gasto', error);
@@ -198,7 +207,6 @@ export class EditarGastoComponent {
 
 
   convertirFechaParaInput(fechaCompleta: string): string {
-    console.log(fechaCompleta)
     return fechaCompleta.split('T')[0];
   }
 
@@ -257,11 +265,9 @@ export class EditarGastoComponent {
     });
 
     const montoTotalAsignado = this.gasto.formaDividir.divisionIndividual.reduce((acc, division) => acc + division.monto, 0);
-    if (sumPorcentajes !== this.totalMontos) {
+    if (montoTotalAsignado !== this.totalMontos) {
       const ajuste = this.totalMontos - montoTotalAsignado;
-      const cantidadUsuarios = this.gasto.formaDividir.divisionIndividual.length;
-      const indiceAleatorio = Math.floor(Math.random() * cantidadUsuarios);
-      this.gasto.formaDividir.divisionIndividual[indiceAleatorio].monto += ajuste;
+      this.gasto.formaDividir.divisionIndividual[this.gasto.formaDividir.divisionIndividual.length - 1].monto += ajuste;
     }
 
     this.formaDividirAnterior = 'MONTO';
@@ -395,31 +401,34 @@ export class EditarGastoComponent {
   }
 
   onFileChange(event: any): void {
+    this.selectedFile = null;
+    this.formValid.imagen = true;
     const file = event.target.files[0];
 
-    // Validar tamaño máximo (5MB en este ejemplo)
-    const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+    const maxSize = 5 * 1024 * 1024;
 
     if (file && file.size > maxSize) {
-      alert('El archivo supera el tamaño máximo permitido de 5MB.');
+      this.formValid.imagen = false;
+      this.messageErrorimagen = 'El archivo supera el tamaño máximo permitido de 5MB.';
       return;
     }
 
-    // Validar tipo de archivo
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
 
     if (file && !allowedTypes.includes(file.type)) {
-      alert('El tipo de archivo no es válido. Solo se permiten imágenes (JPG, JPEG, PNG) y PDF.');
+      this.formValid.imagen = false;
+      this.messageErrorimagen = 'El tipo de archivo no es válido. Solo se permiten imágenes (JPG, JPEG, PNG) y PDF.';
       return;
     }
 
     if (file) {
+      this.selectedFile = file;
+
       const reader = new FileReader();
 
       reader.readAsDataURL(file);
-
       reader.onload = () => {
-        this.gasto.imagen = reader.result as string;
+        this.imageURL = reader.result;
       };
 
       reader.onerror = (error) => {

@@ -79,7 +79,6 @@ public class GastoController {
 		GastoDTO gastoDTO = new GastoDTO(gasto);
 		if (gasto.getImagen() != null) {
 			String imageUrl = baseUrl + "/images/gasto/" + gasto.getImagen();
-			System.out.println(imageUrl);
 			gastoDTO.setImagen(imageUrl);
 		}
 
@@ -145,6 +144,38 @@ public class GastoController {
 
 		try {
 			gastoService.saveImagenComprobante(gasto, file);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@PostMapping("/update/image")
+	public ResponseEntity<String> updateImage(@RequestParam("file") MultipartFile file,
+			@RequestParam("gastoId") Long gastoId) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Object principal = authentication.getPrincipal();
+
+		Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
+
+		if (!usuarioOptional.isPresent()) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
+		Optional<Gasto> gastoOptional = gastoService.getGastoById(gastoId);
+		if (!gastoOptional.isPresent()) {
+			return new ResponseEntity<>("Gasto no encontrado", HttpStatus.NOT_FOUND);
+		}
+		Gasto gasto = gastoOptional.get();
+
+		boolean esMiembro = grupoService.usuarioPerteneceAlGrupo(usuarioOptional.get().getId(),
+				gasto.getGrupo().getId());
+		if (!esMiembro) {
+			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		}
+
+		try {
+			gastoService.updateImagenComprobante(gasto, file);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

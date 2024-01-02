@@ -37,6 +37,10 @@
 .friend-cards {
     display: grid;
     justify-content: center;
+    padding-left: 0;
+}
+
+.friend-cards li {
     cursor: pointer;
 }
 

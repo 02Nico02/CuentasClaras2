@@ -4,6 +4,7 @@ import { environment } from '../../../environments/environment';
 import { GrupoDTO, MiembroDTO } from './grupo.dto';
 import { Observable } from 'rxjs';
 import { PosiblesMiembrosDTO } from './posiblesMiembros.dto copy';
+import { GrupoParejaDTO } from './grupoPareja.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,10 @@ export class GroupService {
 
   obtenerDetalleGrupo(idGrupo: string): Observable<GrupoDTO> {
     return this.http.get<GrupoDTO>(`${environment.urlApi}group/${idGrupo}`);
+  }
+
+  obtenerDetalleGrupoPareja(idGrupo: string): Observable<GrupoParejaDTO> {
+    return this.http.get<GrupoParejaDTO>(`${environment.urlApi}group/pareja/${idGrupo}`);
   }
 
   obtenerPosiblesMiembros(groupId: string, usernameQuery: string): Observable<PosiblesMiembrosDTO> {

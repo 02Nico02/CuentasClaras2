@@ -76,4 +76,10 @@ export class GastoDetalleComponent implements OnInit {
 
     return formattedMonto;
   }
+
+  getTotalGastado(): number {
+    if (!this.gasto?.gastoAutor) return 0;
+
+    return this.gasto.gastoAutor.reduce((total, autor) => total + autor.monto, 0);
+  }
 }

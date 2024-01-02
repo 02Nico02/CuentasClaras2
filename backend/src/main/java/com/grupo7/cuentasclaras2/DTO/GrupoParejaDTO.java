@@ -4,11 +4,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.grupo7.cuentasclaras2.modelos.DeudaUsuario;
@@ -18,29 +15,19 @@ import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Pago;
 import com.grupo7.cuentasclaras2.modelos.Usuario;
 
-public class GrupoDTO {
+public class GrupoParejaDTO {
     private long id;
-    private String nombre;
-    private boolean pareja;
-    private Date fechaCreacion;
-    private CategoriaDTO categoria;
-    private List<MiembrosGrupoDTO> miembros;
-    private List<DeudaUsuarioPreviewDTO> deudasUsuarios;
     private double balance;
+    private IdEmailUsuarioDTO amigo;
+    private List<DeudaUsuarioPreviewDTO> deudasUsuarios;
     private List<ActividadDTO> actividades;
 
-    public GrupoDTO() {
+    public GrupoParejaDTO() {
     }
 
-    public GrupoDTO(Grupo grupo, Usuario usuarioAutenticado) {
+    public GrupoParejaDTO(Grupo grupo, Usuario usuarioAutenticado) {
         this.id = grupo.getId();
-        this.nombre = grupo.getNombre();
-        this.pareja = grupo.getEsPareja();
-        this.fechaCreacion = grupo.getFechaCreacion();
-        this.miembros = convertirUsuariosAMiembrosDTO(grupo, usuarioAutenticado);
-        if (grupo.getCategoria() != null) {
-            this.categoria = new CategoriaDTO(grupo.getCategoria());
-        }
+        this.amigo = obtenerAmigo(grupo.getMiembros(), usuarioAutenticado);
         this.deudasUsuarios = convertirDeudasUsuariosADTOs(grupo.getDeudas(), usuarioAutenticado);
         this.actividades = convertirActividades(grupo, usuarioAutenticado);
     }
@@ -53,46 +40,6 @@ public class GrupoDTO {
         this.id = id;
     }
 
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public boolean isPareja() {
-        return pareja;
-    }
-
-    public void setPareja(boolean pareja) {
-        this.pareja = pareja;
-    }
-
-    public Date getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(Date fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public List<MiembrosGrupoDTO> getMiembros() {
-        return miembros;
-    }
-
-    public void setMiembros(List<MiembrosGrupoDTO> miembros) {
-        this.miembros = miembros;
-    }
-
-    public CategoriaDTO getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(CategoriaDTO categoria) {
-        this.categoria = categoria;
-    }
-
     public List<DeudaUsuarioPreviewDTO> getDeudasUsuarios() {
         return deudasUsuarios;
     }
@@ -101,28 +48,12 @@ public class GrupoDTO {
         this.deudasUsuarios = deudasUsuarios;
     }
 
-    private List<MiembrosGrupoDTO> convertirUsuariosAMiembrosDTO(Grupo grupo, Usuario usuarioAutenticado) {
-        List<MiembrosGrupoDTO> miembrosDTO = new ArrayList<>();
-        List<DeudaUsuario> deudas = grupo.getDeudas();
-        Map<Usuario, Double> saldos = new HashMap<>();
-        balance = 0;
-
-        for (DeudaUsuario deuda : deudas) {
-            saldos.put(deuda.getAcreedor(), saldos.getOrDefault(deuda.getAcreedor(), 0.0) + deuda.getMonto());
-
-            saldos.put(deuda.getDeudor(), saldos.getOrDefault(deuda.getDeudor(), 0.0) - deuda.getMonto());
-        }
-
-        balance = saldos.getOrDefault(usuarioAutenticado, 0.0);
-
-        if (grupo.getMiembros() != null) {
-            for (Usuario usuario : grupo.getMiembros()) {
-                double balanceUsuario = saldos.getOrDefault(usuario, 0.0);
-                MiembrosGrupoDTO miembroDTO = new MiembrosGrupoDTO(usuario, balanceUsuario);
-                miembrosDTO.add(miembroDTO);
-            }
-        }
-        return miembrosDTO;
+    private IdEmailUsuarioDTO obtenerAmigo(List<Usuario> miembros, Usuario usuarioAutenticado) {
+        return miembros.stream()
+                .filter(miembro -> !miembro.equals(usuarioAutenticado))
+                .findFirst()
+                .map(amigo -> new IdEmailUsuarioDTO(amigo))
+                .orElse(null);
     }
 
     public double getBalance() {
@@ -139,6 +70,25 @@ public class GrupoDTO {
 
     public void setActividades(List<ActividadDTO> actividades) {
         this.actividades = actividades;
+    }
+
+    public IdEmailUsuarioDTO getAmigo() {
+        return amigo;
+    }
+
+    public void setAmigo(IdEmailUsuarioDTO amigo) {
+        this.amigo = amigo;
+    }
+
+    private static DecimalFormat getDecimalFormat() {
+        DecimalFormatSymbols simbolos = new DecimalFormatSymbols(Locale.getDefault());
+        simbolos.setDecimalSeparator(',');
+        simbolos.setGroupingSeparator('.');
+        return new DecimalFormat("#,###,##0.00", simbolos);
+    }
+
+    private String formatCurrency(double amount) {
+        return getDecimalFormat().format(amount);
     }
 
     private List<ActividadDTO> convertirActividades(Grupo grupo, Usuario usuarioAutenticado) {
@@ -177,13 +127,7 @@ public class GrupoDTO {
         List<GastoAutor> gastoAutores = gasto.getGastoAutor();
         double totalMonto = gasto.getMontoTotal();
 
-        // Configurar DecimalFormat para el formato argentino
-        DecimalFormatSymbols simbolos = new DecimalFormatSymbols(Locale.getDefault());
-        simbolos.setDecimalSeparator(',');
-        simbolos.setGroupingSeparator('.');
-
-        DecimalFormat df = new DecimalFormat("#,###,##0.00", simbolos);
-        String montoFormateado = df.format(totalMonto);
+        String montoFormateado = formatCurrency(totalMonto);
 
         // Obtener la lista de nombres de los autores del gasto
         List<String> nombresAutores = gastoAutores.stream()
@@ -205,14 +149,6 @@ public class GrupoDTO {
                     .append(" en ")
                     .append(gasto.getNombre());
 
-        } else if (nombresAutores.size() > 1 && !nombresAutores.contains(usuarioAutenticado.getUsername())) {
-            // Caso: Más de un autor y ninguno es el usuario autenticado
-            texto.append(String.join(", ", nombresAutores))
-                    .append(" gastaron $")
-                    .append(montoFormateado)
-                    .append(" en ")
-                    .append(gasto.getNombre());
-
         } else if (nombresAutores.contains(usuarioAutenticado.getUsername())) {
             nombresAutores.remove(usuarioAutenticado.getUsername());
             // Caso: El usuario autenticado está entre los autores
@@ -228,26 +164,20 @@ public class GrupoDTO {
     }
 
     private String generarTextoPago(Pago pago, Usuario usuarioAutenticado) {
-        DecimalFormatSymbols simbolos = new DecimalFormatSymbols(Locale.getDefault());
-        simbolos.setDecimalSeparator(',');
-        simbolos.setGroupingSeparator('.');
+        String montoFormateado = formatCurrency(pago.getMonto());
+        String autor = pago.getAutor().getUsername();
+        String destinatario = pago.getDestinatario().getUsername();
 
-        DecimalFormat df = new DecimalFormat("#,###,##0.00", simbolos);
-        String montoFormateado = df.format(pago.getMonto());
+        if (pago.getAutor().equals(usuarioAutenticado))
+            return "Pagaste $" + montoFormateado + " a " + destinatario;
+        return autor + " te pagó $" + montoFormateado;
 
-        if (pago.getAutor().equals(usuarioAutenticado)) {
-            return "Pagaste $" + montoFormateado + " a " + pago.getDestinatario().getUsername();
-        } else if (pago.getDestinatario().equals(usuarioAutenticado)) {
-            return pago.getAutor().getUsername() + " te pagó $" + montoFormateado;
-        } else {
-            return pago.getAutor().getUsername() + " pagó $" + montoFormateado + " a "
-                    + pago.getDestinatario().getUsername();
-        }
     }
 
     private List<DeudaUsuarioPreviewDTO> convertirDeudasUsuariosADTOs(List<DeudaUsuario> deudaUsuarios,
             Usuario usuarioAutenticado) {
         List<DeudaUsuarioPreviewDTO> deudasDTO = new ArrayList<>();
+        balance = 0.0;
 
         for (DeudaUsuario deuda : deudaUsuarios) {
             DeudaUsuarioPreviewDTO deudaDTO = new DeudaUsuarioPreviewDTO();
@@ -257,8 +187,10 @@ public class GrupoDTO {
             deudaDTO.setIdAcreedor(deuda.getAcreedor().getId());
 
             if (deuda.getDeudor().equals(usuarioAutenticado)) {
+                balance -= deuda.getMonto();
                 deudaDTO.setUsuarioDebe(true);
-            } else {
+            } else if (deuda.getAcreedor().equals(usuarioAutenticado)) {
+                balance += deuda.getMonto();
                 deudaDTO.setUsuarioDebe(false);
             }
 
@@ -269,21 +201,13 @@ public class GrupoDTO {
     }
 
     private String generarTextoDeuda(DeudaUsuario deuda, Usuario usuarioAutenticado) {
-        DecimalFormatSymbols simbolos = new DecimalFormatSymbols(Locale.getDefault());
-        simbolos.setDecimalSeparator(',');
-        simbolos.setGroupingSeparator('.');
+        String montoFormateado = formatCurrency(deuda.getMonto());
+        String deudor = deuda.getDeudor().getUsername();
+        String acreedor = deuda.getAcreedor().getUsername();
 
-        DecimalFormat df = new DecimalFormat("#,###,##0.00", simbolos);
-        String montoFormateado = df.format(deuda.getMonto());
-
-        if (deuda.getDeudor().equals(usuarioAutenticado)) {
-            return "Le debes $" + montoFormateado + " a " + deuda.getAcreedor().getUsername();
-        } else if (deuda.getAcreedor().equals(usuarioAutenticado)) {
-            return deuda.getDeudor().getUsername() + " te debe $" + montoFormateado;
-        } else {
-            return deuda.getDeudor().getUsername() + " debe $" + montoFormateado + " a "
-                    + deuda.getAcreedor().getUsername();
-        }
+        if (deuda.getDeudor().equals(usuarioAutenticado))
+            return "Le debes $" + montoFormateado + " a " + acreedor;
+        return deudor + " te debe $" + montoFormateado;
     }
 
 }

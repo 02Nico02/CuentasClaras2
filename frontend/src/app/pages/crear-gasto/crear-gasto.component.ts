@@ -451,10 +451,6 @@ export class CrearGastoComponent implements OnInit {
         categoriaId: this.newGasto.categoria.id,
         gastoAutor: gastoAutorCrear
       };
-      // formData.append('data', JSON.stringify(crearGastoData));
-      // if (this.selectedFile) {
-      //   formData.append('file', this.selectedFile, this.selectedFile.name);
-      // }
       this.gastoService.crearGasto(crearGastoData).subscribe(
         data => {
           if (this.selectedFile) {

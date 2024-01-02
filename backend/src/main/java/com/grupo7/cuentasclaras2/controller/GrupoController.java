@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import com.grupo7.cuentasclaras2.DTO.GastoDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.GrupoParejaDTO;
 import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
 import com.grupo7.cuentasclaras2.DTO.MiembrosGrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
@@ -75,8 +76,39 @@ public class GrupoController {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 
-		return grupoService.getGroupById(id)
+		return grupoService.getNonParejaGroupById(id)
 				.map(group -> ResponseEntity.ok(new GrupoDTO(group, usuarioAutenticado)))
+				.orElseGet(() -> ResponseEntity.notFound().build());
+	}
+
+	/**
+	 * Obtiene un grupo pareja por su ID.
+	 *
+	 * @param id ID del grupo pareja.
+	 * @return ResponseEntity con el GrupoParejaDTO correspondiente si se encuentra,
+	 *         o
+	 *         ResponseEntity.notFound() si no se encuentra.
+	 */
+	@GetMapping("/pareja/{id}")
+	public ResponseEntity<GrupoParejaDTO> getGroupParejaById(@PathVariable Long id) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Object principal = authentication.getPrincipal();
+
+		Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
+
+		if (!usuarioOptional.isPresent()) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
+		Usuario usuarioAutenticado = usuarioOptional.get();
+		boolean esMiembro = grupoService.usuarioPerteneceAlGrupo(usuarioAutenticado.getId(), id);
+
+		if (!esMiembro) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+
+		return grupoService.getParejaGroupById(id)
+				.map(grupoPareja -> ResponseEntity.ok(new GrupoParejaDTO(grupoPareja, usuarioAutenticado)))
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 

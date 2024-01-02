@@ -58,7 +58,7 @@
                         class="activity-content">
 
                         <div class="activity-date">
-                            {{ formattedDate(actividad.fecha) }}
+                            {{ actividad.fecha | date : "medium" }}
                         </div>
                         <div class="activity-data">{{ actividad.data }}</div>
                     </a>

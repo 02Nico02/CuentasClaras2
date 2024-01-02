@@ -64,11 +64,6 @@ body {
 .btn-primary {
     background-color: #A841CB;
     border: 1px solid #8B2BAE;
-    border: none;
-    border-radius: 5px;
-    padding: 12px 25px;
-    color: white;
-    cursor: pointer;
     transition: all 0.3s ease-in-out;
 }
 

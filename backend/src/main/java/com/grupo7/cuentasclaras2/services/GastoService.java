@@ -168,6 +168,17 @@ public class GastoService {
 		return gasto;
 	}
 
+	public Gasto updateImagenComprobante(Gasto gasto, MultipartFile file) {
+		validateImagen(file);
+		File imageSave = saveFileToDisk(file);
+		if (gasto.getImagen() != null) {
+			deleteFileFromDisk(gasto.getImagen());
+		}
+		gasto.setImagen(imageSave.getName());
+		gastoRepository.save(gasto);
+		return gasto;
+	}
+
 	/**
 	 * Guarda el archivo proporcionado en el sistema de archivos en una ubicación
 	 * específica.
@@ -210,6 +221,27 @@ public class GastoService {
 	}
 
 	/**
+	 * Elimina el archivo con el nombre proporcionado del sistema de archivos.
+	 *
+	 * @param fileName Nombre del archivo a eliminar.
+	 * @throws GastoException Si ocurre un error durante la eliminación del archivo.
+	 */
+	private void deleteFileFromDisk(String fileName) {
+		String directoryPath = "src/main/resources/static/images/gasto/";
+		Path filePath = Paths.get(directoryPath + fileName);
+
+		if (Files.exists(filePath)) {
+			try {
+				Files.delete(filePath);
+			} catch (IOException e) {
+				throw new GastoException("Error al eliminar el archivo: " + e.getMessage());
+			}
+		} else {
+			throw new GastoException("El archivo con el nombre " + fileName + " no existe.");
+		}
+	}
+
+	/**
 	 * Actualiza un gasto existente en el sistema utilizando la información
 	 * proporcionada en un objeto GastoDTO.
 	 *
@@ -241,7 +273,6 @@ public class GastoService {
 
 		gastoExistente.setNombre(gastoDTO.getNombre());
 		gastoExistente.setFecha(gastoDTO.getFecha());
-		gastoExistente.setImagen(gastoDTO.getImagen());
 
 		FormaDividir formaDividir = formaDividirService.updateFormaDividirByDTO(gastoDTO.getFormaDividir(),
 				gastoExistente.getFormaDividir());

@@ -2,7 +2,7 @@ package com.grupo7.cuentasclaras2.services;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+// import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -193,35 +193,41 @@ public class UsuarioService {
     }
 
     public List<Usuario> findUsersNotInGroupAndNotFriends(Usuario usuario, Long idGrupo, String usernameQuery) {
-        List<Usuario> amigosUsuarioAutenticado = usuario.getAmigos();
+        // List<Usuario> amigosUsuarioAutenticado = usuario.getAmigos();
 
-        List<Usuario> usuariosFueraDelGrupo = usuarioRepository.findUsersNotInGroupByQuery(idGrupo,
-                usernameQuery);
+        // List<Usuario> usuariosFueraDelGrupo =
+        // usuarioRepository.findUsersNotInGroupByQuery(idGrupo,
+        // usernameQuery);
 
-        if (!amigosUsuarioAutenticado.isEmpty()) {
-            usuariosFueraDelGrupo = usuariosFueraDelGrupo.stream()
-                    .filter(u -> !amigosUsuarioAutenticado.contains(u))
-                    .collect(Collectors.toList());
-        }
+        // if (!amigosUsuarioAutenticado.isEmpty()) {
+        // usuariosFueraDelGrupo = usuariosFueraDelGrupo.stream()
+        // .filter(u -> !amigosUsuarioAutenticado.contains(u))
+        // .collect(Collectors.toList());
+        // }
 
-        return usuariosFueraDelGrupo;
+        // return usuariosFueraDelGrupo;
+        return usuarioRepository.findNonFriendsByUsernameNotInGroup(usernameQuery,
+                usuario.getId(), idGrupo);
     }
 
     public List<Usuario> findFriendsNotInGroupByQuery(Usuario usuario, Long idGrupo, String usernameQuery) {
-        List<Usuario> amigosUsuarioAutenticado = usuario.getAmigos();
+        // List<Usuario> amigosUsuarioAutenticado = usuario.getAmigos();
 
-        List<Usuario> usuariosFueraDelGrupo = usuarioRepository.findUsersNotInGroupByQuery(idGrupo,
-                usernameQuery);
+        // List<Usuario> usuariosFueraDelGrupo =
+        // usuarioRepository.findUsersNotInGroupByQuery(idGrupo,
+        // usernameQuery);
 
-        if (!amigosUsuarioAutenticado.isEmpty()) {
-            usuariosFueraDelGrupo = usuariosFueraDelGrupo.stream()
-                    .filter(u -> amigosUsuarioAutenticado.contains(u))
-                    .collect(Collectors.toList());
-        } else {
-            usuariosFueraDelGrupo.clear();
-        }
+        // if (!amigosUsuarioAutenticado.isEmpty()) {
+        // usuariosFueraDelGrupo = usuariosFueraDelGrupo.stream()
+        // .filter(u -> amigosUsuarioAutenticado.contains(u))
+        // .collect(Collectors.toList());
+        // } else {
+        // usuariosFueraDelGrupo.clear();
+        // }
 
-        return usuariosFueraDelGrupo;
+        // return usuariosFueraDelGrupo;
+        return usuarioRepository.findFriendsByUsernameNotInGroup(usernameQuery,
+                usuario.getId(), idGrupo);
     }
 
     public List<Usuario> findUsersByUsernameNotFriends(String usernameQuery, Usuario usuario) {

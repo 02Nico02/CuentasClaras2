@@ -91,16 +91,35 @@ export class GastoService {
     formData.append('gastoId', gastoId.toString());
     return this.http.post<GastoDTO>(`${environment.urlApi}spent/create/image`, formData).pipe(
       catchError(error => {
-        console.log("Error al cargar la imagen")
-        // if (error.status === 0) {
-        //   if (error.error && error.error.error) {
-        //     const errorMessage = error.error.error;
-        //     console.error('Error del servidor:', errorMessage);
-        //     this.router.navigate(['/login']);
-        //   } else {
-        //     this.router.navigate(['/login']);
-        //   }
-        // }
+        if (error.status === 0) {
+          if (error.error && error.error.error) {
+            const errorMessage = error.error.error;
+            console.error('Error del servidor:', errorMessage);
+            this.router.navigate(['/login']);
+          } else {
+            this.router.navigate(['/login']);
+          }
+        }
+        throw error;
+      })
+    );
+  }
+
+  updateImagen(gastoId: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    formData.append('gastoId', gastoId.toString());
+    return this.http.post<GastoDTO>(`${environment.urlApi}spent/update/image`, formData).pipe(
+      catchError(error => {
+        if (error.status === 0) {
+          if (error.error && error.error.error) {
+            const errorMessage = error.error.error;
+            console.error('Error del servidor:', errorMessage);
+            this.router.navigate(['/login']);
+          } else {
+            this.router.navigate(['/login']);
+          }
+        }
         throw error;
       })
     );
