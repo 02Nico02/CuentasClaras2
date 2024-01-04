@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
 import com.grupo7.cuentasclaras2.exception.BDErrorException;
 import com.grupo7.cuentasclaras2.exception.PagoException;
+import com.grupo7.cuentasclaras2.exception.RecursoNoEncontradoException;
 import com.grupo7.cuentasclaras2.modelos.DeudaUsuario;
 import com.grupo7.cuentasclaras2.modelos.Grupo;
 import com.grupo7.cuentasclaras2.modelos.Pago;
@@ -108,29 +109,30 @@ public class PagoService {
     }
 
     /**
-     * Guarda un nuevo pago a partir de un DTO.
-     *
-     * @param pagoDTO El DTO con la información del pago.
-     * @return El pago guardado.
+     * Guarda un nuevo pago utilizando la información proporcionada en un DTO.
+     * 
+     * @param pagoDTO El DTO que contiene la información del pago a guardar.
+     * @return El pago que ha sido guardado con éxito.
+     * @throws RecursoNoEncontradoException Si alguno de los recursos (Usuario,
+     *                                      Grupo o Deuda) no se encuentra.
      */
     @Transactional
     public Pago guardarPagoDesdeDTO(PagoDTO pagoDTO) {
         validarPagoDTO(pagoDTO);
 
         Usuario autor = usuarioService.getById(pagoDTO.getAutorId())
-                .orElseThrow(() -> new PagoException("No se encontró el autor del pago"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario", pagoDTO.getAutorId()));
 
         Usuario destinatario = usuarioService.getById(pagoDTO.getDestinatarioId())
-                .orElseThrow(() -> new PagoException("No se encontró el destinatario del pago"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario", pagoDTO.getDestinatarioId()));
 
         Grupo grupo = grupoService.getGroupById(pagoDTO.getGrupoId())
-                .orElseThrow(() -> new PagoException("No se encontró el grupo especificado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Grupo", pagoDTO.getGrupoId()));
 
         DeudaUsuario deudaUsuario = deudaUsuarioService.obtenerDeudaEntreUsuariosEnGrupo(grupo.getId(),
                 autor.getId(), destinatario.getId())
-                .orElseThrow(() -> new PagoException("No se encontró una deuda entre "
-                        + autor.getUsername() + " y " + destinatario.getUsername() + " en el grupo con ID "
-                        + grupo.getId()));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Deuda", "Entre " + autor.getUsername() + " y "
+                        + destinatario.getUsername() + " en el grupo con ID " + grupo.getId()));
 
         validarMontoDePago(pagoDTO.getMonto(), deudaUsuario.getMonto());
 

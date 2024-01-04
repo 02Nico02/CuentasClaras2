@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavComponent } from '../../shared/nav/nav.component';
 import { environment } from '../../../environments/environment';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-gasto-detalle',

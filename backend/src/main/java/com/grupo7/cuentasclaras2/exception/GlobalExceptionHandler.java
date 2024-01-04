@@ -1,5 +1,6 @@
 package com.grupo7.cuentasclaras2.exception;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Clase que maneja las excepciones globalmente en la aplicación.
  * Proporciona respuestas HTTP adecuadas para diferentes tipos de excepciones.
@@ -21,10 +24,35 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private final ObjectMapper objectMapper;
+
+    public GlobalExceptionHandler(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    /**
+     * Manejador para RecursoNoEncontradoException.
+     *
+     * @param ex La excepción RecursoNoEncontradoException.
+     * @return Una respuesta ResponseEntity con el mensaje de error y el código de
+     *         estado HTTP.
+     */
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity<String> handleRecursoNoEncontradoException(RecursoNoEncontradoException ex) {
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("error", ex.getMessage());
+
+        try {
+            String errorResponseJson = objectMapper.writeValueAsString(responseBody);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseJson);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la solicitud");
+        }
+    }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<String> handleUnauthorizedException(UnauthorizedException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+        return createErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
@@ -32,7 +60,7 @@ public class GlobalExceptionHandler {
         Map<String, String> response = new HashMap<>();
         response.put("error", ex.getMessage());
         response.put("field", ex.getErrorKey());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return createJsonResponse(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvitacionException.class)
@@ -47,12 +75,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PagoException.class)
     public ResponseEntity<String> handlePagoException(PagoException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("error", ex.getMessage());
+
+        try {
+            String jsonResponse = objectMapper.writeValueAsString(responseBody);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsonResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la solicitud");
+        }
     }
 
     @ExceptionHandler(GastoException.class)
     public ResponseEntity<String> handleGastoException(GastoException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        return createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BDErrorException.class)
@@ -73,7 +109,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GroupException.class)
     public ResponseEntity<String> handleGroupException(GroupException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        return createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvitationGroupException.class)
@@ -103,4 +139,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.internalServerError().body("Error interno del servidor");
     }
 
+    private ResponseEntity<String> createErrorResponse(String errorMessage, HttpStatus httpStatus) {
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("error", errorMessage);
+
+        try {
+            String jsonResponse = objectMapper.writeValueAsString(responseBody);
+            return ResponseEntity.status(httpStatus).body(jsonResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la solicitud");
+        }
+    }
+
+    private ResponseEntity<Map<String, String>> createJsonResponse(Map<String, String> responseBody,
+            HttpStatus httpStatus) {
+        try {
+            return ResponseEntity.status(httpStatus).body(responseBody);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("error", "Error al procesar la solicitud"));
+        }
+    }
 }

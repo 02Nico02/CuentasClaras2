@@ -91,21 +91,36 @@ public class GrupoController {
 	 */
 	@GetMapping("/pareja/{id}")
 	public ResponseEntity<GrupoParejaDTO> getGroupParejaById(@PathVariable Long id) {
+		System.out.println("Entre al endpoint");
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		Object principal = authentication.getPrincipal();
+		System.out.println("ya tengo principal");
 
 		Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
+		System.out.println("ya tengo un supuesto usuario");
 
 		if (!usuarioOptional.isPresent()) {
+			System.out.println("no tengo usuario");
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		System.out.println("tengo usuario");
+
+		Optional<Grupo> grupoOptional = grupoService.getParejaGroupById(id);
+		if (!grupoOptional.isPresent()) {
+			System.out.println("El grupo no existe");
+			return ResponseEntity.notFound().build();
 		}
 
 		Usuario usuarioAutenticado = usuarioOptional.get();
+		System.out.println("por ver si es miembro");
 		boolean esMiembro = grupoService.usuarioPerteneceAlGrupo(usuarioAutenticado.getId(), id);
 
+		System.out.println("por verificarlo");
 		if (!esMiembro) {
+			System.out.println("No es miembro");
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
+		System.out.println("Es miembro");
 
 		return grupoService.getParejaGroupById(id)
 				.map(grupoPareja -> ResponseEntity.ok(new GrupoParejaDTO(grupoPareja, usuarioAutenticado)))

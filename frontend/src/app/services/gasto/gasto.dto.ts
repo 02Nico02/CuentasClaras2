@@ -10,6 +10,7 @@ export interface GastoDTO {
     formaDividir: FormaDividir;
     categoria: CategoriaDTO;
     editable?: boolean;
+    esDeGrupoPareja?: boolean;
 }
 
 export interface GastoAutor {

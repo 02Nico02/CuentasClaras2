@@ -1,4 +1,4 @@
-import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NavComponent } from '../../shared/nav/nav.component';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -6,6 +6,7 @@ import { Title } from '@angular/platform-browser';
 import { GroupService } from '../../services/group/group.service';
 import { GrupoParejaDTO } from '../../services/group/grupoPareja.dto';
 import { DeudaUsuarioDTO } from '../../services/group/grupo.dto';
+import { LoginService } from '../../services/auth/login.service';
 
 @Component({
   selector: 'app-grupo-pareja',
@@ -22,7 +23,7 @@ export class GrupoParejaComponent implements OnInit {
   limiteActividades = 5;
   visibleActividades: any[] = [];
 
-  constructor(private route: ActivatedRoute, private router: Router, private titleService: Title, private groupService: GroupService, @Inject(LOCALE_ID) private locale: string) { console.log(this.locale); }
+  constructor(private route: ActivatedRoute, private router: Router, private titleService: Title, private groupService: GroupService, private loginService: LoginService) { }
 
   ngOnInit(): void {
     this.titleService.setTitle('Cuentas Claras - Detalle grupo pareja');
@@ -67,10 +68,29 @@ export class GrupoParejaComponent implements OnInit {
 
   llamarAPI() {
     this.grupoId = this.route.snapshot.paramMap.get('id') || "-1";
+    console.log("por llamar api")
     this.groupService.obtenerDetalleGrupoPareja(this.grupoId).subscribe({
       next: (res) => {
+        console.log("todo ok llamar api")
         this.grupoPareja = res
         this.cargarActividades();
+      },
+      error: (error) => {
+        switch (error.status) {
+          case 0:
+          case 401:
+          case 403:
+            this.loginService.logout();
+            this.router.navigate(['/login'])
+            break;
+          case 404:
+            this.router.navigate(['/amigos'], { replaceUrl: true });
+            break;
+          case 500:
+            alert('Ocurrió un error interno. Por favor, intente nuevamente más tarde.');
+            this.router.navigate(['/error']);
+            break;
+        }
       }
     })
 

@@ -5,7 +5,7 @@
     <div class="detalle-gasto" *ngIf="gasto; else noGasto">
 
         <div class="detalle-header">
-            <h2>Detalle del Gasto</h2>
+            <h2>Detalle del Gasto <i class="fa-brands fa-facebook"></i></h2>
         </div>
 
         <div class="detalle-section">
@@ -70,9 +70,21 @@
             </div>
 
             <div class="buttons-section d-flex justify-content-between mt-4">
-                <a [href]="['/grupo/'+ gasto.grupoId+ '/detalle']" class="btn btn-secondary">Grupo</a>
+                <a *ngIf="gasto.esDeGrupoPareja; else noEsDeGrupoPareja" [href]="'/group-duo/' + gasto.grupoId"
+                    class="btn btn-secondary">
+                    Grupo
+                </a>
+
+                <ng-template #noEsDeGrupoPareja>
+                    <a [href]="'/grupo/' + gasto.grupoId + '/detalle'" class="btn btn-secondary">
+                        Grupo
+                    </a>
+                </ng-template>
+
                 <button [disabled]="!gasto.editable" *ngIf="gasto.editable" (click)="editarGasto()"
-                    class="btn btn-primary">Editar Gasto</button>
+                    class="btn btn-primary">
+                    Editar Gasto
+                </button>
             </div>
 
 
