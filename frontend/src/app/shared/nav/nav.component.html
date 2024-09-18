@@ -1,0 +1,28 @@
+<nav>
+    <div class="branding">
+        <img src="../../assets/logo.png" alt="Logo de Cuentas Claras" class="logo">
+        <span>Cuentas Claras</span>
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="/home">Grupos</a></li>
+        <li><a href="/amigos">Amigos</a></li>
+    </ul>
+
+    <div class="user-info">
+        <div *ngIf="userInfo && userInfo.notifications && userInfo.notifications.length > 0" class="notification-icon"
+            (click)="toggleDropdown()">
+            <img src="../../../assets/icons/notifications-active_118870.png" alt="Icono de notificaciones">
+            <div *ngIf="isDropdownOpen" class="dropdown-content" [ngClass]="{'oculto': !isDropdownOpen,}">
+                <app-notification [notifications]="userInfo ? userInfo.notifications : []"></app-notification>
+            </div>
+        </div>
+        <span>{{userInfo?.username}}</span>
+
+        <span class="user-balance">
+            Saldo: {{ formatBalance() }}
+        </span>
+
+        <button class="logout-button" (click)="logout()">Cerrar Sesión</button>
+    </div>
+</nav>

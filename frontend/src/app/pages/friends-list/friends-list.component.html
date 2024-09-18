@@ -1,0 +1,68 @@
+<app-nav></app-nav>
+
+<div class="section-header">
+    <h1 class="section-title">Tus Amigos</h1>
+    <button class="add-friend-button" data-bs-toggle="modal" data-bs-target="#modalAgregarAmigo">Agregar Amigo</button>
+</div>
+
+<section class="friends-section">
+    <div class="container">
+        <ng-container *ngIf="friends && friends.length > 0; else noFriends">
+            <ul class="friend-cards">
+                <li class="friend-card d-flex align-items-center justify-content-between" *ngFor="let friend of friends"
+                    (click)="coupleGroupView(friend.idGroup)">
+                    <div class="friend-info d-flex align-items-center justify-content-between flex-grow-1">
+                        <div class="friend-foto me-3">
+                            <img src="../../../assets/icons/user_icon.png" alt="Imagen de usuario"
+                                class="img-fluid rounded-circle">
+                        </div>
+                        <h2 class="friend-name">{{ friend.userName }}</h2>
+                        <p class="friend-balance">Saldo: <span [ngClass]="getClassBalance(friend.balance)">
+                                ${{friend.balance}}
+                            </span></p>
+                    </div>
+                </li>
+            </ul>
+        </ng-container>
+
+        <ng-template #noFriends>
+            <div class="no-friends-message">
+                Aún no tienes amigos. ¡Agrega algunos!
+            </div>
+        </ng-template>
+    </div>
+</section>
+
+<div class="modal fade" id="modalAgregarAmigo" tabindex="-1" aria-labelledby="modalAgregarAmigoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarAmigoLabel">Agregar Amigo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control mb-3" placeholder="Buscar usuarios..." [(ngModel)]="filtroAmigos"
+                    (keyup)="buscarUsuarios()">
+
+                <h6>Usuarios</h6>
+                <ul class="scroll-list list-group">
+                    <li *ngFor="let usuario of usuarios"
+                        class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ usuario.userName }}</span>
+                        <button [disabled]="usuario.solicitudEnviada" (click)="agregarAmigoSeleccionado(usuario.id)"
+                            class="btn btn-success">
+                            {{ usuario.solicitudEnviada ? 'Enviada' : 'Enviar invitación' }}
+                        </button>
+                    </li>
+                    <li *ngIf="usuarios && usuarios.length === 0" class="list-group-item">No hay usuarios disponibles
+                        para
+                        mostrar.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>

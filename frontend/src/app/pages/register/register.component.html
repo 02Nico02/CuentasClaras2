@@ -1,0 +1,104 @@
+<div class="container relative mt-5">
+  <div class="div-logo">
+    <img src="../../assets/logo.png" alt="Logo Cuentas Claras" class="logo">
+    <p class="web-name">Cuentas Claras</p>
+  </div>
+  <h2 class="text-center mb-4">Registrarse</h2>
+
+  <form [formGroup]="registerForm" class="form">
+    <div class="mb-3 mt-3">
+      <label for="inputUserName" class="form-label">Nombre de usuario</label>
+      <input formControlName="username" type="text" name="username" autocomplete="username" class="form-control"
+        id="inputUserName" aria-describedby="userNameHelp" placeholder="ej. nombreusuario123" />
+      @if(username.invalid && (username.dirty || username.touched)){
+      <div class="text-danger mt-2">
+        @if(username.errors?.['required']){
+        <div>El Nombre de usuario es requerido.</div>
+        }@if(username.errors?.['minlength']){
+        <div>El nombre de usuario debe tener al menos 4 caracteres.</div>
+        } @if(username.errors?.['maxlength']){
+        <div>El nombre de usuario no debe tener más de 20 caracteres.</div>
+        } @if(username.errors?.['pattern']){
+        <div>El nombre de usuario debe contener solo letras y números.</div>
+        }
+      </div>
+
+      }
+    </div>
+
+    <div class="mb-3 mt-3">
+      <label for="inputNames" class="form-label">Nombres</label>
+      <input formControlName="nombres" type="text" name="nombres" autocomplete="name" class="form-control"
+        id="inputNames" aria-describedby="nameHelp" placeholder="Nombres" />
+      @if(nombres.invalid && (nombres.dirty || nombres.touched)){
+      <div class="text-danger mt-2">
+        @if(nombres.errors?.['required']){
+        <div>El nombre es requerido.</div>
+        } @if(nombres.errors?.['pattern']){
+        <div>El nombre debe contener solo letras.</div>
+        }
+      </div>
+
+      }
+    </div>
+
+    <div class="mb-3 mt-3">
+      <label for="surname" class="form-label">Apellidos</label>
+      <input formControlName="apellido" type="text" name="apellido" autocomplete="name" class="form-control"
+        id="surname" aria-describedby="surnameHelp" placeholder="Apellidos" />
+      @if(apellido.invalid && (apellido.dirty || apellido.touched)){
+      <div class="text-danger mt-2">
+        @if(apellido.errors?.['required']){
+        <div>El apellido es requerido.</div>
+        } @if(apellido.errors?.['pattern']){
+        <div>El apellido debe contener solo letras.</div>
+        }
+      </div>
+
+      }
+    </div>
+
+    <div class="mb-3 mt-3">
+      <label for="email1" class="form-label">Email</label>
+      <input formControlName="email" type="email" name="email" autocomplete="email" class="form-control" id="email1"
+        aria-describedby="emailHelp" placeholder="usuario@ejemplo.com" />
+      @if(email.invalid && (email.dirty || email.touched)){
+      <div class="text-danger mt-2">
+        @if(email.errors?.['required']){
+        <div>El email es requerido.</div>
+        } @if(email.errors?.['email']){
+        <div>Por favor, ingresa un email válido.</div>
+        }
+      </div>
+
+      }
+    </div>
+
+    <div class="mb-3">
+      <label for="exampleInputPassword1" class="form-label">Contraseña</label>
+      <input formControlName="password" type="password" name="password" autocomplete="new-password" class="form-control"
+        id="exampleInputPassword1" placeholder="**********" />
+      @if(password.invalid && (password.dirty || password.touched)){
+      <div class="text-danger mt-2">
+        @if(password.errors?.['required']){
+        <div>La contraseña es requerida.</div>
+        }@if(password.errors?.['minlength']){
+        <div>La contraseña debe tener al menos 8 caracteres.</div>
+        } @if(password.errors?.['maxlength']){
+        <div>La contraseña no debe tener más de 20 caracteres.</div>
+        }
+      </div>
+
+      }
+    </div>
+    @if(registerError){
+    <p class="text-danger-error">{{ registerError }}</p>
+    }
+    <button type="submit" (click)="register()" class="btn btn-primary mt-3">
+      Registrarse
+    </button>
+  </form>
+  <button type="button" class="btn btn-secondary mt-4">
+    <a href="/login" class="text-white">Inicia sesión</a>
+  </button>
+</div>
