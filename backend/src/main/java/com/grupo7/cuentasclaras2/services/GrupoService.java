@@ -49,6 +49,28 @@ public class GrupoService {
 	}
 
 	/**
+	 * Obtiene un grupo por su identificador que no sea un grupo pareja.
+	 *
+	 * @param id Identificador del grupo.
+	 * @return Optional que contiene el Grupo correspondiente al identificador, si
+	 *         existe y no es un grupo pareja.
+	 */
+	public Optional<Grupo> getNonParejaGroupById(Long id) {
+		return grupoRepository.findByIdAndEsParejaIsFalse(id);
+	}
+
+	/**
+	 * Obtiene un grupo pareja por su identificador.
+	 *
+	 * @param id Identificador del grupo pareja.
+	 * @return Optional que contiene el Grupo correspondiente al identificador, si
+	 *         es un grupo pareja.
+	 */
+	public Optional<Grupo> getParejaGroupById(Long id) {
+		return grupoRepository.findByIdAndEsParejaIsTrue(id);
+	}
+
+	/**
 	 * Obtiene un grupo por su identificador.
 	 *
 	 * @param id Identificador del grupo.

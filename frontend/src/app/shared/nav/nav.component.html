@@ -1,28 +1,41 @@
-<nav>
-    <div class="branding">
-        <img src="../../assets/logo.png" alt="Logo de Cuentas Claras" class="logo">
-        <span>Cuentas Claras</span>
-    </div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/home">
+            <img src="../../assets/logo.png" alt="Logo de Cuentas Claras" class="logo">
+            Cuentas Claras
+        </a>
 
-    <ul class="nav-links">
-        <li><a href="/home">Grupos</a></li>
-        <li><a href="/amigos">Amigos</a></li>
-    </ul>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-    <div class="user-info">
-        <div *ngIf="userInfo && userInfo.notifications && userInfo.notifications.length > 0" class="notification-icon"
-            (click)="toggleDropdown()">
-            <img src="../../../assets/icons/notifications-active_118870.png" alt="Icono de notificaciones">
-            <div *ngIf="isDropdownOpen" class="dropdown-content" [ngClass]="{'oculto': !isDropdownOpen,}">
-                <app-notification [notifications]="userInfo ? userInfo.notifications : []"></app-notification>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/home">Grupos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/amigos">Amigos</a>
+                </li>
+            </ul>
+
+            <div class="d-flex align-items-center ms-3 user-info">
+                <div *ngIf="userInfo && userInfo.notifications && userInfo.notifications.length > 0"
+                    class="notification-icon" (click)="toggleDropdown()">
+                    <img src="../../../assets/icons/notifications-active_118870.png" alt="Icono de notificaciones">
+                    <div *ngIf="isDropdownOpen" class="dropdown-content">
+                        <app-notification [notifications]="userInfo ? userInfo.notifications : []"></app-notification>
+                    </div>
+                </div>
+
+                <div class="user-details">
+                    <span class="username">{{userInfo?.username}}</span>
+                    <span *ngIf="userInfo" class="user-balance">Saldo: {{ formatMonto(userInfo.balance) }}</span>
+                </div>
+
+                <button class="btn btn-logout" (click)="logout()">Cerrar Sesión</button>
             </div>
         </div>
-        <span>{{userInfo?.username}}</span>
-
-        <span class="user-balance">
-            Saldo: {{ formatBalance() }}
-        </span>
-
-        <button class="logout-button" (click)="logout()">Cerrar Sesión</button>
     </div>
 </nav>

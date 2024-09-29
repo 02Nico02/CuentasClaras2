@@ -1,0 +1,76 @@
+<app-nav></app-nav>
+
+<div *ngIf="grupoPareja" class="container mt-5">
+    <div class="grupo-section">
+        <h2 class="grupo-name">Grupo con {{grupoPareja.amigo.userName}}</h2>
+        <div class="grupo-balance">
+            Saldo:
+            <span [ngClass]="getClassBalance(grupoPareja.balance)">
+                {{ formatBalanceString(grupoPareja.balance || 0) }}
+            </span>
+        </div>
+
+        <div class="buttons-section">
+            <button (click)="agregarGasto()">Agregar Gasto</button>
+            <button (click)="eliminarAmigo()">Eliminar Amigo</button>
+        </div>
+    </div>
+
+    <div class="sections">
+        <!-- Actividades -->
+        <div class="section-box">
+            <h3>Actividades Recientes</h3>
+            <ul class="activities-list">
+                <li *ngFor="let actividad of visibleActividades" class="activity-item"
+                    [ngClass]="{ click: actividad.type === 'gasto' }">
+
+                    <a *ngIf="actividad.type === 'gasto'" [href]="['/gasto/'+ actividad.id+ '/detalle']"
+                        class="activity-content">
+
+                        <div class="activity-date">
+                            {{ actividad.fecha | date : "medium" }}
+                        </div>
+                        <div class="activity-data">{{ actividad.data }}</div>
+                    </a>
+
+
+                    <div *ngIf="actividad.type !== 'gasto'" class="activity-content">
+                        <div class="activity-date">
+                            {{ actividad.fecha | date : "medium" }}
+                        </div>
+                        <div class="activity-data">{{ actividad.data }}</div>
+                    </div>
+                </li>
+            </ul>
+            <div class="activity-buttons">
+                <button *ngIf="visibleActividades.length < (grupoPareja.actividades.length || 0)"
+                    (click)="mostrarMasActividades()">
+                    Ver más
+                </button>
+                <button *ngIf="visibleActividades.length > 5" (click)="mostrarMenosActividades()">
+                    Ver menos
+                </button>
+            </div>
+            <div *ngIf="!grupoPareja?.actividades || grupoPareja?.actividades?.length === 0" class="message">
+                Aún no hay actividades registradas. ¡Agrega un gasto!
+            </div>
+        </div>
+
+        <!-- Deudas -->
+        <div class="section-box">
+            <h3>Deudas</h3>
+            <ul class="deudas-grid">
+                <li *ngFor="let deuda of grupoPareja?.deudasUsuarios" class="deuda-item">
+                    <div class="deuda-data">{{ deuda.data }}</div>
+                    <button *ngIf="deuda.usuarioDebe" (click)="pagarDeuda(deuda)" class="button pagar">
+                        Pagar
+                    </button>
+                </li>
+            </ul>
+            <div *ngIf="!grupoPareja?.deudasUsuarios || grupoPareja?.deudasUsuarios?.length === 0" class="message">
+                Aún no hay deudas registradas.
+            </div>
+        </div>
+    </div>
+    <button (click)="regresarAmigos()" class="btn btn-info">Volver a Amigos</button>
+</div>

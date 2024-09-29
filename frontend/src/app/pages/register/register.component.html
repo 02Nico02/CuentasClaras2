@@ -6,98 +6,74 @@
   <h2 class="text-center mb-4">Registrarse</h2>
 
   <form [formGroup]="registerForm" class="form">
+    <!-- Nombre de usuario -->
     <div class="mb-3 mt-3">
       <label for="inputUserName" class="form-label">Nombre de usuario</label>
       <input formControlName="username" type="text" name="username" autocomplete="username" class="form-control"
-        id="inputUserName" aria-describedby="userNameHelp" placeholder="ej. nombreusuario123" />
-      @if(username.invalid && (username.dirty || username.touched)){
-      <div class="text-danger mt-2">
-        @if(username.errors?.['required']){
-        <div>El Nombre de usuario es requerido.</div>
-        }@if(username.errors?.['minlength']){
-        <div>El nombre de usuario debe tener al menos 4 caracteres.</div>
-        } @if(username.errors?.['maxlength']){
-        <div>El nombre de usuario no debe tener más de 20 caracteres.</div>
-        } @if(username.errors?.['pattern']){
-        <div>El nombre de usuario debe contener solo letras y números.</div>
-        }
+        id="inputUserName" placeholder="ej. nombreusuario123" />
+      <div *ngIf="username.invalid && (username.dirty || username.touched)" class="text-danger mt-2">
+        <div *ngIf="username.errors?.['required']">El Nombre de usuario es requerido.</div>
+        <div *ngIf="username.errors?.['minlength']">El nombre de usuario debe tener al menos 4 caracteres.</div>
+        <div *ngIf="username.errors?.['maxlength']">El nombre de usuario no debe tener más de 20 caracteres.</div>
+        <div *ngIf="username.errors?.['pattern']">El nombre de usuario debe contener solo letras y números.</div>
       </div>
-
-      }
     </div>
 
+    <!-- Nombres -->
     <div class="mb-3 mt-3">
       <label for="inputNames" class="form-label">Nombres</label>
       <input formControlName="nombres" type="text" name="nombres" autocomplete="name" class="form-control"
-        id="inputNames" aria-describedby="nameHelp" placeholder="Nombres" />
-      @if(nombres.invalid && (nombres.dirty || nombres.touched)){
-      <div class="text-danger mt-2">
-        @if(nombres.errors?.['required']){
-        <div>El nombre es requerido.</div>
-        } @if(nombres.errors?.['pattern']){
-        <div>El nombre debe contener solo letras.</div>
-        }
+        id="inputNames" placeholder="Nombres" />
+      <div *ngIf="nombres.invalid && (nombres.dirty || nombres.touched)" class="text-danger mt-2">
+        <div *ngIf="nombres.errors?.['required']">El nombre es requerido.</div>
+        <div *ngIf="nombres.errors?.['pattern']">El nombre debe contener solo letras.</div>
       </div>
-
-      }
     </div>
 
+    <!-- Apellidos -->
     <div class="mb-3 mt-3">
       <label for="surname" class="form-label">Apellidos</label>
       <input formControlName="apellido" type="text" name="apellido" autocomplete="name" class="form-control"
-        id="surname" aria-describedby="surnameHelp" placeholder="Apellidos" />
-      @if(apellido.invalid && (apellido.dirty || apellido.touched)){
-      <div class="text-danger mt-2">
-        @if(apellido.errors?.['required']){
-        <div>El apellido es requerido.</div>
-        } @if(apellido.errors?.['pattern']){
-        <div>El apellido debe contener solo letras.</div>
-        }
+        id="surname" placeholder="Apellidos" />
+      <div *ngIf="apellido.invalid && (apellido.dirty || apellido.touched)" class="text-danger mt-2">
+        <div *ngIf="apellido.errors?.['required']">El apellido es requerido.</div>
+        <div *ngIf="apellido.errors?.['pattern']">El apellido debe contener solo letras.</div>
       </div>
-
-      }
     </div>
 
+    <!-- Email -->
     <div class="mb-3 mt-3">
       <label for="email1" class="form-label">Email</label>
       <input formControlName="email" type="email" name="email" autocomplete="email" class="form-control" id="email1"
-        aria-describedby="emailHelp" placeholder="usuario@ejemplo.com" />
-      @if(email.invalid && (email.dirty || email.touched)){
-      <div class="text-danger mt-2">
-        @if(email.errors?.['required']){
-        <div>El email es requerido.</div>
-        } @if(email.errors?.['email']){
-        <div>Por favor, ingresa un email válido.</div>
-        }
+        placeholder="usuario@ejemplo.com" />
+      <div *ngIf="email.invalid && (email.dirty || email.touched)" class="text-danger mt-2">
+        <div *ngIf="email.errors?.['required']">El email es requerido.</div>
+        <div *ngIf="email.errors?.['email']">Por favor, ingresa un email válido.</div>
       </div>
-
-      }
     </div>
 
+    <!-- Contraseña -->
     <div class="mb-3">
       <label for="exampleInputPassword1" class="form-label">Contraseña</label>
       <input formControlName="password" type="password" name="password" autocomplete="new-password" class="form-control"
         id="exampleInputPassword1" placeholder="**********" />
-      @if(password.invalid && (password.dirty || password.touched)){
-      <div class="text-danger mt-2">
-        @if(password.errors?.['required']){
-        <div>La contraseña es requerida.</div>
-        }@if(password.errors?.['minlength']){
-        <div>La contraseña debe tener al menos 8 caracteres.</div>
-        } @if(password.errors?.['maxlength']){
-        <div>La contraseña no debe tener más de 20 caracteres.</div>
-        }
+      <div *ngIf="password.invalid && (password.dirty || password.touched)" class="text-danger mt-2">
+        <div *ngIf="password.errors?.['required']">La contraseña es requerida.</div>
+        <div *ngIf="password.errors?.['minlength']">La contraseña debe tener al menos 8 caracteres.</div>
+        <div *ngIf="password.errors?.['maxlength']">La contraseña no debe tener más de 20 caracteres.</div>
       </div>
-
-      }
     </div>
-    @if(registerError){
-    <p class="text-danger-error">{{ registerError }}</p>
-    }
+
+    <!-- Mensaje de error general -->
+    <div *ngIf="registerError" class="text-danger-error">{{ registerError }}</div>
+
+    <!-- Botón de registro -->
     <button type="submit" (click)="register()" class="btn btn-primary mt-3">
       Registrarse
     </button>
   </form>
+
+  <!-- Botón para ir a iniciar sesión -->
   <button type="button" class="btn btn-secondary mt-4">
     <a href="/login" class="text-white">Inicia sesión</a>
   </button>

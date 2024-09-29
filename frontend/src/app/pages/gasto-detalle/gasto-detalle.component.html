@@ -1,0 +1,114 @@
+<app-nav></app-nav>
+
+<div class="detalle-gasto-container">
+
+    <div class="detalle-gasto" *ngIf="gasto; else noGasto">
+
+        <div class="detalle-header">
+            <h2>Detalle del Gasto <i class="fa-brands fa-facebook"></i></h2>
+        </div>
+
+        <div class="detalle-section">
+
+            <div class="detalle-item title-date" *ngIf="gasto.nombre">
+                <div class="detalle-item-content">
+                    <h3 class="detalle-title">Nombre del Gasto</h3>
+                    <p class="detalle-content">{{ gasto.nombre }}</p>
+                </div>
+                <div *ngIf="gasto.fecha" class="detalle-item-date">
+                    <p class="detalle-content date-content">{{ mostrarFechaLocal(gasto.fecha) }}</p>
+                </div>
+            </div>
+
+            <div *ngIf="gasto.categoria || gasto.imagen" class="row detalle-item">
+                <div *ngIf="gasto.categoria" class="col-md-6">
+                    <h3 class="detalle-title">Categoría</h3>
+                    <div class="grupo-category">
+                        <div class="category-icon">
+                            <img *ngIf="gasto.categoria.icon" src="../../../assets/icons/icono_familia.png"
+                                alt="icono de la categoria {{ gasto.categoria.nombre }}">
+                        </div>
+                        <p>{{ gasto.categoria.nombre }}</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h3 class="detalle-title">Comprobante del Gasto</h3>
+                    <img *ngIf="gasto.imagen" class="img-icon-comprobante" src="../../../assets/icons/icono_imagen.png"
+                        alt="Botón para abrir y mostrar el comprobante" data-bs-toggle="modal"
+                        data-bs-target="#modalImagenComprobante">
+                    <span>{{ gasto.imagen ? 'Ver comprobante' : 'Sin comprobante' }}</span>
+                </div>
+            </div>
+
+            <div class="detalle-item">
+                <h3 class="detalle-title">Total Gastado:</h3>
+                <p class="detalle-content">{{ formatMonto(getTotalGastado()) }}</p>
+            </div>
+
+            <div *ngIf="gasto.gastoAutor?.length" class="detalle-item">
+                <h3 class="detalle-title">Contribuyentes del Gasto</h3>
+                <ul class="members-grid">
+                    <li *ngFor="let autor of gasto.gastoAutor">
+                        <span class="userName">{{ autor.userName }}</span>
+                        <span>{{ " "+formatMonto(autor.monto) }}</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div *ngIf="gasto.formaDividir" class="detalle-item">
+                <h3 class="detalle-title">{{ getstringdistribution(gasto.formaDividir.formaDividir) }}</h3>
+                <ul class="members-grid">
+                    <li *ngFor="let division of gasto.formaDividir.divisionIndividual">
+                        <span class="userName">{{ division.userName }}</span>
+                        <span>
+                            {{ gasto.formaDividir.formaDividir == 'MONTO' ? '$'+ division.monto.toFixed(2) :
+                            division.monto.toFixed(2)+'%' }}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="buttons-section d-flex justify-content-between mt-4">
+                <a *ngIf="gasto.esDeGrupoPareja; else noEsDeGrupoPareja" [href]="'/group-duo/' + gasto.grupoId"
+                    class="btn btn-secondary">
+                    Grupo
+                </a>
+
+                <ng-template #noEsDeGrupoPareja>
+                    <a [href]="'/grupo/' + gasto.grupoId + '/detalle'" class="btn btn-secondary">
+                        Grupo
+                    </a>
+                </ng-template>
+
+                <button [disabled]="!gasto.editable" *ngIf="gasto.editable" (click)="editarGasto()"
+                    class="btn btn-primary">
+                    Editar Gasto
+                </button>
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <ng-template #noGasto>
+        <p class="message">El gasto no existe o no se encontró información.</p>
+    </ng-template>
+
+</div>
+
+<div *ngIf="gasto" class="modal fade" id="modalImagenComprobante" tabindex="-1"
+    aria-labelledby="modalImagenComprobanteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalImagenComprobanteLabel">Comprobante del Gasto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img [src]="gasto.imagen" alt="Comprobante del gasto" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>

@@ -7,8 +7,8 @@
   <form [formGroup]="loginForm" class="form">
     <div class="mb-3">
       <label for="exampleInputEmail1" class="form-label">Correo electrónico</label>
-      <input formControlName="userName" type="text" name="email" class="form-control" id="exampleInputEmail1"
-        aria-describedby="emailHelp" placeholder="usuario@ejemplo.com" />
+      <input formControlName="userName" type="text" name="email" autocomplete="email" class="form-control"
+        id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="usuario@ejemplo.com" />
       @if(userName.invalid && (userName.dirty || userName.touched)){
       <div class="text-danger mt-2">
         @if(userName.errors?.['required']){
@@ -22,8 +22,8 @@
     </div>
     <div class="mb-3">
       <label for="exampleInputPassword1" class="form-label">Contraseña</label>
-      <input formControlName="password" type="password" name="password" class="form-control" id="exampleInputPassword1"
-        placeholder="**********" />
+      <input formControlName="password" type="password" name="password" autocomplete="password" class="form-control"
+        id="exampleInputPassword1" placeholder="**********" />
       @if(password.invalid && (password.dirty || password.touched)){
       @if(password.errors?.['required']){
 

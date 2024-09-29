@@ -10,8 +10,8 @@ export interface GrupoDTO {
 
 export interface CategoriaDTO {
     id: number;
-    nombre: string;
-    icon: string;
+    nombre?: string;
+    icon?: string;
 }
 
 export interface MiembroDTO {
@@ -32,5 +32,5 @@ export interface DeudaUsuarioDTO {
     usuarioDebe: boolean;
     data: string;
     monto: number;
-    idAcreedor:number
+    idAcreedor: number
 }

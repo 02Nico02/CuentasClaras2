@@ -13,6 +13,10 @@ import com.grupo7.cuentasclaras2.modelos.Usuario;
 public interface GrupoRepository extends JpaRepository<Grupo, Long> {
     Optional<Grupo> findByNombre(String nombre);
 
+    Optional<Grupo> findByIdAndEsParejaIsFalse(Long groupId);
+
+    Optional<Grupo> findByIdAndEsParejaIsTrue(Long groupId);
+
     boolean existsByEsParejaAndMiembrosIn(boolean b, List<Usuario> asList);
 
     List<Grupo> findAllByEsParejaAndMiembrosIn(boolean esPareja, List<Usuario> miembros);

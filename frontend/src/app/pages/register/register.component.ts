@@ -4,11 +4,12 @@ import { Router, RouterModule } from '@angular/router';
 import { RegisterService } from '../../services/auth/register.service';
 import { RegisterRequest } from '../../services/auth/registerRequest';
 import { Title } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [RouterModule, ReactiveFormsModule],
+  imports: [RouterModule, ReactiveFormsModule, CommonModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })

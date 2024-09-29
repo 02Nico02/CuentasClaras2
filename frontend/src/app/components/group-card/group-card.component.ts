@@ -31,4 +31,13 @@ export class GroupCardComponent {
       return 'zero-balance';
     }
   }
+
+  formatMonto(monto: number): string {
+    const formattedMonto = monto.toLocaleString('es-AR', {
+      style: 'currency',
+      currency: 'ARS'
+    });
+
+    return formattedMonto;
+  }
 }

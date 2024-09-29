@@ -4,6 +4,8 @@ import { Router, RouterModule } from '@angular/router';
 import { LoginService } from '../../services/auth/login.service';
 import { LoginRequest } from '../../services/auth/loginRequest';
 import { Title } from '@angular/platform-browser';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
 
 @Component({
@@ -16,6 +18,7 @@ import { Title } from '@angular/platform-browser';
 export class LoginComponent implements OnInit {
   loginError: string = "";
   loginForm: FormGroup;
+  private errorHandled: boolean = false;
 
   constructor(private formBuilder: FormBuilder, private router: Router, private loginService: LoginService, private titleService: Title) {
     this.loginForm = this.formBuilder.group({
@@ -30,25 +33,43 @@ export class LoginComponent implements OnInit {
 
   login(): void {
     if (this.loginForm.valid) {
-      this.loginService.login(this.loginForm.value as LoginRequest).subscribe({
-        next: (userData) => {
-          console.log({ userData });
-        },
-        error: (errorData) => {
-          console.error(errorData);
-          this.loginError = errorData;
-        },
-        complete: () => {
-          console.info("Login completo")
-          this.router.navigateByUrl("/home")
-          this.loginForm.reset()
-        }
-      })
+      this.errorHandled = false;
+      this.loginService.login(this.loginForm.value as LoginRequest)
+        .pipe(
+          catchError((error) => {
+            if (!this.errorHandled) {
+              this.errorHandled = true;
+              if (error && error.error && error.error.error) {
+                this.loginError = error.error.error;
+              } else {
+                this.loginError = "Error desconocido";
+              }
+            }
+            return throwError(error);
+          })
+        )
+        .subscribe({
+          next: (userData) => {
+            console.log({ userData });
+          },
+          error: (errorData) => {
+            console.error("Error en la suscripción:", errorData);
+            if (!this.errorHandled) {
+              this.errorHandled = true;
+              this.loginError = errorData;
+            }
+          },
+          complete: () => {
+            this.router.navigateByUrl("/home");
+            this.loginForm.reset();
+          }
+        });
     } else {
       console.log("Formulario inválido");
       this.loginForm.markAllAsTouched();
     }
   }
+
 
   get userName() {
     return this.loginForm.controls["userName"];

@@ -43,7 +43,6 @@ export class LoginService {
   }
 
   private handleError(error: HttpErrorResponse) {
-    console.log("error")
     let errorMessage = "Algo falló. Por favor intente nuevamente";
 
     if (error.error instanceof ErrorEvent) {

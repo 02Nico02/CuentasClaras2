@@ -1,0 +1,66 @@
+/* Importa aquí cualquier estilo global o específico que necesites */
+
+.detalle-gasto-container {
+    /* Estilos similares a gasto-detalle */
+    margin: 20px auto;
+    max-width: 900px;
+    background: linear-gradient(180deg, #DFA2FC 0%, rgba(206, 195, 254, 0.8) 40%, rgba(164, 249, 254, 0.05) 100%);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detalle-header {
+    background: linear-gradient(to bottom, #a841cb, #d77ff3);
+    color: #ffffff;
+    padding: 15px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    text-align: center;
+}
+
+.detalle-section {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 1px 1px 8px 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.detalle-item {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 15px;
+}
+
+.detalle-item-content {
+    flex: 1;
+}
+
+.detalle-title {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #6c5ce7;
+}
+
+.btn-primary {
+    background-color: #A841CB;
+    border: 1px solid #8B2BAE;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: #8B2BAE;
+    border-color: #6A1E89;
+}
+
+.preview-img {
+    max-width: 300px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+.total-amount {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}

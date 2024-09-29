@@ -10,7 +10,7 @@
 }
 
 .group-card:hover {
-  box-shadow: 0px 7px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 7px 15px rgba(0, 0, 0, 0.15);
 }
 
 .card-left {
@@ -26,19 +26,21 @@
 .card-right {
   flex: 1;
   padding: 1.5rem;
-  background: #f7f7f7;
+  background: #f9f9f9;
   display: flex;
   flex-direction: column;
+  border-left: 1px solid #e0e0e0;
 }
 
 .card-right h3 {
-  color: #482883;
+  color: #6A1E89;
+  margin-bottom: 1rem;
 }
 
 .foto {
   height: 130px;
   width: 130px;
-  background-color: #A841CB;
+  background-color: #8B2BAE;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -56,7 +58,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 15px;
-  background: linear-gradient(45deg, #8B2BAE, #6A1E89);
+  background: linear-gradient(45deg, #A841CB, #8B2BAE);
   border-radius: 20px;
   padding: 5px 6px;
   color: white;
@@ -65,7 +67,7 @@
 }
 
 .category-logo {
-  background-color: #f4f4f4;
+  background-color: #e0e0e0;
   border-radius: 50%;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -80,7 +82,7 @@
 .category-name {
   margin-left: 8px;
   margin-right: 8px;
-  font-weight: bold;
+  font-weight: 600;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
@@ -124,12 +126,12 @@
 
 .balance-info {
   margin-top: 1.3rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #777;
 }
 
 .balance-info span {
-  margin-left: 5px;
+  margin-left: 3px;
 }
 
 .balance-chip {
@@ -149,7 +151,7 @@
   display: inline-block;
   margin-top: 1.5rem;
   padding: 0.8rem 1.5rem;
-  background-color: #A841CB;
+  background-color: #6A1E89;
   color: #fff;
   text-decoration: none;
   border-radius: 5px;
@@ -158,7 +160,7 @@
 }
 
 .button:hover {
-  background-color: #8B2BAE;
+  background-color: #482883;
 }
 
 .negative-balance {

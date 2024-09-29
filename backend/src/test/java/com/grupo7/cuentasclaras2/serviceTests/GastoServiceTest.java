@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import com.grupo7.cuentasclaras2.DTO.CategoriaDTO;
+import com.grupo7.cuentasclaras2.DTO.CrearGastoDTO;
 import com.grupo7.cuentasclaras2.DTO.DivisionIndividualDTO;
 import com.grupo7.cuentasclaras2.DTO.FormaDividirDTO;
 import com.grupo7.cuentasclaras2.DTO.GastoAutorDTO;
@@ -123,13 +123,13 @@ public class GastoServiceTest {
                                                 divisionIndividualDTO3));
 
                 // Primer gasto
-                GastoDTO gastoDTO1 = new GastoDTO();
+                CrearGastoDTO gastoDTO1 = new CrearGastoDTO();
                 gastoDTO1.setGastoAutor(List.of(gastoAutorDTO1));
                 gastoDTO1.setNombre("Asado");
                 gastoDTO1.setFecha(new Date());
                 gastoDTO1.setGrupoId(grupo.getId());
                 gastoDTO1.setFormaDividir(formaDividirDTO1);
-                gastoDTO1.setCategoria(new CategoriaDTO(categoriaGasto));
+                gastoDTO1.setCategoriaId(categoriaGasto.getId());
 
                 // Crear gastos
                 Gasto gasto1 = gastoService.newSpendingByDTO(gastoDTO1);
@@ -171,13 +171,13 @@ public class GastoServiceTest {
                                                 divisionIndividualDTO6));
 
                 // Segundo gasto
-                GastoDTO gastoDTO2 = new GastoDTO();
+                CrearGastoDTO gastoDTO2 = new CrearGastoDTO();
                 gastoDTO2.setGastoAutor(List.of(gastoAutorDTO2));
                 gastoDTO2.setNombre("Asado");
                 gastoDTO2.setFecha(new Date());
                 gastoDTO2.setGrupoId(grupo.getId());
                 gastoDTO2.setFormaDividir(formaDividirDTO2);
-                gastoDTO2.setCategoria(new CategoriaDTO(categoriaGasto));
+                gastoDTO2.setCategoriaId(categoriaGasto.getId());
 
                 Gasto gasto2 = gastoService.newSpendingByDTO(gastoDTO2);
 
@@ -240,13 +240,13 @@ public class GastoServiceTest {
                                                 divisionIndividualDTO9));
 
                 // tercer gasto
-                GastoDTO gastoDTO3 = new GastoDTO();
+                CrearGastoDTO gastoDTO3 = new CrearGastoDTO();
                 gastoDTO3.setGastoAutor(List.of(gastoAutorDTO3));
                 gastoDTO3.setNombre("Asado");
                 gastoDTO3.setFecha(new Date());
                 gastoDTO3.setGrupoId(grupo.getId());
                 gastoDTO3.setFormaDividir(formaDividirDTO3);
-                gastoDTO3.setCategoria(new CategoriaDTO(categoriaGasto));
+                gastoDTO3.setCategoriaId(categoriaGasto.getId());
 
                 gastoService.newSpendingByDTO(gastoDTO3);
 
@@ -336,13 +336,13 @@ public class GastoServiceTest {
                 formaDividirDTO.setDivisionIndividual(List.of(divisionIndividualDTO1, divisionIndividualDTO2));
 
                 // Gasto
-                GastoDTO gastoDTO = new GastoDTO();
+                CrearGastoDTO gastoDTO = new CrearGastoDTO();
                 gastoDTO.setGastoAutor(List.of(gastoAutorDTO1, gastoAutorDTO2));
                 gastoDTO.setNombre("Cena Romántica");
                 gastoDTO.setFecha(new Date());
                 gastoDTO.setGrupoId(grupo.getId());
                 gastoDTO.setFormaDividir(formaDividirDTO);
-                gastoDTO.setCategoria(new CategoriaDTO(categoriaGasto));
+                gastoDTO.setCategoriaId(categoriaGasto.getId());
 
                 // Crear el gasto
                 Gasto gasto = gastoService.newSpendingByDTO(gastoDTO);
@@ -378,13 +378,13 @@ public class GastoServiceTest {
                 formaDividirDTO2.setDivisionIndividual(List.of(divisionIndividualDTO3, divisionIndividualDTO4));
 
                 // Segundo gasto
-                GastoDTO gastoDTO2 = new GastoDTO();
+                CrearGastoDTO gastoDTO2 = new CrearGastoDTO();
                 gastoDTO2.setGastoAutor(List.of(gastoAutorDTO3));
                 gastoDTO2.setNombre("Regalo Sorpresa");
                 gastoDTO2.setFecha(new Date());
                 gastoDTO2.setGrupoId(grupo.getId());
                 gastoDTO2.setFormaDividir(formaDividirDTO2);
-                gastoDTO2.setCategoria(new CategoriaDTO(categoriaGasto));
+                gastoDTO2.setCategoriaId(categoriaGasto.getId());
 
                 // Crear el segundo gasto
                 gastoService.newSpendingByDTO(gastoDTO2);

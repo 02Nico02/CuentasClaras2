@@ -1,21 +1,21 @@
-<div class="group-card">
+<div *ngIf="groupData" class="group-card">
   <div class="card-left">
     <div class="foto">
       <img src="../../../assets/sin-img.png" alt="Imagen del grupo">
     </div>
     <div class="category-container">
       <div class="category-logo">
-        <img src="../../../assets/icons/{{groupData?.categoria?.icon}}"
-          alt="icono de la categoria {{ groupData?.categoria?.nombre }}">
+        <img src="../../../assets/icons/{{groupData.categoria.icon}}"
+          alt="icono de la categoria {{ groupData.categoria.nombre }}">
       </div>
-      <span class="category-name">{{ groupData?.categoria?.nombre }}</span>
+      <span class="category-name">{{ groupData.categoria.nombre }}</span>
     </div>
   </div>
   <div class="card-right">
-    <h3>{{ groupData?.nombre }}</h3>
+    <h3>{{ groupData.nombre }}</h3>
     <div class="members-list">
       <div class="member-chips">
-        <span *ngFor="let member of groupData?.miembros">
+        <span *ngFor="let member of groupData.miembros">
           <div class="member-chip">{{ member.userName }}</div>
         </span>
       </div>
@@ -24,10 +24,10 @@
       <div class="balance-info balance-chip">
         {{ groupData ? getBalanceMessage(groupData.balance) : 'Datos no disponibles' }}
         <span [ngClass]="getClassBalance(groupData ? groupData.balance : 0)">
-          ${{groupData?.balance}}
+          {{formatMonto(groupData.balance)}}
         </span>
       </div>
-      <a href="/grupo/{{groupData?.id}}/detalle" class="button">Ver detalles</a>
+      <a href="/grupo/{{groupData.id}}/detalle" class="button">Ver detalles</a>
     </div>
   </div>
 </div>

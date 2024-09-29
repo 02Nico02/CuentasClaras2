@@ -24,20 +24,6 @@ export class NavComponent implements OnInit {
     this.fetchUserInfo();
   }
 
-  formatBalance(): string {
-    if (this.userInfo && typeof this.userInfo.balance !== 'undefined') {
-      if (this.userInfo.balance > 0) {
-        return `+$${this.userInfo.balance.toFixed(2)}`;
-      } else if (this.userInfo.balance < 0) {
-        return `-$${Math.abs(this.userInfo.balance).toFixed(2)}`;
-      } else {
-        return '$0';
-      }
-    } else {
-      return 'Balance no disponible';
-    }
-  }
-
   logout() {
     this.loginService.logout().subscribe({
       next: () => {
@@ -64,5 +50,14 @@ export class NavComponent implements OnInit {
         console.error('Error al obtener información del usuario:', error);
       }
     );
+  }
+
+  formatMonto(monto: number): string {
+    const formattedMonto = monto.toLocaleString('es-AR', {
+      style: 'currency',
+      currency: 'ARS'
+    });
+
+    return formattedMonto;
   }
 }

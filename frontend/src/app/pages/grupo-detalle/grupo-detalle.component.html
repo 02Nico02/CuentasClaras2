@@ -37,9 +37,7 @@
               'saldo-negativo': miembro.balance < 0
             }">
                         {{
-                        miembro.balance > 0
-                        ? "+$" + miembro.balance.toFixed(2)
-                        : "-$" + (-miembro.balance).toFixed(2)
+                        formatBalance(miembro.balance)
                         }}
                     </span>
                 </li>
@@ -54,12 +52,19 @@
             <h3>Actividades Recientes</h3>
             <ul class="activities-list">
                 <li *ngFor="let actividad of visibleActividades" class="activity-item"
-                    [ngClass]="{ click: actividad.type === 'gasto' }" (click)="
-            actividad.type === 'gasto'
-              ? mostrarDetallesActividad(actividad)
-              : null
-          ">
-                    <div class="activity-content">
+                    [ngClass]="{ click: actividad.type === 'gasto' }">
+
+                    <a *ngIf="actividad.type === 'gasto'" [href]="['/gasto/'+ actividad.id+ '/detalle']"
+                        class="activity-content">
+
+                        <div class="activity-date">
+                            {{ actividad.fecha | date : "medium" }}
+                        </div>
+                        <div class="activity-data">{{ actividad.data }}</div>
+                    </a>
+
+
+                    <div *ngIf="actividad.type !== 'gasto'" class="activity-content">
                         <div class="activity-date">
                             {{ actividad.fecha | date : "medium" }}
                         </div>

@@ -1,4 +1,4 @@
-import { HttpEvent, HttpHandler, HttpHandlerFn, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { HttpEvent, HttpHandler, HttpHandlerFn, HttpHeaders, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LoginService } from './login.service';
@@ -6,43 +6,23 @@ import { LoginService } from './login.service';
 // @Injectable({
 //   providedIn: 'root'
 // })
-export function JwtInterceptorService (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>>{
+export function JwtInterceptorService(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
 
-  // constructor(private loginService: LoginService) {   
-    console.log("Interceptor: Entrando en el interceptor");
-    // let token: String = this.loginService.userToken
-    let token: String = localStorage?.["token"];
-    console.log("Token:", token);
-    if (token != "") {
-      req = req.clone({
-        setHeaders: {
-          "Content-Type": "application/json;charset=utf-8",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
-      })
-    }
-    return next(req)
+  let token: string | null = localStorage.getItem("token");
+  if (token) {
+    req = req.clone({
+      setHeaders: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
   }
-// export class JwtInterceptorService implements HttpInterceptor {
 
-//   constructor(private loginService: LoginService) { }
+  if (!(req.body instanceof FormData)) {
+    const headers = req.headers.set("Content-Type", "application/json;charset=utf-8")
+      .set("Accept", "application/json");
 
-
-//   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-//     console.log("Interceptor: Entrando en el interceptor");
-//     // let token: String = this.loginService.userToken
-//     let token: String = localStorage?.["token"];
-//     console.log("Token:", token);
-//     if (token != "") {
-//       req = req.clone({
-//         setHeaders: {
-//           "Content-Type": "application/json;charset=utf-8",
-//           "Accept": "application/json",
-//           "Authorization": `Bearer ${token}`
-//         }
-//       })
-//     }
-//     return next.handle(req)
-//   }
+    req = req.clone({ headers });
+  }
+  return next(req)
+}
 

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import com.grupo7.cuentasclaras2.DTO.GastoDTO;
 import com.grupo7.cuentasclaras2.DTO.GrupoDTO;
+import com.grupo7.cuentasclaras2.DTO.GrupoParejaDTO;
 import com.grupo7.cuentasclaras2.DTO.IdEmailUsuarioDTO;
 import com.grupo7.cuentasclaras2.DTO.MiembrosGrupoDTO;
 import com.grupo7.cuentasclaras2.DTO.PagoDTO;
@@ -75,8 +76,54 @@ public class GrupoController {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 
-		return grupoService.getGroupById(id)
+		return grupoService.getNonParejaGroupById(id)
 				.map(group -> ResponseEntity.ok(new GrupoDTO(group, usuarioAutenticado)))
+				.orElseGet(() -> ResponseEntity.notFound().build());
+	}
+
+	/**
+	 * Obtiene un grupo pareja por su ID.
+	 *
+	 * @param id ID del grupo pareja.
+	 * @return ResponseEntity con el GrupoParejaDTO correspondiente si se encuentra,
+	 *         o
+	 *         ResponseEntity.notFound() si no se encuentra.
+	 */
+	@GetMapping("/pareja/{id}")
+	public ResponseEntity<GrupoParejaDTO> getGroupParejaById(@PathVariable Long id) {
+		System.out.println("Entre al endpoint");
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Object principal = authentication.getPrincipal();
+		System.out.println("ya tengo principal");
+
+		Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
+		System.out.println("ya tengo un supuesto usuario");
+
+		if (!usuarioOptional.isPresent()) {
+			System.out.println("no tengo usuario");
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		System.out.println("tengo usuario");
+
+		Optional<Grupo> grupoOptional = grupoService.getParejaGroupById(id);
+		if (!grupoOptional.isPresent()) {
+			System.out.println("El grupo no existe");
+			return ResponseEntity.notFound().build();
+		}
+
+		Usuario usuarioAutenticado = usuarioOptional.get();
+		System.out.println("por ver si es miembro");
+		boolean esMiembro = grupoService.usuarioPerteneceAlGrupo(usuarioAutenticado.getId(), id);
+
+		System.out.println("por verificarlo");
+		if (!esMiembro) {
+			System.out.println("No es miembro");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		System.out.println("Es miembro");
+
+		return grupoService.getParejaGroupById(id)
+				.map(grupoPareja -> ResponseEntity.ok(new GrupoParejaDTO(grupoPareja, usuarioAutenticado)))
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
@@ -277,6 +324,45 @@ public class GrupoController {
 		PosiblesMiembrosDTO posiblesMiembrosDTO = new PosiblesMiembrosDTO(amigosFiltradosDTO, usuariosFiltradosDTO);
 
 		return ResponseEntity.ok(posiblesMiembrosDTO);
+	}
+
+	/**
+	 * Obtiene la lista de miembros de un grupo.
+	 *
+	 * @param grupoId ID del grupo.
+	 * @return ResponseEntity con la lista de MiembrosGrupoDTO si la operación se
+	 *         realiza
+	 *         con éxito, o ResponseEntity.notFound() si el grupo no se encuentra o
+	 *         el usuario no es miembro.
+	 */
+	@GetMapping("/{grupoId}/members")
+	public ResponseEntity<List<MiembrosGrupoDTO>> getMembersByGroup(@PathVariable long grupoId) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Object principal = authentication.getPrincipal();
+
+		Optional<Usuario> usuarioOptional = usuarioService.getByUsername((String) principal);
+
+		if (!usuarioOptional.isPresent()) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+
+		Usuario usuario = usuarioOptional.get();
+		if (!grupoService.usuarioPerteneceAlGrupo(usuario.getId(), grupoId)) {
+			throw new UnauthorizedException("Usuario no autorizado");
+		}
+
+		Optional<Grupo> grupoOptional = grupoService.getGroupById(grupoId);
+
+		if (!grupoOptional.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+		List<MiembrosGrupoDTO> members = grupoOptional.get()
+				.getMiembros()
+				.stream()
+				.map(MiembrosGrupoDTO::new)
+				.collect(Collectors.toList());
+
+		return ResponseEntity.ok(members);
 	}
 
 }
